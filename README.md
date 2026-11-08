@@ -108,11 +108,11 @@ Choose the APK that matches your device's CPU architecture.
 
 | APK File | Compatible Devices |
 |---|---|
-| `app-github-arm64-v8a-release.apk` | Modern 64-bit ARM Android phones and tablets |
-| `app-github-armeabi-v7a-release.apk` | Older 32-bit ARM Android devices |
-| `app-github-x86-release.apk` | 32-bit Intel x86 devices and compatible emulators |
-| `app-github-x86_64-release.apk` | 64-bit Intel/AMD x86-64 devices and compatible emulators |
-| `app-github-universal-release.apk` | General-purpose APK for multiple supported architectures |
+| `app-arm64-v8a-release.apk` | Modern 64-bit ARM Android phones and tablets |
+| `app-armeabi-v7a-release.apk` | Older 32-bit ARM Android devices |
+| `app-x86-release.apk` | 32-bit Intel x86 devices and compatible emulators |
+| `app-x86_64-release.apk` | 64-bit Intel/AMD x86-64 devices and compatible emulators |
+| `app-universal-release.apk` | General-purpose APK for multiple supported architectures |
 
 **Not sure which one to download?**
 
