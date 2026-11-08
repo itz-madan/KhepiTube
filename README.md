@@ -100,7 +100,76 @@ cd KhepiTube
 Output APK will be generated at:
 `app/build/outputs/apk/github/release/`
 
+
+
+## 📥 Download KhepiTube
+
+Choose the APK that matches your device's CPU architecture.
+
+| APK File | Compatible Devices |
+|---|---|
+| `app-github-arm64-v8a-release.apk` | Modern 64-bit ARM Android phones and tablets |
+| `app-github-armeabi-v7a-release.apk` | Older 32-bit ARM Android devices |
+| `app-github-x86-release.apk` | 32-bit Intel x86 devices and compatible emulators |
+| `app-github-x86_64-release.apk` | 64-bit Intel/AMD x86-64 devices and compatible emulators |
+| `app-github-universal-release.apk` | General-purpose APK for multiple supported architectures |
+
+**Not sure which one to download?**
+
+- Most modern Android smartphones use **ARM64-v8a**.
+- Older or 32-bit ARM phones should use **armeabi-v7a**.
+- Android emulators may use **x86** or **x86_64**, depending on their configured system image.
+- If you cannot identify your architecture, try the **Universal APK**.
+
+*Note: Universal APK is larger because it includes support for multiple architectures. It is a convenient fallback, but the architecture-specific APK is generally preferable when you know your device architecture.*
+
+## 📱 Installation Guide
+
+### Step 1 — Download the APK
+1. Open the Assets section below this release.
+2. Find the APK compatible with your device.
+3. Tap the APK filename to download it.
+
+### Step 2 — Allow App Installation
+If Android blocks the installation:
+
+1. Open **Settings** on your device.
+2. Go to **Apps → Special app access → Install unknown apps**.
+3. Select the browser or file manager you used to download the APK.
+4. Enable **Allow from this source**.
+
+*The exact menu names may vary depending on your Android version and device manufacturer.*
+
+### Step 3 — Install KhepiTube
+1. Open your Downloads folder or file manager.
+2. Locate the downloaded `KhepiTube APK`.
+3. Tap the APK file.
+4. Press **Install**.
+5. Wait for the installation to finish.
+6. Open KhepiTube and enjoy! 🎉
+
+### 🔄 Updating from an Older Version
+If you already have KhepiTube installed:
+
+1. Download the newer APK matching your device architecture.
+2. Open the downloaded APK.
+3. Tap **Update** or **Install** when prompted.
+4. Wait for the update to complete.
+
+**Important:** For a normal update, install over your existing app rather than uninstalling it first. Uninstalling may erase locally stored app data. If Android reports a signature conflict, verify that you downloaded the correct official build.
+
+### ❓ Installation Troubleshooting
+
+| Problem | Suggested Solution |
+|---|---|
+| App not installed | Check architecture compatibility and available storage |
+| Parse error | Download the APK again; the file may be incomplete |
+| App not compatible | Try the correct architecture-specific APK |
+| Installation blocked | Enable installation permission for your browser/file manager |
+| Signature conflict | Check whether the existing app was signed with a different key |
+
 ---
+
 
 ## 🤝 Contributing
 
