@@ -1,0 +1,15 @@
+# Default owner for everything in the repository.
+* @itz-madan
+
+# Release, signing, and CI paths.
+/.github/workflows/    @itz-madan
+/.github/dependabot.yml @itz-madan
+/app/build.gradle.kts  @itz-madan
+/build.gradle.kts      @itz-madan
+/gradle/               @itz-madan
+/fastlane/             @itz-madan
+
+# Project policy documents.
+/AGENTS.md             @itz-madan
+/CONTRIBUTING.md       @itz-madan
+/SECURITY.md           @itz-madan

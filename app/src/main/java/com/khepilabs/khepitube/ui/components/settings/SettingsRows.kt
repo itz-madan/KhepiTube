@@ -1,0 +1,344 @@
+package com.khepilabs.khepitube.ui.components.settings
+
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedListItem
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.khepilabs.khepitube.ui.components.shared.KhepiNavRow
+import com.khepilabs.khepitube.ui.components.shared.KhepiSelectionRow
+import com.khepilabs.khepitube.ui.components.shared.KhepiSwitchRow
+import com.khepilabs.khepitube.ui.components.shared.KhepiToggleOption
+import com.khepilabs.khepitube.ui.components.shared.LocalDpadNavigation
+import kotlinx.coroutines.flow.StateFlow
+
+@Composable
+internal fun SettingsIconBadge(
+    icon: ImageVector? = null,
+    @DrawableRes iconRes: Int? = null,
+    destructive: Boolean = false,
+) {
+    if (icon == null && iconRes == null) return
+    val containerColor =
+        if (destructive) {
+            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
+        } else {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+        }
+    val contentColor =
+        if (destructive) {
+            MaterialTheme.colorScheme.error
+        } else {
+            MaterialTheme.colorScheme.primary
+        }
+
+    Box(
+        modifier =
+            Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(containerColor),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = contentColor,
+            )
+        } else if (iconRes != null) {
+            Icon(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = contentColor,
+            )
+        }
+    }
+}
+
+/**
+ * A switch for [entry]. [summary] replaces the entry's own summary when the row needs to say
+ * something about the current state.
+ */
+fun SettingsGroupScope.switch(
+    entry: SettingEntry,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    summary: String? = null,
+    icon: ImageVector? = null,
+    @DrawableRes iconRes: Int? = null,
+) = entryRow(entry) { shape ->
+    KhepiSwitchRow(
+        title = stringResource(entry.title),
+        supportingText = summary ?: entry.summaryText(),
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        enabled = enabled,
+        leadingContent =
+            if (icon != null || iconRes != null) {
+                { SettingsIconBadge(icon = icon, iconRes = iconRes) }
+            } else {
+                null
+            },
+        shape = shape,
+    )
+}
+
+/**
+ * A switch that collects its own [state], so flipping it recomposes this row alone rather than the
+ * page that declared it.
+ */
+fun SettingsGroupScope.switch(
+    entry: SettingEntry,
+    state: StateFlow<Boolean>,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+    @DrawableRes iconRes: Int? = null,
+) = entryRow(entry) { shape ->
+    val checked by state.collectAsStateWithLifecycle()
+    KhepiSwitchRow(
+        title = stringResource(entry.title),
+        supportingText = entry.summaryText(),
+        checked = checked,
+        onCheckedChange = onCheckedChange,
+        enabled = enabled,
+        leadingContent =
+            if (icon != null || iconRes != null) {
+                { SettingsIconBadge(icon = icon, iconRes = iconRes) }
+            } else {
+                null
+            },
+        shape = shape,
+    )
+}
+
+/**
+ * A row that opens a picker for [entry] and shows its current choice, read inside the row by
+ * [valueText] so a changed value recomposes this row alone.
+ */
+fun SettingsGroupScope.choice(
+    entry: SettingEntry,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    icon: ImageVector? = null,
+    valueText: @Composable () -> String?,
+) = entryRow(entry) { shape ->
+    KhepiNavRow(
+        title = stringResource(entry.title),
+        supportingText = valueText() ?: entry.summaryText(),
+        onClick = onClick,
+        enabled = enabled,
+        showChevron = false,
+        leadingContent = icon?.let { { SettingsIconBadge(icon = it) } },
+        shape = shape,
+    )
+}
+
+/**
+ * A row that opens a page, dialog or sheet for [entry]. A [value] is shown under the title — the
+ * current choice of a setting that opens a picker — and otherwise the entry's summary. [valueText]
+ * is the same for a value read from state, so a change recomposes this row alone.
+ */
+fun SettingsGroupScope.nav(
+    entry: SettingEntry,
+    onClick: () -> Unit,
+    value: String? = null,
+    valueText: (@Composable () -> String?)? = null,
+    enabled: Boolean = true,
+    showChevron: Boolean = true,
+    selected: Boolean = false,
+    icon: ImageVector? = null,
+    @DrawableRes iconRes: Int? = null,
+    destructive: Boolean = false,
+    modifier: Modifier = Modifier,
+) = entryRow(entry) { shape ->
+    KhepiNavRow(
+        title = stringResource(entry.title),
+        modifier = modifier,
+        supportingText = valueText?.invoke() ?: value ?: entry.summaryText(),
+        onClick = onClick,
+        enabled = enabled,
+        showChevron = showChevron,
+        selected = selected,
+        leadingContent =
+            if (icon != null || iconRes != null) {
+                { SettingsIconBadge(icon = icon, iconRes = iconRes, destructive = destructive) }
+            } else {
+                null
+            },
+        destructive = destructive,
+        shape = shape,
+    )
+}
+
+/** A row that only reports a value, such as when something last ran. It is not clickable. */
+fun SettingsGroupScope.info(
+    entry: SettingEntry,
+    value: String?,
+    icon: ImageVector? = null,
+) = entryRow(entry) { shape -> InfoRow(stringResource(entry.title), value ?: entry.summaryText(), icon, shape) }
+
+/** [info] for a status that is not a setting, so it stays out of settings search. */
+fun SettingsGroupScope.info(
+    key: String,
+    title: String,
+    value: String?,
+    icon: ImageVector? = null,
+) = row(key) { shape -> InfoRow(title, value, icon, shape) }
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun InfoRow(
+    title: String,
+    value: String?,
+    icon: ImageVector?,
+    shape: Shape,
+) {
+    val focusModifier =
+        if (LocalDpadNavigation.current) {
+            val interactionSource = remember { MutableInteractionSource() }
+            Modifier
+                .indication(interactionSource, ripple(focusRingShape = shape))
+                .focusable(interactionSource = interactionSource)
+        } else {
+            Modifier
+        }
+    SegmentedListItem(
+        modifier = focusModifier,
+        verticalAlignment = Alignment.CenterVertically,
+        shapes = ListItemDefaults.shapes(shape = shape),
+        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        leadingContent = icon?.let { { SettingsIconBadge(icon = it) } },
+        supportingContent = value?.let { { Text(it) } },
+    ) {
+        Text(title)
+    }
+}
+
+/** One option of a single-choice list drawn inline on a page rather than in a dialog. */
+fun SettingsGroupScope.option(
+    key: String,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    supportingText: String? = null,
+    enabled: Boolean = true,
+) = row(key) { shape ->
+    KhepiSelectionRow(
+        title = label,
+        supportingText = supportingText,
+        selected = selected,
+        onClick = onClick,
+        enabled = enabled,
+        shape = shape,
+    )
+}
+
+/** A choice between two to four values, answered in place with a connected toggle group. */
+fun <T> SettingsGroupScope.toggleGroup(
+    entry: SettingEntry,
+    options: List<KhepiToggleOption<T>>,
+    selected: T,
+    onSelected: (T) -> Unit,
+    enabled: Boolean = true,
+    summary: String? = null,
+    preview: (@Composable () -> Unit)? = null,
+) = entryRow(entry) { shape ->
+    SettingsToggleGroupRow(
+        title = stringResource(entry.title),
+        summary = summary ?: entry.summaryText(),
+        options = options,
+        selected = selected,
+        onSelected = onSelected,
+        enabled = enabled,
+        shape = shape,
+        preview = preview,
+    )
+}
+
+/** A toggle group that collects its own [state]; see the state-backed [switch]. */
+fun <T> SettingsGroupScope.toggleGroup(
+    entry: SettingEntry,
+    options: List<KhepiToggleOption<T>>,
+    state: StateFlow<T>,
+    onSelected: (T) -> Unit,
+    enabled: Boolean = true,
+) = entryRow(entry) { shape ->
+    val selected by state.collectAsStateWithLifecycle()
+    SettingsToggleGroupRow(
+        title = stringResource(entry.title),
+        summary = entry.summaryText(),
+        options = options,
+        selected = selected,
+        onSelected = onSelected,
+        enabled = enabled,
+        shape = shape,
+    )
+}
+
+/**
+ * A numeric setting on a slider. The value is only written when the drag ends, so a DataStore
+ * write never runs per frame.
+ */
+fun SettingsGroupScope.slider(
+    entry: SettingEntry,
+    value: Float,
+    onValueCommitted: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    valueLabel: @Composable (Float) -> String,
+    steps: Int = 0,
+    enabled: Boolean = true,
+    summary: String? = null,
+) = entryRow(entry) { shape ->
+    SettingsSliderRow(
+        title = stringResource(entry.title),
+        summary = summary ?: entry.summaryText(),
+        value = value,
+        onValueCommitted = onValueCommitted,
+        valueRange = valueRange,
+        steps = steps,
+        valueLabel = valueLabel,
+        enabled = enabled,
+        shape = shape,
+    )
+}
+
+/** A notice between groups; see [SettingsNotice]. */
+fun SettingsListScope.notice(
+    key: String,
+    text: @Composable () -> String,
+    icon: ImageVector? = null,
+    title: (@Composable () -> String)? = null,
+    isWarning: Boolean = false,
+) = item(key) {
+    SettingsNotice(text = text(), icon = icon, title = title?.invoke(), isWarning = isWarning)
+}
+
+@Composable
+private fun SettingEntry.summaryText(): String? = summary?.let { stringResource(it) }

@@ -1,0 +1,28 @@
+KHEPITUBE CHANGE LOG
+VERSION: 1.0.0
+DATE: 2026-03-31
+STATUS: stable
+
+KEY FEATURES
+- Ad-Free Streaming: Enjoy unlimited video and music playback with zero advertisement interruptions.
+- Background & Audio Playback: Continue listening to videos and music in the background or with your screen turned off.
+- Picture-in-Picture (PiP): Multitask effortlessly with automatic and manual Picture-in-Picture video mode.
+- High-Speed Downloads: Download video and audio files in your preferred resolutions for offline viewing.
+
+KHEPITUBE MUSIC & SHORTS
+- YouTube Music Integration: Explore trending tracks, albums, artist pages, curated playlists, and live lyrics.
+- Music Recognition: Instantly identify songs playing around you with the built-in Shazam-like audio scanner.
+- Vertical Shorts Feed: Browse YouTube Shorts with full playback controls, auto-scroll, and speed settings.
+- Custom Equalizer: Adjust your audio output with equalizer presets and personalized frequency controls.
+
+PRIVACY & SMART INTEGRATIONS
+- SponsorBlock: Automatically skip sponsored segments, intros, outros, and self-promotions.
+- DeArrow: Display clean, clickbait-free video titles and non-misleading thumbnails.
+- Return YouTube Dislike: View public dislike counts on all videos.
+- Local Storage & Privacy: Your watch history, playlists, and settings stay encrypted and stored 100% locally on your device.
+
+CUSTOMIZATION & CONNECTIVITY
+- Solid Opaque Navigation: Fast, modern bottom navigation bar with active tab indicators and direct access to Home, Shorts, Music, Subscriptions, and Library.
+- Streamlined Settings: Access Look & Feel, Watching, Your Data, System, and About settings in a clean 5-category layout.
+- Cross-Device Sync: Sync your history, subscriptions, and playlists seamlessly across phones, tablets, and Android TV.
+- Auto Update Checker: Get instant notifications and 1-tap APK downloads directly from GitHub Releases.

@@ -1,0 +1,25 @@
+package com.khepilabs.khepitube.ui.screens.settings.content
+
+import com.khepilabs.khepitube.data.local.PlayerPreferences
+import com.khepilabs.khepitube.ui.components.library.LibrarySection
+import com.khepilabs.khepitube.ui.screens.settings.SettingsViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+
+@HiltViewModel
+class LibrarySettingsViewModel
+    @Inject
+    constructor(
+        private val preferences: PlayerPreferences,
+    ) : SettingsViewModel() {
+        internal val hidden = preferences.hiddenLibrarySections.map(LibrarySection::fromStored).asState(emptySet())
+        val separatePlaylists = preferences.separatePlaylistKinds.asState(false)
+        val shortsContent = preferences.shortsContentEnabled.asState(true)
+        val notes = preferences.notesEnabled.asState(true)
+
+        internal fun setShown(
+            section: LibrarySection,
+            shown: Boolean,
+        ) = write { preferences.setLibrarySectionHidden(section.name, hidden = !shown) }
+    }
