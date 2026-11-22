@@ -1,29 +1,62 @@
 package com.khepilabs.khepitube.ui.screens.library
 
+import android.content.Intent
+import android.net.Uri
+import android.webkit.CookieManager
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Login
+import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.outlined.VideoLibrary
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.model.Video
@@ -31,21 +64,21 @@ import com.khepilabs.khepitube.data.music.DownloadedTrack
 import com.khepilabs.khepitube.data.music.model.MusicTrack
 import com.khepilabs.khepitube.data.stats.RecapPeriod
 import com.khepilabs.khepitube.data.video.DownloadedVideo
+import com.khepilabs.khepitube.innertube.models.AccountInfo
 import com.khepilabs.khepitube.ui.OnTabReselected
 import com.khepilabs.khepitube.ui.components.layout.khepiBottomContentPadding
 import com.khepilabs.khepitube.ui.components.layout.navigation.KhepiTab
 import com.khepilabs.khepitube.ui.components.layout.topbar.KhepiTopBar
 import com.khepilabs.khepitube.ui.components.library.LibraryNavigationRow
 import com.khepilabs.khepitube.ui.components.library.LibrarySection
+import com.khepilabs.khepitube.ui.components.shared.ChannelAvatarImage
 import com.khepilabs.khepitube.ui.components.shared.KhepiEmptyState
 import com.khepilabs.khepitube.ui.components.shared.KhepiMaxContentWidth
 import com.khepilabs.khepitube.ui.components.shared.MediaKind
-import com.khepilabs.khepitube.ui.components.stats.RecapEntryCard
-import java.time.format.TextStyle
+import com.khepilabs.khepitube.ui.screens.account.YoutubeLoginDialog
 
 private val ListVerticalPadding = 12.dp
 private val ShelfSpacing = 24.dp
-private val RecapCardPadding = 16.dp
 
 @Composable
 fun LibraryScreen(
@@ -74,9 +107,29 @@ fun LibraryScreen(
     val shelfPreviewsEnabled by viewModel.shelfPreviewsEnabled.collectAsStateWithLifecycle()
     val separatePlaylistKinds by viewModel.separatePlaylistKinds.collectAsStateWithLifecycle()
     val isLibraryEmpty by viewModel.isLibraryEmpty.collectAsStateWithLifecycle()
-    val recapReady by viewModel.recapReady.collectAsStateWithLifecycle()
     val hiddenSections by viewModel.hiddenSections.collectAsStateWithLifecycle()
-    val locale = LocalConfiguration.current.locales[0]
+    val youtubeCookie by viewModel.youtubeCookie.collectAsStateWithLifecycle()
+    val accountInfo by viewModel.accountInfo.collectAsStateWithLifecycle()
+
+    var showLoginDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Check cookies when returning from Chrome browser
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val cookieManager = CookieManager.getInstance()
+                val cookies = cookieManager.getCookie("https://www.youtube.com")
+                if (!cookies.isNullOrBlank() && cookies.contains("SAPISID")) {
+                    viewModel.setYoutubeCookie(cookies)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     val listState = rememberLazyListState()
     OnTabReselected(KhepiTab.Library.route) { listState.animateScrollToItem(0) }
     val openSection: (LibrarySection) -> Unit = { section ->
@@ -110,9 +163,35 @@ fun LibraryScreen(
             contentPadding = PaddingValues(top = ListVerticalPadding, bottom = khepiBottomContentPadding(ListVerticalPadding)),
             verticalArrangement = Arrangement.spacedBy(ShelfSpacing),
         ) {
+            // YouTube Account Card at top of Library
+            item(key = "youtube-account-card", contentType = "account") {
+                YouTubeAccountCard(
+                    youtubeCookie = youtubeCookie,
+                    accountInfo = accountInfo,
+                    onSignInChrome = {
+                        runCatching {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("https://accounts.google.com/AccountChooser?service=youtube&continue=https://www.youtube.com/"),
+                            )
+                            context.startActivity(intent)
+                        }.onFailure {
+                            showLoginDialog = true
+                        }
+                    },
+                    onSignInDialog = { showLoginDialog = true },
+                    onSignOut = {
+                        viewModel.setYoutubeCookie(null)
+                        CookieManager.getInstance().removeAllCookies(null)
+                        CookieManager.getInstance().flush()
+                    },
+                )
+            }
+
             val hidden = hiddenSections ?: return@LazyColumn
             val contentSections = visibleContentSections(hidden, separatePlaylistKinds, shortsEnabled)
             val settingsSections = visibleSettingsSections(hidden)
+
             if (shelfPreviewsEnabled && isLibraryEmpty) {
                 item(key = "library-empty", contentType = "empty") {
                     KhepiEmptyState(
@@ -159,6 +238,150 @@ fun LibraryScreen(
                             LibrarySectionRow(section = section, counts = null, onClick = { openSection(section) })
                         }
                         Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            }
+        }
+    }
+
+    if (showLoginDialog) {
+        YoutubeLoginDialog(
+            onDismiss = { showLoginDialog = false },
+            onLoginSuccess = { cookie ->
+                viewModel.setYoutubeCookie(cookie)
+                showLoginDialog = false
+            },
+        )
+    }
+}
+
+@Composable
+private fun YouTubeAccountCard(
+    youtubeCookie: String?,
+    accountInfo: AccountInfo?,
+    onSignInChrome: () -> Unit,
+    onSignInDialog: () -> Unit,
+    onSignOut: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(20.dp),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+            )
+            .clip(RoundedCornerShape(20.dp)),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            if (!youtubeCookie.isNullOrBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    val avatarUrl = accountInfo?.thumbnailUrl.orEmpty()
+                    val accountName = accountInfo?.name ?: stringResource(R.string.account_signed_in)
+                    ChannelAvatarImage(
+                        url = avatarUrl,
+                        contentDescription = accountName,
+                        modifier = Modifier.size(52.dp),
+                    )
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = accountName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = accountInfo?.channelHandle ?: stringResource(R.string.account_signed_in),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    OutlinedButton(
+                        onClick = onSignOut,
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error,
+                        ),
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.Logout,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(text = stringResource(R.string.account_sign_out), fontSize = 12.sp)
+                    }
+                }
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Rounded.AccountCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(32.dp),
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.account_sign_in_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = "Sync YouTube playlists, likes & subscriptions",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Button(
+                        onClick = onSignInChrome,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.Login,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(text = "Google Sign-In", fontSize = 13.sp)
+                    }
+                    OutlinedButton(
+                        onClick = onSignInDialog,
+                        shape = RoundedCornerShape(16.dp),
+                    ) {
+                        Text(text = "Web Login", fontSize = 13.sp)
                     }
                 }
             }

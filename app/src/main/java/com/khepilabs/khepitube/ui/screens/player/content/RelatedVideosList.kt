@@ -6,8 +6,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.local.PlayerRelatedCardStyle
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.ui.components.FeedGridLayout
@@ -22,6 +27,7 @@ internal fun LazyListScope.relatedVideosContent(
     relatedVideos: List<Video>,
     onVideoClick: (Video) -> Unit,
     cardStyle: PlayerRelatedCardStyle = PlayerRelatedCardStyle.FULL_WIDTH,
+    onLoadMore: (() -> Unit)? = null,
 ) {
     // Video items
     items(
@@ -46,6 +52,21 @@ internal fun LazyListScope.relatedVideosContent(
             }
         }
     }
+
+    if (relatedVideos.isNotEmpty() && onLoadMore != null) {
+        item(key = "related_load_more_btn") {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = 16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                OutlinedButton(onClick = onLoadMore) {
+                    Text(text = stringResource(R.string.desc_see_more))
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -59,6 +80,7 @@ internal fun LazyListScope.relatedVideosGridContent(
     layout: FeedGridLayout,
     onVideoClick: (Video) -> Unit,
     cardStyle: PlayerRelatedCardStyle = PlayerRelatedCardStyle.FULL_WIDTH,
+    onLoadMore: (() -> Unit)? = null,
 ) {
     val columns = if (cardStyle == PlayerRelatedCardStyle.COMPACT) 1 else layout.columns
     val rows = relatedGridRows(relatedVideos.size, columns)
@@ -90,6 +112,21 @@ internal fun LazyListScope.relatedVideosGridContent(
                     Box(modifier = Modifier.weight(1f)) {
                         MediaVideoCard(video = video, onClick = { onVideoClick(video) })
                     }
+                }
+            }
+        }
+    }
+
+    if (relatedVideos.isNotEmpty() && onLoadMore != null) {
+        item(key = "related_grid_load_more_btn") {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp, horizontal = layout.contentPadding),
+                contentAlignment = Alignment.Center,
+            ) {
+                OutlinedButton(onClick = onLoadMore) {
+                    Text(text = stringResource(R.string.desc_see_more))
                 }
             }
         }

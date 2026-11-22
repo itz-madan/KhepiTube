@@ -234,12 +234,14 @@ internal fun EnhancedVideoPlayerScreen(
                                     layout = relatedLayout,
                                     onVideoClick = onVideoClick,
                                     cardStyle = relatedCardStyle,
+                                    onLoadMore = { viewModel.loadMoreRelatedVideos() },
                                 )
                             } else {
                                 relatedVideosContent(
                                     relatedVideos = uiState.relatedVideos,
                                     onVideoClick = onVideoClick,
                                     cardStyle = relatedCardStyle,
+                                    onLoadMore = { viewModel.loadMoreRelatedVideos() },
                                 )
                             }
                         }

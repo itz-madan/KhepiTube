@@ -33,7 +33,7 @@ enum class KhepiTab(
     Home(0, "home", R.string.nav_home),
     Shorts(1, "shorts", R.string.nav_shorts),
     Music(2, "music", R.string.nav_music),
-    LocalMedia(3, "localMedia", R.string.settings_local_media_title),
+    LocalMedia(3, "localMedia", R.string.nav_media),
     Subscriptions(4, "subscriptions", R.string.nav_subs),
     Library(5, "library", R.string.nav_library),
     Search(6, "search", R.string.nav_search),

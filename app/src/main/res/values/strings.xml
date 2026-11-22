@@ -364,6 +364,7 @@
     <string name="nav_home">Home</string>
     <string name="nav_shorts">Shorts</string>
     <string name="nav_music">Music</string>
+    <string name="nav_media" tools:ignore="MissingTranslation">Media</string>
     <string name="nav_subs">Subs</string>
     <string name="nav_library">Library</string>
     <string name="notifications">Notifications</string>
@@ -4349,4 +4350,10 @@
 
     <string name="about_original_creator_label">Original creator</string>
     <string name="about_original_creator_role">Original Flow project attribution</string>
+
+    <!-- Account / Sign In -->
+    <string name="account_signed_in" tools:ignore="MissingTranslation">Signed in</string>
+    <string name="account_not_signed_in" tools:ignore="MissingTranslation">Not signed in</string>
+    <string name="account_sign_in_title" tools:ignore="MissingTranslation">Sign in to YouTube</string>
+    <string name="account_sign_out" tools:ignore="MissingTranslation">Sign out</string>
 </resources>

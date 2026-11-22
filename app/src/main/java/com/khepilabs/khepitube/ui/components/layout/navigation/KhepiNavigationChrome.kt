@@ -62,6 +62,7 @@ fun KhepiNavigationChrome(
     barVisible: Boolean,
     railVisible: Boolean,
     modifier: Modifier = Modifier,
+    onTrendingClick: (() -> Unit)? = null,
     onBarHeightChanged: (Dp) -> Unit = {},
     onRailWidthChanged: (Dp) -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
@@ -102,6 +103,7 @@ fun KhepiNavigationChrome(
                     tabs = tabs,
                     selectedTab = selectedTab,
                     onTabSelected = onTabSelected,
+                    onTrendingClick = onTrendingClick,
                     visible = barVisible,
                     onHeightChanged = onBarHeightChanged,
                 )
@@ -115,6 +117,7 @@ private fun BoxScope.NavigationBarSlot(
     tabs: List<KhepiTab>,
     selectedTab: KhepiTab?,
     onTabSelected: (KhepiTab) -> Unit,
+    onTrendingClick: (() -> Unit)?,
     visible: Boolean,
     onHeightChanged: (Dp) -> Unit,
 ) {
@@ -131,6 +134,7 @@ private fun BoxScope.NavigationBarSlot(
             tabs = tabs,
             selectedTab = selectedTab,
             onTabSelected = onTabSelected,
+            onTrendingClick = onTrendingClick,
             modifier =
                 Modifier
                     .testTag(KHEPI_NAV_BAR_TAG)

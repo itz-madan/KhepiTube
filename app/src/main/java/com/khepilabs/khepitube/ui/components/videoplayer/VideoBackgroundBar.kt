@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.outlined.Headphones
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -364,6 +365,19 @@ private fun BackgroundBarContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                )
+            }
+            IconButton(
+                onClick = {
+                    val manager = EnhancedPlayerManager.getInstance()
+                    manager.switchToAudioOnly()
+                },
+                modifier = chrome,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Headphones,
+                    contentDescription = "Background Audio Play",
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
             MediaPlayPauseButton(

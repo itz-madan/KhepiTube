@@ -392,6 +392,37 @@ fun NavGraphBuilder.khepiAppGraph(
         }
     }
 
+    composable(
+        route = "channel?url={url}",
+        arguments =
+            listOf(
+                navArgument("url") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = ""
+                },
+            ),
+    ) { backStackEntry ->
+        currentRoute.value = "channel"
+        val channelUrl = backStackEntry.arguments?.getString("url").orEmpty()
+        ChannelScreen(
+            channelUrl = channelUrl,
+            onBackClick = { navController.popBackStack() },
+            onVideoClick = { video ->
+                navController.openVideoOrShorts(video, disableShortsPlayer) { playerViewModel.playVideo(it) }
+            },
+            onChannelClick = { channelId ->
+                mediaNavigator.openChannel(channelId)
+            },
+            onShortClick = { shortId, _ ->
+                navController.openShortsOrPlayer(ShortsQueueSource.SeededFeed(shortId), disableShortsPlayer)
+            },
+            onPlaylistClick = { playlistId ->
+                navController.navigate("playlist/$playlistId")
+            },
+        )
+    }
+
     composable("search") {
         currentRoute.value = "search"
         SearchScreen(

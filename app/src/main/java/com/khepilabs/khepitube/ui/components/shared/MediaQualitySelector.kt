@@ -1,21 +1,20 @@
 package com.khepilabs.khepitube.ui.components.shared
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -35,110 +34,79 @@ fun <T> MediaQualitySelectorContent(
     groupedByResolution: Boolean,
     onOptionSelected: (T) -> Unit,
 ) {
-    if (!groupedByResolution) {
-        val sorted = options.sortedByDescending { it.height }
-        KhepiRowGroup {
-            sorted.forEachIndexed { index, option ->
-                KhepiSelectionRow(
-                    title = option.label,
-                    supportingText = option.supportingText,
-                    selected = option.selected,
-                    shape = khepiRowGroupShape(index, sorted.size),
-                    onClick = { onOptionSelected(option.item) },
-                )
-            }
-        }
-        return
-    }
-
+    // Minimal merged quality options: Auto + one best stream option per resolution
     val auto = options.firstOrNull { it.height == 0 }
-    val resolutions =
-        options
-            .filter { it.height != 0 }
-            .groupBy { it.height }
-            .entries
-            .sortedByDescending { it.key }
-            .map { it.value }
-    val rowCount = resolutions.size + if (auto == null) 0 else 1
-    KhepiRowGroup {
-        if (auto != null) {
-            KhepiSelectionRow(
-                title = auto.label,
-                selected = auto.selected,
-                shape = khepiRowGroupShape(0, rowCount),
-                onClick = { onOptionSelected(auto.item) },
-            )
+    val resolutionGrouped = options
+        .filter { it.height != 0 }
+        .groupBy { it.height }
+        .entries
+        .sortedByDescending { it.key }
+        .map { (_, groupOptions) ->
+            // Pick the selected option if any in this resolution group is selected, otherwise pick best
+            groupOptions.firstOrNull { it.selected } ?: groupOptions.first()
         }
-        resolutions.forEachIndexed { index, group ->
-            val rowIndex = index + if (auto == null) 0 else 1
-            val codecOptions = group.filter { it.codecKey.isNotBlank() || it.codecLabel.isNotBlank() }
-            if (codecOptions.isEmpty()) {
-                val option = group.first()
-                KhepiSelectionRow(
-                    title = option.label,
-                    supportingText = option.supportingText,
-                    selected = option.selected,
-                    shape = khepiRowGroupShape(rowIndex, rowCount),
-                    onClick = { onOptionSelected(option.item) },
-                )
-            } else {
-                MediaQualitySelectorCodecRow(
-                    qualityLabel = group.first().resolutionLabel(),
-                    codecOptions = codecOptions,
-                    shape = khepiRowGroupShape(rowIndex, rowCount),
-                    onOptionSelected = onOptionSelected,
-                )
-            }
-        }
-    }
-}
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun <T> MediaQualitySelectorCodecRow(
-    qualityLabel: String,
-    codecOptions: List<MediaQualitySelectorOption<T>>,
-    shape: Shape,
-    onOptionSelected: (T) -> Unit,
-) {
-    val rowSelected = codecOptions.any { it.selected }
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    val finalOptions = buildList {
+        if (auto != null) add(auto)
+        addAll(resolutionGrouped)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Text(
-            text = qualityLabel,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (rowSelected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (rowSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            modifier = Modifier.width(84.dp),
-        )
-        Spacer(Modifier.width(12.dp))
-        FlowRow(
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            codecOptions.forEach { option ->
-                KhepiFilterChip(
-                    label = option.codecLabel.ifBlank { option.label },
-                    selected = option.selected,
-                    onClick = { onOptionSelected(option.item) },
-                )
+        finalOptions.forEach { option ->
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                color = if (option.selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+                },
+                onClick = { onOptionSelected(option.item) },
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Column {
+                        Text(
+                            text = option.label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = if (option.selected) FontWeight.Bold else FontWeight.Medium,
+                            color = if (option.selected) {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                        )
+                        if (!option.supportingText.isNullOrBlank()) {
+                            Text(
+                                text = option.supportingText,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (option.selected) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
+                            )
+                        }
+                    }
+                    if (option.selected) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
             }
         }
     }
 }
-
-private fun MediaQualitySelectorOption<*>.resolutionLabel(): String =
-    if (codecLabel.isNotBlank() && label.endsWith(" $codecLabel")) {
-        label.removeSuffix(" $codecLabel")
-    } else {
-        label
-    }

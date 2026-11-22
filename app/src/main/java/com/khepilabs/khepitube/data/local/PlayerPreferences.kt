@@ -315,6 +315,9 @@ class PlayerPreferences(
         val SUBS_SHOW_CHECKED_VIDEO_COUNT = booleanPreferencesKey("subs_show_checked_video_count")
         val SHOW_CHANNEL_GROUP_BADGES = booleanPreferencesKey("show_channel_group_badges")
 
+        // Account / YouTube Cookie
+        val YOUTUBE_COOKIE = stringPreferencesKey("youtube_cookie")
+
         // Donation / support prompt
         val DONATION_FIRST_LAUNCH_TIME = longPreferencesKey("donation_first_launch_time")
         val DONATION_PROMPT_LAST_SHOWN = longPreferencesKey("donation_prompt_last_shown")
@@ -464,6 +467,22 @@ class PlayerPreferences(
     }
 
     // ── Volume boost (#491): opt-in, default OFF ──
+    val youtubeCookie: Flow<String?> =
+        context.playerPreferencesDataStore.data
+            .map { preferences ->
+                preferences[Keys.YOUTUBE_COOKIE]
+            }
+
+    suspend fun setYoutubeCookie(cookie: String?) {
+        context.playerPreferencesDataStore.edit { preferences ->
+            if (cookie.isNullOrBlank()) {
+                preferences.remove(Keys.YOUTUBE_COOKIE)
+            } else {
+                preferences[Keys.YOUTUBE_COOKIE] = cookie
+            }
+        }
+    }
+
     val allowVolumeBoost: Flow<Boolean> =
         context.playerPreferencesDataStore.data
             .map { preferences ->
@@ -1705,7 +1724,7 @@ class PlayerPreferences(
     val sponsorBlockEnabled: Flow<Boolean> =
         context.playerPreferencesDataStore.data
             .map { preferences ->
-                preferences[Keys.SPONSOR_BLOCK_ENABLED] ?: false
+                preferences[Keys.SPONSOR_BLOCK_ENABLED] ?: true
             }
 
     suspend fun setSponsorBlockEnabled(enabled: Boolean) {
@@ -3559,7 +3578,7 @@ class PlayerPreferences(
     val miniPlayerContinueWatchingEnabled: Flow<Boolean> =
         context.playerPreferencesDataStore.data
             .map { preferences ->
-                preferences[Keys.MINI_PLAYER_CONTINUE_WATCHING_ENABLED] ?: true
+                preferences[Keys.MINI_PLAYER_CONTINUE_WATCHING_ENABLED] ?: false
             }
 
     suspend fun setMiniPlayerContinueWatchingEnabled(enabled: Boolean) {

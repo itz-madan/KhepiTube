@@ -179,17 +179,6 @@ internal fun PlayerBottomSheetsContainer(
             onSheetProgressChange = onMediaSheetProgressChange,
         )
     }
-
-    // Shorts Suggestion Dialog
-    if (screenState.showShortsPrompt && !disableShortsPlayer && showShortsPlayerPrompt) {
-        ShortsSuggestionDialog(
-            onPlayAsShort = {
-                screenState.showShortsPrompt = false
-                onPlayAsShort(completeVideo.id)
-            },
-            onDismiss = { screenState.showShortsPrompt = false },
-        )
-    }
 }
 
 /**

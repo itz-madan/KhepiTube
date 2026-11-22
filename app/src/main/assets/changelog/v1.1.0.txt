@@ -1,0 +1,12 @@
+KHEPITUBE CHANGE LOG
+VERSION: 1.1.0
+DATE: 2026-04-01
+STATUS: stable
+
+NEW FEATURES & ENHANCEMENTS
+- YouTube Account Integration: Sign in with Google to sync your playlists, likes, and subscriptions in Library.
+- Real-Time Trending Feed: Tap the center Flame button on the navigation bar to fetch YouTube's real-time trending videos.
+- Minimal Stream Quality Selector: Cleaned up video resolution selection with merged, rounded single-row resolution choices.
+- Background Audio Play: Easily switch video playback to background audio-only mode from the MiniPlayer.
+- In-App Auto Updates: Auto-checks GitHub releases on startup with 1-tap in-app download and installation.
+- Default Preferences: SponsorBlock is enabled by default, and Continue Watching on app open is turned off by default.

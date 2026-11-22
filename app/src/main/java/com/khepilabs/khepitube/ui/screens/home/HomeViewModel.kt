@@ -544,6 +544,53 @@ class HomeViewModel
             }
         }
 
+        fun loadTrendingFeed() {
+            wave2Job?.cancel()
+            feedJob?.cancel()
+            subsTopUpJob?.cancel()
+            channelMemoryJob?.cancel()
+            visibleMetadataJob?.cancel()
+            feedGeneration++
+
+            _uiState.update { it.copy(isLoading = true, videos = emptyList(), error = null) }
+
+            feedJob =
+                viewModelScope.launch(PerformanceDispatcher.networkIO) {
+                    try {
+                        val region = playerPreferences.trendingRegion.first()
+                        val trendingQuery = "trending videos $region"
+
+                        val trendingList: List<Video> = withTimeoutOrNull(SEARCH_TIMEOUT_MS) {
+                            repository.searchVideos(trendingQuery).first
+                        } ?: emptyList()
+
+                        val fallbackList: List<Video> = if (trendingList.isEmpty()) {
+                            withTimeoutOrNull(SEARCH_TIMEOUT_MS) {
+                                repository.searchVideos("trending").first
+                            } ?: emptyList()
+                        } else trendingList
+
+                        val finalTrending = fallbackList.distinctBy { it.id }
+
+                        if (finalTrending.isNotEmpty()) {
+                            _uiState.update { state ->
+                                state.copy(
+                                    videos = finalTrending,
+                                    isLoading = false,
+                                    error = null,
+                                    lastRefreshTime = System.currentTimeMillis(),
+                                )
+                            }
+                        } else {
+                            loadFlowFeed(forceRefresh = true)
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to load trending feed", e)
+                        loadFlowFeed(forceRefresh = true)
+                    }
+                }
+        }
+
         fun loadFlowFeed(forceRefresh: Boolean = false) {
             if (_uiState.value.isLoading && !forceRefresh) return
 
@@ -687,11 +734,9 @@ class HomeViewModel
                                 now = now,
                                 freshSlotTarget = dynamicFreshSubSlots(userSubs.size),
                                 subAvatarMap = subAvatarMap,
-                                rank = { pool -> KhepiNeuroEngine.rank(pool, userSubs, trace = trace) },
-                                rankRelevant = { pool ->
-                                    KhepiNeuroEngine.rank(pool, userSubs, NeuroScoring.LANE_RELEVANCE_FLOOR, trace)
-                                },
-                                share = KhepiNeuroEngine::shareByInterest,
+                                rank = { pool -> pool },
+                                rankRelevant = { pool -> pool },
+                                share = { pool -> pool },
                                 rawNeighbours = rawNeighbours,
                                 searchOf = queriesById(discoveryPairs)::get,
                             )
@@ -914,14 +959,7 @@ class HomeViewModel
                                     .filterNot(feedExclusions()::hidesFromRecommendations)
                             if (wave2Valid.isEmpty()) return@wave2
 
-                            val wave2Ranked =
-                                KhepiNeuroEngine
-                                    .shareByInterest(
-                                        demoteByFit(
-                                            KhepiNeuroEngine.rank(wave2Valid, userSubs, NeuroScoring.LANE_RELEVANCE_FLOOR, snapshotTrace),
-                                            taste,
-                                        ),
-                                    ).take(15)
+                            val wave2Ranked = wave2Valid.take(15)
 
                             if (wave2Ranked.isNotEmpty()) {
                                 var updatedSnapshot: List<Video>? = null
@@ -1011,17 +1049,10 @@ class HomeViewModel
                     .filter { it.source == HomeFeedCacheRepository.SOURCE_RELATED }
                     .mapTo(HashSet()) { it.video.id }
             val reserveVideos =
-                KhepiNeuroEngine.shareByInterest(
-                    KhepiNeuroEngine.rank(
-                        reserveRows
-                            .map { it.video }
-                            .filterValid()
-                            .filterRecentHomeSuggestion(now),
-                        userSubs,
-                        NeuroScoring.LANE_RELEVANCE_FLOOR,
-                        snapshotTrace,
-                    ),
-                )
+                reserveRows
+                    .map { it.video }
+                    .filterValid()
+                    .filterRecentHomeSuggestion(now)
             val start = page.size
             val reserveAdded =
                 addUniquePageVideos(
@@ -1067,21 +1098,7 @@ class HomeViewModel
                     .filterWatchedGraph(watchedVideoIds.value)
                     .filterRecentHomeSuggestionGraph(now)
             val graphMetadata = graphCandidates.associateBy { it.video.id }
-            val graphRanked =
-                KhepiNeuroEngine.shareByInterest(
-                    demoteByFit(
-                        applyGraphBoost(
-                            KhepiNeuroEngine.rank(
-                                graphCandidates.map { it.video },
-                                userSubs,
-                                NeuroScoring.LANE_RELEVANCE_FLOOR,
-                                snapshotTrace,
-                            ),
-                            graphMetadata,
-                        ),
-                        taste,
-                    ),
-                )
+            val graphRanked = graphCandidates.map { it.video }
             val graphStartIndex = page.size
             addUniquePageVideos(
                 candidates = graphRanked,
@@ -1256,14 +1273,7 @@ class HomeViewModel
                             .filterWatched(watchedVideoIds.value)
                             .filterRecentHomeSuggestion(now)
                     if (newVideos.isEmpty()) return
-                    val rankedDiscovery =
-                        KhepiNeuroEngine
-                            .shareByInterest(
-                                demoteByFit(
-                                    KhepiNeuroEngine.rank(newVideos, userSubs, NeuroScoring.LANE_RELEVANCE_FLOOR, snapshotTrace),
-                                    taste,
-                                ),
-                            ).let { spreadAcrossSearches(it, queries::get, it.size) }
+                    val rankedDiscovery = newVideos
                     addUniquePageVideos(
                         candidates = rankedDiscovery,
                         targetList = page,
@@ -1316,21 +1326,7 @@ class HomeViewModel
                                 .filterWatchedGraph(watchedVideoIds.value)
                                 .filterRecentHomeSuggestionGraph(now)
                         val fallbackMetadata = fallbackCandidates.associateBy { it.video.id }
-                        val fallbackRanked =
-                            KhepiNeuroEngine.shareByInterest(
-                                demoteByFit(
-                                    applyGraphBoost(
-                                        KhepiNeuroEngine.rank(
-                                            fallbackCandidates.map { it.video },
-                                            userSubs,
-                                            NeuroScoring.LANE_RELEVANCE_FLOOR,
-                                            snapshotTrace,
-                                        ),
-                                        fallbackMetadata,
-                                    ),
-                                    taste,
-                                ),
-                            )
+                        val fallbackRanked = fallbackCandidates.map { it.video }
                         val fallbackStartIndex = page.size
                         addUniquePageVideos(
                             candidates = fallbackRanked,

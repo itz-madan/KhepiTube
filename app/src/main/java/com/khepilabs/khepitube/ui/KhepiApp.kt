@@ -34,6 +34,8 @@ import com.khepilabs.khepitube.data.local.DEFAULT_NAV_TAB_ORDER
 import com.khepilabs.khepitube.data.local.MusicPlayerBackgroundStyle
 import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.data.recommendation.KhepiNeuroEngine
+import com.khepilabs.khepitube.data.update.UpdateRelease
+import com.khepilabs.khepitube.data.update.UpdateRepository
 import com.khepilabs.khepitube.player.DeepFlowManager
 import com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
 import com.khepilabs.khepitube.player.EnhancedPlayerManager
@@ -44,6 +46,7 @@ import com.khepilabs.khepitube.ui.components.layout.KhepiBottomInsets
 import com.khepilabs.khepitube.ui.components.layout.LocalKhepiBottomInsets
 import com.khepilabs.khepitube.ui.components.layout.navigation.KhepiNavigationChrome
 import com.khepilabs.khepitube.ui.components.layout.navigation.KhepiNavigationDefaults
+import com.khepilabs.khepitube.ui.components.layout.navigation.KhepiTab
 import com.khepilabs.khepitube.ui.components.layout.navigation.NavigationVisibility
 import com.khepilabs.khepitube.ui.components.layout.navigation.khepiUsesNavigationRail
 import com.khepilabs.khepitube.ui.components.layout.navigation.rememberKhepiNavigationScrollState
@@ -65,11 +68,13 @@ import com.khepilabs.khepitube.ui.screens.equalizer.EqualizerViewModel
 import com.khepilabs.khepitube.ui.screens.home.HomeViewModel
 import com.khepilabs.khepitube.ui.screens.notifications.NotificationViewModel
 import com.khepilabs.khepitube.ui.screens.player.VideoPlayerViewModel
+import com.khepilabs.khepitube.ui.screens.update.InAppUpdateDialog
 import com.khepilabs.khepitube.ui.theme.ThemeMode
 import com.khepilabs.khepitube.ui.theme.ThemeVariant
 import com.khepilabs.khepitube.ui.utils.LocalWindowSizeClass
 import com.khepilabs.khepitube.ui.utils.isMediumWidth
 import kotlinx.coroutines.flow.first
+import okhttp3.OkHttpClient
 import kotlin.math.roundToInt
 
 @UnstableApi
@@ -398,16 +403,54 @@ fun KhepiApp(
                     miniPlayerSpanPx = miniPlayerSpanState,
                 )
             }
+        val homeViewModel: HomeViewModel = hiltViewModel(activity!!)
+        LaunchedEffect(homeViewModel) {
+            homeViewModel.initialize(context.applicationContext)
+        }
+
+        val updateRepository = remember(context) { UpdateRepository(context, OkHttpClient()) }
+        var availableUpdateRelease by remember { mutableStateOf<UpdateRelease?>(null) }
+        var skippedVersion by remember { mutableStateOf("") }
+
+        LaunchedEffect(Unit) {
+            val release = updateRepository.checkLatestRelease()
+            if (release != null && release.isNewer && release.versionName != skippedVersion) {
+                availableUpdateRelease = release
+            }
+        }
+
+        if (availableUpdateRelease != null) {
+            InAppUpdateDialog(
+                release = availableUpdateRelease!!,
+                repository = updateRepository,
+                onDismiss = { availableUpdateRelease = null },
+                onSkipVersion = { version ->
+                    skippedVersion = version
+                    availableUpdateRelease = null
+                },
+            )
+        }
+
         KhepiNavigationChrome(
             tabs = navigationTabs,
             selectedTab = selectedTab,
             onTabSelected = { tab ->
+                if (tab == KhepiTab.Home) {
+                    homeViewModel.loadFlowFeed(forceRefresh = true)
+                }
                 if (currentTab == tab) {
                     TabScrollEventBus.emitScrollToTop(tab.route)
                 } else {
                     currentRoute.value = tab.route
                     navController.navigateToTab(tab, defaultStartRoute)
                 }
+            },
+            onTrendingClick = {
+                if (currentRoute.value != KhepiTab.Home.route) {
+                    currentRoute.value = KhepiTab.Home.route
+                    navController.navigateToTab(KhepiTab.Home, defaultStartRoute)
+                }
+                homeViewModel.loadTrendingFeed()
             },
             barVisible = showBottomNav && navScrollState.isBarVisible,
             railVisible = isNavigationRailVisible,
@@ -448,11 +491,6 @@ fun KhepiApp(
                                 .nestedScroll(navScrollState.nestedScrollConnection),
                     ) {
                         if (needsOnboarding != null) {
-                            val homeViewModel: HomeViewModel = hiltViewModel(activity!!)
-                            LaunchedEffect(homeViewModel) {
-                                homeViewModel.initialize(context.applicationContext)
-                            }
-
                             ProvideKhepiGlobalActions(
                                 unreadNotifications = notificationViewModel.unreadCount,
                                 onOpenNotifications = { navController.navigate("notifications") },

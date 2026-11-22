@@ -60,12 +60,6 @@ internal fun ContentSettingsScreen(
             switch(ContentIndex.homeSubscriptions, viewModel.homeSubscriptions, viewModel::setHomeSubscriptions)
             switch(ContentIndex.hideWatchedHome, viewModel.hideWatchedHome, viewModel::setHideWatchedHome)
         }
-        group(key = "content.music", header = R.string.screen_title_music) {
-            nav(
-                DestinationIndex.entry(SettingsDestination.MUSIC_HOME),
-                onClick = { onNavigate(SettingsTarget(SettingsDestination.MUSIC_HOME)) },
-            )
-        }
         group(key = "content.library", header = R.string.library) {
             nav(
                 DestinationIndex.entry(SettingsDestination.LIBRARY),

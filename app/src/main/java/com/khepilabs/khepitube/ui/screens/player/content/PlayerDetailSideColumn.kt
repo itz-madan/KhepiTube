@@ -235,6 +235,7 @@ internal fun PlayerDetailSideColumn(
                                         relatedVideos = uiState.relatedVideos,
                                         onVideoClick = onVideoClick,
                                         cardStyle = relatedCardStyle,
+                                        onLoadMore = { viewModel.loadMoreRelatedVideos() },
                                     )
                                 }
                             }

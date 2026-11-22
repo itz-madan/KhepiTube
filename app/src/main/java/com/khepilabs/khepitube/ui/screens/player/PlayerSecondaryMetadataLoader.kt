@@ -380,6 +380,43 @@ internal class PlayerSecondaryMetadataLoader(
             }
     }
 
+    fun loadMoreRelatedVideos(
+        videoId: String,
+        loadToken: Long,
+    ) {
+        if (videoId.isBlank() || !isPlaybackCurrent(loadToken)) return
+        scope.launch(networkDispatcher) {
+            val current = currentState().relatedVideos
+            if (current.isEmpty()) return@launch
+
+            val seedIds = current.takeLast(10).map { it.id }.distinct()
+            val newCandidates = mutableListOf<Video>()
+
+            for (seedId in seedIds) {
+                if (!isPlaybackCurrent(loadToken)) break
+                val fetched = runCatching { repository.getRelatedCandidates(seedId) }.getOrElse { emptyList() }
+                val sanitized =
+                    PlayerRelatedVideosPolicy.sanitize(
+                        videoId = videoId,
+                        candidates = fetched,
+                        shortsEnabled = shortsEnabled(),
+                        exclusions = exclusions(),
+                    )
+                for (item in sanitized) {
+                    if (current.none { it.id == item.id } && newCandidates.none { it.id == item.id }) {
+                        newCandidates.add(item)
+                    }
+                }
+                if (newCandidates.size >= 15) break
+            }
+
+            if (newCandidates.isNotEmpty() && isPlaybackCurrent(loadToken)) {
+                val updated = current + newCandidates
+                publish(videoId, updated, loadToken)
+            }
+        }
+    }
+
     /**
      * Folds the NewPipe metadata a fast InnerTube load raced past into the screen once it lands,
      * then re-arms the related lane and the channel request from the richer references it carries.

@@ -594,6 +594,12 @@ class VideoPlayerViewModel
             comments.loadMoreReplies(videoId, comment)
         }
 
+        fun loadMoreRelatedVideos() {
+            val videoId = _uiState.value.cachedVideo?.id ?: return
+            if (videoId.isBlank()) return
+            collaborators.secondaryMetadata.loadMoreRelatedVideos(videoId, loads.token)
+        }
+
         fun toggleSkipSilence(isEnabled: Boolean) = settings.toggleSkipSilence(isEnabled)
 
         fun toggleVolumeNormalization(isEnabled: Boolean) = settings.toggleVolumeNormalization(isEnabled)

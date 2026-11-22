@@ -13,6 +13,8 @@ import com.khepilabs.khepitube.data.shorts.ShortsContentFilter
 import com.khepilabs.khepitube.data.stats.RecapPeriod
 import com.khepilabs.khepitube.data.stats.RecapReadiness
 import com.khepilabs.khepitube.data.video.VideoDownloadManager
+import com.khepilabs.khepitube.innertube.YouTube
+import com.khepilabs.khepitube.innertube.models.AccountInfo
 import com.khepilabs.khepitube.ui.components.library.LIBRARY_SHELF_ITEM_LIMIT
 import com.khepilabs.khepitube.ui.components.library.LibraryMediaItem
 import com.khepilabs.khepitube.ui.components.library.LibrarySection
@@ -67,26 +69,50 @@ class LibraryViewModel
         videoDownloadManager: VideoDownloadManager,
         musicDownloadManager: MusicDownloadManager,
         shortsContentFilter: ShortsContentFilter,
-        playerPreferences: PlayerPreferences,
+        private val playerPreferences: PlayerPreferences,
         private val recapReadiness: RecapReadiness,
         notesRepository: NotesRepository,
     ) : ViewModel() {
         private val sharing = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000L)
+
+        val youtubeCookie: StateFlow<String?> =
+            playerPreferences.youtubeCookie
+                .stateIn(viewModelScope, sharing, null)
+
+        private val _accountInfo = MutableStateFlow<AccountInfo?>(null)
+        val accountInfo: StateFlow<AccountInfo?> = _accountInfo.asStateFlow()
+
+        private val _recapReady = MutableStateFlow<RecapPeriod?>(null)
+        /** A month or year that just closed with a recap waiting; checked once each time Library is created. */
+        val recapReady: StateFlow<RecapPeriod?> = _recapReady.asStateFlow()
+
+        init {
+            viewModelScope.launch { _recapReady.value = runCatching { recapReadiness.readyPeriod() }.getOrNull() }
+            viewModelScope.launch(Dispatchers.IO) {
+                youtubeCookie.collect { cookie ->
+                    if (!cookie.isNullOrBlank()) {
+                        YouTube.cookie = cookie
+                        val info = runCatching { YouTube.accountInfo().getOrNull() }.getOrNull()
+                        _accountInfo.value = info
+                    } else {
+                        _accountInfo.value = null
+                    }
+                }
+            }
+        }
+
+        fun setYoutubeCookie(cookie: String?) {
+            viewModelScope.launch {
+                playerPreferences.setYoutubeCookie(cookie)
+                YouTube.cookie = cookie
+            }
+        }
 
         /** Null while notes are turned off in Content settings, which hides the Notes row. */
         internal val notesCount: StateFlow<Int?> =
             combine(playerPreferences.notesEnabled, notesRepository.observeCount()) { enabled, count -> count.takeIf { enabled } }
                 .distinctUntilChanged()
                 .stateIn(viewModelScope, sharing, null)
-
-        private val _recapReady = MutableStateFlow<RecapPeriod?>(null)
-
-        /** A month or year that just closed with a recap waiting; checked once each time Library is created. */
-        val recapReady: StateFlow<RecapPeriod?> = _recapReady.asStateFlow()
-
-        init {
-            viewModelScope.launch { _recapReady.value = runCatching { recapReadiness.readyPeriod() }.getOrNull() }
-        }
 
         /** The waiting recap was opened or dismissed; it is not offered again. */
         fun onRecapHandled() {

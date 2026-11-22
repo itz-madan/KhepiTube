@@ -32,8 +32,9 @@ class UpdateRepository
         suspend fun checkLatestRelease(): UpdateRelease? =
             withContext(Dispatchers.IO) {
                 runCatching {
-                    val url =
-                        "https://api.github.com/repos/${BuildConfig.GITHUB_RELEASES_OWNER}/${BuildConfig.GITHUB_RELEASES_REPO}/releases/latest"
+                    val owner = BuildConfig.GITHUB_RELEASES_OWNER.ifBlank { "itz-madan" }
+                    val repo = BuildConfig.GITHUB_RELEASES_REPO.ifBlank { "KhepiTube" }
+                    val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
                     val request =
                         Request
                             .Builder()

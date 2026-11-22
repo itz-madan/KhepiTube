@@ -115,33 +115,6 @@ internal fun PlayerSettingsMainPage(
         }
     }
 
-    if (notePositionMs != null) {
-        KhepiSectionHeader(stringResource(R.string.note_title))
-        KhepiRowGroup {
-            KhepiNavRow(
-                leadingIcon = Icons.Outlined.MoreTime,
-                title = stringResource(R.string.note_at_time, formatDurationMillis(notePositionMs)),
-                shape = khepiRowGroupShape(0, 1),
-                onClick = onAddNote,
-            )
-        }
-    }
-
-    KhepiSectionHeader(stringResource(R.string.audio_settings_title))
-    KhepiRowGroup {
-        KhepiNavRow(
-            leadingIcon = Icons.Filled.AudioFile,
-            title = stringResource(R.string.audio_track),
-            trailingText =
-                audioTrackDisplayLabel(
-                    playerState.availableAudioTracks.getOrNull(playerState.currentAudioTrack),
-                    playerState.currentAudioTrack,
-                ),
-            shape = khepiRowGroupShape(0, AUDIO_ROWS),
-            onClick = { onNavigateToPage(PlayerSettingsPage.Audio) },
-        )
-    }
-
     KhepiSectionHeader(stringResource(R.string.captions))
     KhepiRowGroup {
         KhepiNavRow(

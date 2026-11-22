@@ -57,16 +57,16 @@ android {
         applicationId = "com.khepilabs.khepitube"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
 
         buildConfigField("int", "NIGHTLY_RUN", "0")
         buildConfigField("String", "APP_LANGUAGE_TAGS", "\"${(listOf("en") + translatedLocaleTags()).joinToString(",")}\"")
-        buildConfigField("String", "GITHUB_RELEASES_OWNER", "\"khepilabs\"")
-        buildConfigField("String", "GITHUB_RELEASES_REPO", "\"khepitube\"")
-        // Last.fm keys come from the CI secrets; builds without them ask the viewer for their own key.
+        buildConfigField("String", "GITHUB_RELEASES_OWNER", "\"itz-madan\"")
+        buildConfigField("String", "GITHUB_RELEASES_REPO", "\"KhepiTube\"")
         buildConfigField("String", "LASTFM_API_KEY", "\"${secretValue("lastfmApiKey", "lastfm.apiKey", "LASTFM_API_KEY")}\"")
         buildConfigField("String", "LASTFM_API_SECRET", "\"${secretValue("lastfmApiSecret", "lastfm.apiSecret", "LASTFM_API_SECRET")}\"")
+        buildConfigField("Boolean", "UPDATER_ENABLED", "true")
 
         testInstrumentationRunner = "com.khepilabs.khepitube.HiltTestRunner"
         vectorDrawables {
@@ -86,25 +86,13 @@ android {
         includeInBundle = false
     }
 
+    // Generates 5 device-specific release APK variants (arm64-v8a, armeabi-v7a, x86, x86_64 + universal)
     splits {
         abi {
             isEnable = true
             reset()
             include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
             isUniversalApk = true
-        }
-    }
-
-    flavorDimensions += "version"
-    productFlavors {
-        create("github") {
-            dimension = "version"
-            isDefault = true
-            buildConfigField("Boolean", "UPDATER_ENABLED", "true")
-        }
-        create("foss") {
-            dimension = "version"
-            buildConfigField("Boolean", "UPDATER_ENABLED", "false")
         }
     }
 
@@ -133,13 +121,6 @@ android {
                 ?: System.getenv("KEY_PASSWORD")
                 ?: ""
         }
-        // One long-lived key for every nightly, so each build installs over the last one.
-        create("nightly") {
-            storeFile = rootDir.resolve("nightly.keystore")
-            storePassword = System.getenv("NIGHTLY_STORE_PASSWORD") ?: localProperties.getProperty("nightlyStorePassword") ?: ""
-            keyAlias = System.getenv("NIGHTLY_KEY_ALIAS") ?: localProperties.getProperty("nightlyKeyAlias") ?: ""
-            keyPassword = System.getenv("NIGHTLY_KEY_PASSWORD") ?: localProperties.getProperty("nightlyKeyPassword") ?: ""
-        }
     }
 
     buildTypes {
@@ -154,20 +135,13 @@ android {
         release {
             buildConfigField("String", "UPDATE_CHANNEL", "\"stable\"")
             isDebuggable = false
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("debug")
-        }
-        // Nightly: release-level performance under its own app id. It must come after release,
-        // because initWith copies release as it stands at this point.
-        create("nightly") {
-            initWith(getByName("release"))
-            applicationIdSuffix = ".nightly"
-            versionNameSuffix = "-nightly"
-            matchingFallbacks += "release"
-            buildConfigField("String", "UPDATE_CHANNEL", "\"nightly\"")
-            val nightlyKey = signingConfigs.getByName("nightly")
-            signingConfig = if (nightlyKey.storeFile?.exists() == true) nightlyKey else signingConfigs.getByName("debug")
         }
     }
 
@@ -178,7 +152,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true // Enable desugaring
+        isCoreLibraryDesugaringEnabled = true
     }
 
     packaging {
@@ -210,37 +184,8 @@ tasks.withType<Test>().configureEach {
     maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
 }
 
-// One profile for every shipped variant: foss, nightly and github run the same startup code, and
-// a per-variant profile left foss and nightly with library profiles only (#1301).
 baselineProfile {
     mergeIntoMain = true
-}
-
-// CI nightlies are numbered by workflow run: versionCode = run, versionName = <next>-nightly.<run>+<sha>.
-// Local nightly builds keep defaultConfig's version, so they never replace a CI nightly.
-androidComponents {
-    onVariants(selector().withBuildType("nightly")) { variant ->
-        val run = providers.environmentVariable("GITHUB_RUN_NUMBER").map(String::toInt)
-        val sha = providers.environmentVariable("GITHUB_SHA").map { it.take(7) }
-        val base = providers.gradleProperty("flow.nightlyBaseVersion")
-        variant.outputs.forEach { output ->
-            val localCode = output.versionCode.get()
-            val localName = output.versionName.get()
-            output.versionCode.set(run.orElse(localCode))
-            output.versionName.set(
-                base
-                    .zip(run) { name, number -> "$name-nightly.$number" }
-                    .zip(sha) { name, commit -> "$name+$commit" }
-                    .orElse(localName),
-            )
-        }
-        variant.buildConfigFields?.put(
-            "NIGHTLY_RUN",
-            run
-                .map { BuildConfigField("int", it.toString(), null) }
-                .orElse(BuildConfigField("int", "0", null)),
-        )
-    }
 }
 
 room {
@@ -353,7 +298,6 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.androidx.datastore.preferences)
-    // implementation(libs.androidx.datastore) // In TOML if needed
 
     // --- Home-screen widgets (Jetpack Glance) ---
     implementation(libs.androidx.glance.appwidget)
@@ -371,11 +315,7 @@ dependencies {
     implementation(libs.re2j)
 
     // --- Baseline profiles ---
-    // Runtime installer for the merged baseline profile. AGP merges profiles shipped inside
-    // library AARs (Compose, RecyclerView, ...) at build time; this applies them at runtime,
-    // which matters for sideloaded/F-Droid installs that bypass Play's cloud profiles.
     implementation(libs.androidx.profileinstaller)
-    // Trace sections the startup and Home benchmarks measure (#1301); already on the classpath through Compose.
     implementation(libs.androidx.tracing)
     baselineProfile(project(":benchmark"))
 
@@ -388,21 +328,18 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.truth)
-    // Han word breaker for tests; the JDK breaker does not split Han runs.
     testImplementation(libs.icu4j)
     testImplementation(libs.turbine)
     testImplementation(libs.androidx.glance.appwidget.testing)
     testImplementation(libs.hilt.android.testing)
     kspTest(libs.hilt.android.compiler)
 
-    // Compose UI tests in the JVM (Robolectric) so CI's unit-test task covers them
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.ui.test.junit4)
 
-    // Room migration tests (device-sync schema 20→23)
     androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -415,7 +352,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 }
 
-// Allow references to generated code
 ksp {
     arg("dagger.fastInit", "enabled")
 }
