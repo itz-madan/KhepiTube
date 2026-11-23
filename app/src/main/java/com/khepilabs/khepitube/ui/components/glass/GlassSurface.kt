@@ -4,6 +4,7 @@ import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.graphics.RenderEffect as PlatformRenderEffect
 import android.graphics.Shader
+import android.graphics.RuntimeShader
 import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.drawscope.drawLayer
 import androidx.compose.ui.graphics.drawscope.drawPath
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -39,6 +41,38 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.ui.theme.GlassTier
 import com.khepilabs.khepitube.ui.theme.LocalGlassTokens
+
+private const val REFRACTION_SHADER = """
+    uniform shader content;
+    uniform float2 size;
+    uniform float cornerRadius;
+    uniform float lensDepth;
+    uniform float dispersion;
+
+    float roundedRectDistance(float2 point, float2 halfSize, float radius) {
+        float2 corner = abs(point) - (halfSize - float2(radius));
+        float outside = length(max(corner, 0.0));
+        float inside = min(max(corner.x, corner.y), 0.0);
+        return outside + inside - radius;
+    }
+
+    half4 main(float2 coordinate) {
+        float2 halfSize = size * 0.5;
+        float2 centered = coordinate - halfSize;
+        float distance = roundedRectDistance(centered, halfSize, cornerRadius);
+        float edge = 1.0 - smoothstep(0.0, lensDepth, -distance);
+        float2 direction = normalize(centered + float2(0.001));
+        float2 displacement = direction * edge * lensDepth * 0.72;
+        float2 colorSplit = displacement * dispersion * edge * 0.16;
+        float2 refracted = coordinate + displacement;
+
+        half red = content.eval(refracted + colorSplit).r;
+        half green = content.eval(refracted).g;
+        half blue = content.eval(refracted - colorSplit).b;
+        half alpha = content.eval(refracted).a;
+        return half4(red, green, blue, alpha);
+    }
+"""
 
 /**
  * MeeTube-style glass container foundation.
@@ -81,17 +115,31 @@ fun GlassSurface(
     val effectLayer = rememberGraphicsLayer()
     val density = LocalDensity.current
     var positionInRoot by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
-    val blurEffect = remember(density) {
+    val refractionShader = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            RuntimeShader(REFRACTION_SHADER)
+        } else {
+            null
+        }
+    }
+    val blurEffect = remember(density, refractionShader) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val saturation = ColorMatrix().apply { setSaturation(1.5f) }
             val saturatedBackdrop =
                 PlatformRenderEffect.createColorFilterEffect(ColorMatrixColorFilter(saturation))
-            PlatformRenderEffect.createBlurEffect(
+            val frost = PlatformRenderEffect.createBlurEffect(
                 with(density) { 8.dp.toPx() },
                 with(density) { 8.dp.toPx() },
                 saturatedBackdrop,
                 Shader.TileMode.CLAMP,
-            ).asComposeRenderEffect()
+            )
+            val effect = if (refractionShader != null) {
+                val lens = PlatformRenderEffect.createRuntimeShaderEffect(refractionShader, "content")
+                PlatformRenderEffect.createChainEffect(lens, frost)
+            } else {
+                frost
+            }
+            effect.asComposeRenderEffect()
         } else {
             null
         }
@@ -111,7 +159,18 @@ fun GlassSurface(
                     .clip(shape)
                     .onGloballyPositioned { positionInRoot = it.positionInRoot() }
                     .drawWithContent {
+                        val outline = shape.createOutline(size, layoutDirection, this)
                         if (backdrop != null && blurEffect != null) {
+                            if (refractionShader != null) {
+                                val radius = when (outline) {
+                                    is Outline.Rounded -> outline.roundRect.topLeftCornerRadius.x
+                                    else -> size.minDimension / 2f
+                                }
+                                refractionShader.setFloatUniform("size", size.width, size.height)
+                                refractionShader.setFloatUniform("cornerRadius", radius)
+                                refractionShader.setFloatUniform("lensDepth", 24.dp.toPx())
+                                refractionShader.setFloatUniform("dispersion", 0.85f)
+                            }
                             effectLayer.renderEffect = blurEffect
                             effectLayer.record {
                                 translate(
@@ -125,7 +184,6 @@ fun GlassSurface(
                             drawRect(fillColor)
                         }
                         drawContent()
-                        val outline = shape.createOutline(size, layoutDirection, this)
                         val borderPath = when (outline) {
                             is Outline.Generic -> outline.path
                             is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
