@@ -41,7 +41,6 @@ internal fun SettingsDetail(
     target: SettingsTarget,
     onBack: (() -> Unit)?,
     onNavigate: (SettingsTarget) -> Unit,
-    onOpenRecap: () -> Unit,
     options: SettingsHostOptions = SettingsHostOptions(),
 ) {
     options.pages[target.destination]?.let { page ->
