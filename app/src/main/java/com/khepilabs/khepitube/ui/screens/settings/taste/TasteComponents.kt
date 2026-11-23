@@ -241,19 +241,26 @@ internal fun TasteMeterRow(
     detail: String? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
-    SegmentedListItem(
-        verticalAlignment = Alignment.CenterVertically,
-        shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f)),
-        supportingContent = {
-            Column(verticalArrangement = Arrangement.spacedBy(MeterSpacing), modifier = Modifier.padding(top = MeterSpacing)) {
-                value?.let { LinearProgressIndicator(progress = { it.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
-                detail?.let { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) }
-            }
-        },
-        trailingContent = trailing,
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
-        Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        SegmentedListItem(
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = ListItemDefaults.shapes(shape = shape),
+            colors = ListItemDefaults.segmentedColors(containerColor = Color.Transparent),
+            supportingContent = {
+                Column(verticalArrangement = Arrangement.spacedBy(MeterSpacing), modifier = Modifier.padding(top = MeterSpacing)) {
+                    value?.let { LinearProgressIndicator(progress = { it.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }
+                    detail?.let { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                }
+            },
+            trailingContent = trailing,
+        ) {
+            Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
     }
 }
 
