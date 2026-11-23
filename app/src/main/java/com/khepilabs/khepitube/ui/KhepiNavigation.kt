@@ -179,7 +179,6 @@ fun NavGraphBuilder.khepiAppGraph(
                 R.string.library_downloads_label,
             )
         LibraryScreen(
-            onOpenRecap = { },
             onNavigateToHistory = {
                 navController.navigate("history")
             },
