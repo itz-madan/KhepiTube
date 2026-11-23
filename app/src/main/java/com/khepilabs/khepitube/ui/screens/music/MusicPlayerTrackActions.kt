@@ -10,7 +10,6 @@ import com.khepilabs.khepitube.data.localmedia.LocalMediaIds
 import com.khepilabs.khepitube.data.music.DownloadManager
 import com.khepilabs.khepitube.data.music.PlaylistRepository
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
 import com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
 import com.khepilabs.khepitube.utils.PerformanceDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +27,6 @@ internal class MusicPlayerTrackActions(
     private val playlistRepository: PlaylistRepository,
     private val likedVideosRepository: LikedVideosRepository,
     private val downloadManager: DownloadManager,
-    private val musicBrain: MusicBrainEngine,
     private val playerPreferences: PlayerPreferences,
 ) {
     fun toggleLike() {
@@ -53,7 +51,6 @@ internal class MusicPlayerTrackActions(
                         durationSeconds = currentTrack.duration,
                     ),
                 )
-                musicBrain.onExplicitLike(currentTrack)
                 if (playerPreferences.autoDownloadLikedMusic.first()) downloadManager.downloadTrack(currentTrack)
             } else {
                 playlistRepository.removeFromFavorites(currentTrack.videoId)
@@ -62,31 +59,9 @@ internal class MusicPlayerTrackActions(
         }
     }
 
-    /**
-     * "Not interested": soft-suppresses the track's artist for two weeks. A
-     * second one while still suppressed escalates to a permanent block —
-     * mirrored from the desktop two-layer feedback system.
-     */
-    fun notInterested(track: MusicTrack) {
-        val primary = track.artists.firstOrNull()
-        scope.launch(PerformanceDispatcher.diskIO) {
-            musicBrain.dislikeArtist(
-                primary?.id ?: track.channelId.takeIf { it.isNotBlank() },
-                primary?.name ?: track.artist,
-            )
-        }
-    }
+    fun notInterested(track: MusicTrack) = Unit
 
-    /** "Don't recommend {artist}": an immediate permanent hard block, reversible in settings. */
-    fun dontRecommendArtist(track: MusicTrack) {
-        val primary = track.artists.firstOrNull()
-        scope.launch(PerformanceDispatcher.diskIO) {
-            musicBrain.blockArtist(
-                primary?.id ?: track.channelId.takeIf { it.isNotBlank() },
-                primary?.name ?: track.artist,
-            )
-        }
-    }
+    fun dontRecommendArtist(track: MusicTrack) = Unit
 
     fun playNext(track: MusicTrack) {
         EnhancedMusicPlayerManager.playNext(track)
