@@ -35,7 +35,7 @@ private const val VIDEO_ROWS = 1
 private const val PLAYBACK_ROWS = 3
 private const val AUDIO_ROWS = 1
 private const val CAPTION_ROWS = 2
-private const val OVERLAY_ROWS = 3
+private const val OVERLAY_ROWS = 4
 private const val EFFECT_ROWS = 3
 private const val DISPLAY_ROWS = 1
 
@@ -49,6 +49,7 @@ internal fun PlayerSettingsMainPage(
     onShowSubtitleStyle: () -> Unit,
     onCastClick: () -> Unit,
     onPipClick: () -> Unit,
+    onFloatingPlayerClick: () -> Unit,
     onSleepTimerClick: () -> Unit,
     onLoopToggle: (Boolean) -> Unit,
     onAutoplayToggle: (Boolean) -> Unit,
@@ -148,9 +149,15 @@ internal fun PlayerSettingsMainPage(
             onClick = onPipClick,
         )
         KhepiNavRow(
+            leadingIcon = Icons.Filled.PictureInPicture,
+            title = stringResource(R.string.floating_player),
+            shape = khepiRowGroupShape(2, OVERLAY_ROWS),
+            onClick = onFloatingPlayerClick,
+        )
+        KhepiNavRow(
             leadingIcon = Icons.Filled.Bedtime,
             title = stringResource(R.string.sleep_timer),
-            shape = khepiRowGroupShape(2, OVERLAY_ROWS),
+            shape = khepiRowGroupShape(3, OVERLAY_ROWS),
             onClick = onSleepTimerClick,
         )
     }
