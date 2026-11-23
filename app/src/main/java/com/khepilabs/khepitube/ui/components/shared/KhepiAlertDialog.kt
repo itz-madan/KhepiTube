@@ -13,7 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -58,10 +58,9 @@ fun KhepiAlertDialog(
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest, modifier = modifier, properties = properties) {
         val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
-        Surface(
+        GlassSurface(
             shape = AlertDialogDefaults.shape,
-            color = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.86f) else AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
+            containerColor = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.72f) else AlertDialogDefaults.containerColor.copy(alpha = 0.90f),
         ) {
             Column(
                 modifier =
