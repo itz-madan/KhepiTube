@@ -52,6 +52,7 @@ internal fun YouTubeDeviceLoginDialog(
             while (isPolling && System.currentTimeMillis() < deadline) {
                 delay(interval * 1000L)
                 val approved = withContext(Dispatchers.IO) { auth.pollApproval(code.deviceCode) }
+                interval = auth.nextPollIntervalSeconds()
                 if (approved != null) {
                     isPolling = false
                     status = "Account connected."
