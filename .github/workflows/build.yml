@@ -76,7 +76,7 @@ jobs:
 
       - name: Check Kotlin formatting
         run: >
-          ./gradlew spotlessCheck
+          bash .github/scripts/gradle_retry.sh spotlessCheck
           --build-cache --stacktrace
 
   tests:
@@ -109,7 +109,7 @@ jobs:
       # compile: breakage here otherwise lands on main unnoticed.
       - name: Run unit tests and compile instrumentation tests
         run: >
-          ./gradlew :app:testDebugUnitTest
+          bash .github/scripts/gradle_retry.sh :app:testDebugUnitTest
           :app:compileDebugAndroidTestKotlin
           --build-cache --stacktrace
 
@@ -146,7 +146,7 @@ jobs:
       - name: Lint GitHub nightly
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         run: >
-          ./gradlew :app:lintDebug
+          bash .github/scripts/gradle_retry.sh :app:lintDebug
           --build-cache --stacktrace
 
       - name: Lint GitHub release
@@ -181,7 +181,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build debug APK
-        run: ./gradlew :app:assembleDebug --build-cache --stacktrace
+        run: bash .github/scripts/gradle_retry.sh :app:assembleDebug --build-cache
 
       - name: Verify debug APK
         run: test -s app/build/outputs/apk/debug/app-debug.apk
