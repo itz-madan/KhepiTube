@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.khepilabs.khepitube.data.update.UpdateRelease
 import com.khepilabs.khepitube.data.update.UpdateRepository
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
+import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,10 +52,13 @@ fun InAppUpdateDialog(
     var isDownloading by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
-        Surface(
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
+        GlassSurface(
             shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            tonalElevation = 8.dp,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(
+                alpha = if (windowBlurEnabled) 0.76f else 0.94f,
+            ),
+            borderWidth = 0.75.dp,
             modifier = Modifier.fillMaxWidth().padding(16.dp),
         ) {
             Column(

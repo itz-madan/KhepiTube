@@ -16,6 +16,7 @@ import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.data.model.SponsorBlockCategories
 import com.khepilabs.khepitube.data.repository.SponsorBlockRepository
 import com.khepilabs.khepitube.ui.components.shared.KhepiDialogDefaults
+import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 import com.khepilabs.khepitube.utils.formatDurationMillis
 import com.khepilabs.khepitube.utils.parseTimestampMs
 import com.khepilabs.khepitube.utils.sponsorCategoryLabelRes
@@ -48,9 +49,10 @@ internal fun SbSubmitSegmentDialog(
     var endError by remember { mutableStateOf(false) }
 
     BasicAlertDialog(onDismissRequest = onDismiss) {
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
         Surface(
             shape = AlertDialogDefaults.shape,
-            color = AlertDialogDefaults.containerColor,
+            color = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.86f) else AlertDialogDefaults.containerColor,
             tonalElevation = AlertDialogDefaults.TonalElevation,
         ) {
             Column(
