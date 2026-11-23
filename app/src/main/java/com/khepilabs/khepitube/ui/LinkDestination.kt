@@ -1,7 +1,6 @@
 package com.khepilabs.khepitube.ui
 
 import android.content.Intent
-import com.khepilabs.khepitube.data.local.PlaylistRepository
 import com.khepilabs.khepitube.utils.YouTubeLink
 
 /** Where a YouTube link opened from another app, or pasted into search, takes the user. */
@@ -47,7 +46,6 @@ internal fun linkDestination(link: YouTubeLink): LinkDestination? =
 private fun videoDestination(link: YouTubeLink.Video): LinkDestination {
     val playlistId = link.playlistId?.takeUnless { it in ACCOUNT_LISTS }
     return when {
-        link.isMusic -> LinkDestination.Page(musicPlayerRoute(link.id, playlistId))
         playlistId == null || isMix(playlistId) -> LinkDestination.Video(link.id)
         else -> LinkDestination.Page(linkedPlaylistRoute(playlistId, link.id), playsVideo = true)
     }
@@ -57,8 +55,8 @@ private fun pageRoute(link: YouTubeLink): String? =
     when (link) {
         is YouTubeLink.Video, is YouTubeLink.Short, is YouTubeLink.Search -> null
         is YouTubeLink.Playlist -> playlistRoute(link)
-        is YouTubeLink.Album -> musicCollectionRoute(link.browseId)
-        is YouTubeLink.Channel -> if (link.isMusic) musicArtistRoute(link.id) else youtubeChannelRoute(link.id)
+        is YouTubeLink.Album -> null
+        is YouTubeLink.Channel -> if (link.isMusic) null else youtubeChannelRoute(link.id)
         is YouTubeLink.ChannelHandle -> youtubeChannelRoute(link.handle)
         is YouTubeLink.LegacyChannel -> youtubeChannelRoute(link.url)
     }
@@ -67,9 +65,9 @@ private fun playlistRoute(link: YouTubeLink.Playlist): String? =
     when {
         link.id == "LL" -> "playlist/${PlaylistRepository.LIKED_VIDEOS_ID}"
         link.id == "WL" -> "playlist/${PlaylistRepository.WATCH_LATER_ID}"
-        link.id == "LM" -> musicCollectionRoute(PlaylistRepository.LIKED_MUSIC_ID)
+        link.id == "LM" -> null
         isMix(link.id) -> null
-        link.isMusic -> musicCollectionRoute(link.id)
+        link.isMusic -> null
         else -> "playlist/${link.id}"
     }
 
