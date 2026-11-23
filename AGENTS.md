@@ -27,7 +27,7 @@ Rules:
 Models default to dated "AI slop" UI trends. The following are STRICTLY FORBIDDEN anywhere in this codebase:
 
 - ❌ **No gradients** — do not use `Brush.linearGradient`/`verticalGradient`/etc. as a background or surface fill unless explicitly instructed, and never as a substitute for a real Material 3 surface color.
-- ⚠️ **Scoped Liquid Glass exception** — the `feature/liquid-glass` branch is explicitly authorized to port MeeTube's Liquid Glass system. Implement backdrop sampling/refraction only through the shared, measured glass engine and only on approved UI surfaces (navigation chrome, selected dialogs/popups, and player controls). Do not use `Modifier.blur` as a fake backdrop blur, do not spread translucent panels across unrelated screens, and retain a readable opaque fallback for unsupported devices / battery-saver mode.
+- ❌ **No glassmorphism** — no blurred, frosted, or semi-transparent "milky" backgrounds (`Modifier.blur` on backgrounds, translucent overlay panels) outside of the one existing, deliberately-designed ambient/blur surfaces already in the player (do not add new ones elsewhere).
 - ❌ **No fake drop shadows / glow effects** — do not hand-roll `shadow()` glows or neon box-shadow equivalents. Use Material 3's built-in elevation/tonal-elevation system only.
 - ❌ **No colored borders around cards** — card/container borders must be neutral (`MaterialTheme.colorScheme.outline`/`outlineVariant`), never a primary/accent-colored stroke used as decoration.
 - ❌ **No arbitrary hex codes** — never write `Color(0xFF...)` inline. All colors must come from `MaterialTheme.colorScheme` (or the app's defined color scheme source). If a needed color doesn't exist yet, add it to the theme definition, don't inline it at the call site.
