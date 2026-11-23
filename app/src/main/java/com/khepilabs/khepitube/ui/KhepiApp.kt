@@ -431,6 +431,13 @@ fun KhepiApp(
             )
         }
 
+        val bottomPaddingTarget =
+            if (isBottomNavShown) {
+                navigationBarHeight + with(density) { navBarBottomInset.toDp() }
+            } else {
+                with(density) { navBarBottomInset.toDp() }
+            }
+
         KhepiNavigationChrome(
             tabs = navigationTabs,
             selectedTab = selectedTab,
@@ -456,6 +463,46 @@ fun KhepiApp(
             railVisible = isNavigationRailVisible,
             onBarHeightChanged = { navigationBarHeight = it },
             onRailWidthChanged = { navigationRailWidth = it },
+            glassOverlay = {
+            KhepiPlayerOverlays(
+                navController = navController,
+                mediaNavigator = mediaNavigator,
+                playerViewModel = playerViewModel,
+                playerUiStateResult = playerUiStateResult,
+                playerVisibleState = playerVisibleState,
+                playerSheetState = playerSheetState,
+                activeVideo = activeVideo,
+                isShortsPlayerRoute = isShortsPlayerRoute,
+                bottomPadding = bottomPaddingTarget,
+                startInset = if (usesNavigationRail && isNavigationRailVisible) navigationRailWidth else 0.dp,
+                miniPlayerScale = miniPlayerScale,
+                miniPlayerShowSkipControls = miniPlayerShowSkipControls,
+                miniPlayerShowNextPrevControls = miniPlayerShowNextPrevControls,
+                showMusicSheet = isMusicSheetShown,
+                showVideoBar = showVideoBar,
+                musicPlayerSheetState = musicPlayerSheetState,
+                containerWidth = maxWidth,
+                containerHeight = with(density) { screenHeightPx.toDp() },
+                miniBarBounds = miniPlayerBounds,
+                musicMenus = musicMenus,
+                equalizerState = equalizerViewModel.state,
+                bottomInsets = bottomInsets,
+                openOrigins = mediaOpenOrigins,
+                snackbarHostState = snackbarHostState,
+            )
+    
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 16.dp)
+                        .offset {
+                            val lift = bottomInsets.floatingBottomPx(this) + 12.dp.toPx()
+                            IntOffset(0, -lift.roundToInt())
+                        },
+            )
+            },
         ) {
             ProvideMusicPlaybackState(
                 surfacesVisible = !musicPlayerSheetState.isExpanded && playerSheetState.currentValue != PlayerSheetValue.Expanded,
@@ -537,49 +584,6 @@ fun KhepiApp(
             }
         }
 
-        val bottomPaddingTarget =
-            if (isBottomNavShown) {
-                navigationBarHeight + with(density) { navBarBottomInset.toDp() }
-            } else {
-                with(density) { navBarBottomInset.toDp() }
-            }
-        KhepiPlayerOverlays(
-            navController = navController,
-            mediaNavigator = mediaNavigator,
-            playerViewModel = playerViewModel,
-            playerUiStateResult = playerUiStateResult,
-            playerVisibleState = playerVisibleState,
-            playerSheetState = playerSheetState,
-            activeVideo = activeVideo,
-            isShortsPlayerRoute = isShortsPlayerRoute,
-            bottomPadding = bottomPaddingTarget,
-            startInset = if (usesNavigationRail && isNavigationRailVisible) navigationRailWidth else 0.dp,
-            miniPlayerScale = miniPlayerScale,
-            miniPlayerShowSkipControls = miniPlayerShowSkipControls,
-            miniPlayerShowNextPrevControls = miniPlayerShowNextPrevControls,
-            showMusicSheet = isMusicSheetShown,
-            showVideoBar = showVideoBar,
-            musicPlayerSheetState = musicPlayerSheetState,
-            containerWidth = maxWidth,
-            containerHeight = with(density) { screenHeightPx.toDp() },
-            miniBarBounds = miniPlayerBounds,
-            musicMenus = musicMenus,
-            equalizerState = equalizerViewModel.state,
-            bottomInsets = bottomInsets,
-            openOrigins = mediaOpenOrigins,
-            snackbarHostState = snackbarHostState,
-        )
 
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier =
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(horizontal = 16.dp)
-                    .offset {
-                        val lift = bottomInsets.floatingBottomPx(this) + 12.dp.toPx()
-                        IntOffset(0, -lift.roundToInt())
-                    },
-        )
     }
 }
