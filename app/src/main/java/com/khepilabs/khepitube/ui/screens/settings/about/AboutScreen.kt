@@ -260,7 +260,7 @@ private fun KhepiLabsRow(
         shapes = ListItemDefaults.shapes(shape = shape),
         colors =
             ListItemDefaults.segmentedColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                containerColor = Color.Transparent,
             ),
         leadingContent = {
             Box(
@@ -268,7 +268,7 @@ private fun KhepiLabsRow(
                     Modifier
                         .size(AvatarSize)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.62f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
