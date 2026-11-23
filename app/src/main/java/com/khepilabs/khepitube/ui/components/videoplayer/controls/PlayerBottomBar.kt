@@ -1,6 +1,7 @@
 package com.khepilabs.khepitube.ui.components.videoplayer.controls
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.rounded.CloseFullscreen
 import androidx.compose.material.icons.rounded.OpenInFull
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.theme.PlayerScrim
 import com.khepilabs.khepitube.ui.theme.PlayerScrimAffordance
 import com.khepilabs.khepitube.ui.theme.PlayerScrimContent
@@ -52,17 +53,19 @@ private fun PlayerLabelPill(
     height: Dp,
 ) {
     val haptics = LocalHapticFeedback.current
-    Surface(
-        onClick = {
-            haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
-            onClick()
-        },
-        color = PlayerScrimAffordance,
-        shape = CircleShape,
+    GlassSurface(
         modifier =
             Modifier
                 .height(height)
-                .widthIn(min = height),
+                .widthIn(min = height)
+                .clickable {
+                    haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    onClick()
+                },
+        containerColor = PlayerScrimAffordance.copy(alpha = 0.78f),
+        borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+        borderWidth = 0.75.dp,
+        shape = CircleShape,
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -177,11 +180,12 @@ internal fun PlayerBottomBar(
                 )
 
                 if (currentChapter != null) {
-                    Surface(
-                        onClick = actions.onChapterClick,
-                        color = PlayerScrimAffordance,
+                    GlassSurface(
+                        modifier = Modifier.height(metrics.pillHeight).clickable(onClick = actions.onChapterClick),
+                        containerColor = PlayerScrimAffordance.copy(alpha = 0.78f),
+                        borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+                        borderWidth = 0.75.dp,
                         shape = CircleShape,
-                        modifier = Modifier.height(metrics.pillHeight),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
