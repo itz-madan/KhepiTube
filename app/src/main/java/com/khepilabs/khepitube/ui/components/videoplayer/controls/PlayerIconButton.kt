@@ -23,9 +23,8 @@ import com.khepilabs.khepitube.ui.theme.PlayerScrimContent
 /**
  * A round icon button resting on video.
  *
- * [FilledIconButton] rather than [androidx.compose.material3.IconButton] because the player's
- * buttons are laid out against fixed pill and row heights: `IconButton` reserves a 48dp minimum
- * interactive size, which would grow a 28dp pill's slot and move everything beside it.
+ * The glass hit target stays at the caller's exact size so the player's pill and row geometry
+ * remains unchanged.
  */
 @Composable
 internal fun PlayerPillIconButton(
@@ -66,4 +65,5 @@ internal fun PlayerPillIconButton(
                 modifier = Modifier.size(iconSize),
             )
         }
-    }}
+    }
+}
