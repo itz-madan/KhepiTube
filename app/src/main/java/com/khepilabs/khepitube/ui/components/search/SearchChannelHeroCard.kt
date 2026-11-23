@@ -129,6 +129,8 @@ fun SearchChannelHeroCard(
     }
 }
 
+}
+
 @Composable
 private fun ChannelIdentity(
     channel: Channel,
