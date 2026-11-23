@@ -48,7 +48,6 @@ fun SettingsHost(
     start: SettingsTarget?,
     onExit: () -> Unit,
     onOpenDonations: () -> Unit = {},
-    onOpenRecap: () -> Unit,
     onOpenUpdate: () -> Unit,
     options: SettingsHostOptions = SettingsHostOptions(),
 ) {
@@ -155,7 +154,6 @@ fun SettingsHost(
                             target = target,
                             onBack = if (twoPane && stack.size <= 1) null else ::back,
                             onNavigate = ::push,
-                            onOpenRecap = onOpenRecap,
                             options = options,
                         )
                     }
