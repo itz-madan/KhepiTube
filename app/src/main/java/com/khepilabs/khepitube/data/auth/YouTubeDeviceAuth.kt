@@ -91,10 +91,55 @@ class YouTubeDeviceAuth(context: Context) {
             ?: error("Google did not return a refresh token")
         val access = response.optString("access_token").takeIf { it.isNotBlank() }
             ?: error("Google did not return an access token")
-        val account = SignedInAccount(access, refresh, response.optLong("expires_in", 3600L), null, null)
+        val expires = response.optLong("expires_in", 3600L)
         store.saveRefreshToken(refresh)
+        store.saveAccessToken(access, System.currentTimeMillis() + expires * 1000L)
+        val profile = fetchAccountProfile(access)
         store.clearPendingClient()
-        return account
+        return SignedInAccount(access, refresh, expires, profile.first, profile.second)
+    }
+
+
+    private fun fetchAccountProfile(accessToken: String): Pair<String?, String?> {
+        val body = JSONObject()
+            .put("context", JSONObject().put("client", JSONObject()
+                .put("clientName", "TVHTML5").put("clientVersion", "7.20260128")))
+            .put("accountReadMask", JSONObject()
+                .put("returnOwner", true).put("returnBrandAccounts", true).put("returnPersonaAccounts", false))
+        val request = Request.Builder().url("https://www.youtube.com/youtubei/v1/account/accounts_list")
+            .post(body.toString().toRequestBody(JSON_MEDIA_TYPE))
+            .header("Content-Type", "application/json")
+            .header("Authorization", "Bearer $accessToken")
+            .header("X-YouTube-Client-Name", "TVHTML5")
+            .header("X-YouTube-Client-Version", "7.20260128")
+            .header("Origin", "https://www.youtube.com")
+            .header("User-Agent", "Mozilla/5.0 (Linux; Android 13; TV)")
+            .build()
+        http.newCall(request).execute().use { response ->
+            val raw = response.body?.string().orEmpty()
+            if (!response.isSuccessful || raw.isBlank()) error("Could not load YouTube account profile (HTTP ${response.code})")
+            val account = findAccountObject(JSONObject(raw)) ?: error("YouTube did not return an account profile")
+            val nameValue = account.opt("accountName")
+            val name = if (nameValue is JSONObject) nameValue.optString("simpleText") else nameValue?.toString()
+            val thumbnails = account.optJSONObject("accountPhoto")?.optJSONArray("thumbnails")
+            val avatar = thumbnails?.let { items ->
+                (0 until items.length()).mapNotNull { items.optJSONObject(it)?.optString("url") }
+                    .lastOrNull { it.isNotBlank() }
+            }
+            return name?.takeIf { it.isNotBlank() } to avatar
+        }
+    }
+
+    private fun findAccountObject(value: Any?): JSONObject? {
+        when (value) {
+            is JSONObject -> {
+                if (value.has("accountName") && value.has("accountPhoto")) return value
+                val keys = value.keys()
+                while (keys.hasNext()) findAccountObject(value.opt(keys.next()))?.let { return it }
+            }
+            is org.json.JSONArray -> for (i in 0 until value.length()) findAccountObject(value.opt(i))?.let { return it }
+        }
+        return null
     }
 
     /** Returns a valid access token, refreshing it before expiry. */
