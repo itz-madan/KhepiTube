@@ -45,6 +45,7 @@ import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.player.EnhancedPlayerManager
 import com.khepilabs.khepitube.player.GlobalPlayerState
 import com.khepilabs.khepitube.player.state.EnhancedPlayerState
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.videoplayer.motion.lerpClamped
 import com.khepilabs.khepitube.ui.theme.PlayerScrimContent
 import com.khepilabs.khepitube.ui.theme.PlayerScrimMiniButton
@@ -293,12 +294,12 @@ private fun MiniPlayerButtonBackground(
     backgroundColor: Color = PlayerScrimMiniButton,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .size(backgroundSize)
-                .background(backgroundColor, CircleShape),
-        contentAlignment = Alignment.Center,
+    GlassSurface(
+        modifier = Modifier.size(backgroundSize),
+        shape = CircleShape,
+        containerColor = backgroundColor.copy(alpha = 0.72f),
+        borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+        borderWidth = 0.75.dp,
         content = content,
     )
 }

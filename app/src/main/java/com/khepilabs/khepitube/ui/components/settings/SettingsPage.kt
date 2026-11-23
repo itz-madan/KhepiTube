@@ -26,6 +26,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 import com.khepilabs.khepitube.ui.components.layout.LocalKhepiBottomInsets
 import com.khepilabs.khepitube.ui.components.layout.floatAboveBottomChrome
 import com.khepilabs.khepitube.ui.components.layout.khepiBottomContentPadding
@@ -82,7 +83,7 @@ fun SettingsPage(
         Scaffold(
             modifier = modifier,
             contentWindowInsets = WindowInsets(0.dp),
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = Color.Transparent,
             topBar = {
                 KhepiTopBar(
                     title = title,

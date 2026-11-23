@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import kotlinx.coroutines.launch
 
 private fun sheetSpring() =
@@ -272,12 +273,18 @@ fun KhepiBottomSheet(
             color = containerColor,
             tonalElevation = 0.dp,
         ) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding(),
+            GlassSurface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = shape,
+                containerColor = Color.Transparent,
+                borderWidth = 0.75.dp,
             ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding(),
+                ) {
                 if (header != null) {
                     header(dragModifier)
                 } else {
@@ -291,7 +298,8 @@ fun KhepiBottomSheet(
                         BottomSheetDefaults.DragHandle()
                     }
                 }
-                content()
+                    content()
+                }
             }
         }
     }
