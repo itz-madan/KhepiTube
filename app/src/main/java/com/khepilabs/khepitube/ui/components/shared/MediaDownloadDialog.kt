@@ -20,7 +20,6 @@ import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.data.video.DownloadStreamPolicy
 import com.khepilabs.khepitube.data.video.downloader.request.DownloadSubtitle
-import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 import com.khepilabs.khepitube.player.state.SubtitleOption
 import com.khepilabs.khepitube.player.stream.VideoCodecUtils
 
