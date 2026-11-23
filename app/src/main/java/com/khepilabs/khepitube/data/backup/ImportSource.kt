@@ -18,7 +18,7 @@ enum class ImportSource(
         R.string.settings_backup_title,
         R.string.onboarding_import_source_KhepiTube,
         R.drawable.ic_flow_logo,
-        listOf(ImportKind.FLOW_BACKUP, ImportKind.MASTER, ImportKind.ENGINE, ImportKind.MUSIC_BRAIN),
+        listOf(ImportKind.FLOW_BACKUP, ImportKind.MASTER, ImportKind.ENGINE),
     ),
     YOUTUBE(
         R.string.settings_backup_source_youtube,
