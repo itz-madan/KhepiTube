@@ -52,7 +52,7 @@ fun GlassScreenHost(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
     glassOverlay: @Composable BoxScope.() -> Unit,
-    contentBackdrop: @Composable BoxScope.() -> Unit = {},
+    contentBackdrop: (@Composable BoxScope.() -> Unit)? = null,
 ) {
     val source = rememberGraphicsLayer()
     val contentSource = rememberGraphicsLayer()
@@ -66,22 +66,37 @@ fun GlassScreenHost(
             contentBackdropState.originInRoot = origin
         },
     ) {
-        // A separate, non-recursive backdrop source for glass surfaces embedded in scrolling
-        // content. It is recorded independently from the foreground, so rows never sample
-        // themselves or their own text while drawing.
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .drawWithContent {
-                        contentSource.record {
-                            this@drawWithContent.drawContent()
-                        }
-                        drawLayer(contentSource)
-                    },
-            content = contentBackdrop,
-        )
-        CompositionLocalProvider(LocalGlassBackdrop provides contentBackdropState) {
+        if (contentBackdrop != null) {
+            // A separate, non-recursive backdrop source for glass surfaces embedded in scrolling
+            // content. It is recorded independently from the foreground, so rows never sample
+            // themselves or their own text while drawing.
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .drawWithContent {
+                            contentSource.record {
+                                this@drawWithContent.drawContent()
+                            }
+                            drawLayer(contentSource)
+                        },
+                content = contentBackdrop,
+            )
+            CompositionLocalProvider(LocalGlassBackdrop provides contentBackdropState) {
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .drawWithContent {
+                                source.record {
+                                    this@drawWithContent.drawContent()
+                                }
+                                drawLayer(source)
+                            },
+                    content = content,
+                )
+            }
+        } else {
             Box(
                 modifier =
                     Modifier
