@@ -18,7 +18,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,6 +37,7 @@ import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.innertube.YouTube
 import com.khepilabs.khepitube.innertube.models.AccountInfo
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsPage
 import com.khepilabs.khepitube.ui.components.shared.ChannelAvatarImage
 import kotlinx.coroutines.Dispatchers
@@ -82,10 +82,10 @@ fun AccountSettingsScreen(
     ) {
         group(key = "account.main", header = R.string.scrobbling_account) {
             row("account.status") { shape ->
-                Surface(
+                GlassSurface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = shape,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
