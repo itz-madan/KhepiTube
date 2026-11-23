@@ -21,10 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.drawscope.drawLayer
+import androidx.compose.ui.graphics.drawscope.drawPath
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -98,7 +103,7 @@ fun GlassSurface(
         modifier = modifier,
         shape = shape,
         color = if (canSampleBackdrop) Color.Transparent else fillColor,
-        border = stroke,
+        border = null,
     ) {
         Box(
             modifier =
@@ -120,6 +125,17 @@ fun GlassSurface(
                             drawRect(fillColor)
                         }
                         drawContent()
+                        val outline = shape.createOutline(size, layoutDirection, this)
+                        val borderPath = when (outline) {
+                            is Outline.Generic -> outline.path
+                            is Outline.Rounded -> Path().apply { addRoundRect(outline.roundRect) }
+                            is Outline.Rectangle -> Path().apply { addRect(Rect(androidx.compose.ui.geometry.Offset.Zero, size)) }
+                        }
+                        drawPath(
+                            path = borderPath,
+                            brush = stroke.brush,
+                            style = Stroke(width = strokeWidth.toPx() * 2f),
+                        )
                     },
             content = content,
         )
