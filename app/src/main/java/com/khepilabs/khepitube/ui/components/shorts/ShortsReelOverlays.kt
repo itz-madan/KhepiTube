@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -37,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.local.ThumbnailQuality
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiLoadingIndicator
 import com.khepilabs.khepitube.ui.components.shared.LocalThumbnailQuality
 import com.khepilabs.khepitube.ui.components.shared.VideoThumbnailImage
@@ -109,7 +108,12 @@ internal fun ShortsAutoScrollBadge(
         exit = fadeOut(MaterialTheme.motionScheme.defaultEffectsSpec()),
         modifier = modifier,
     ) {
-        Surface(color = PlayerScrimPanel, shape = CircleShape) {
+        GlassSurface(
+            shape = CircleShape,
+            containerColor = PlayerScrimPanel.copy(alpha = 0.78f),
+            borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+            borderWidth = 0.75.dp,
+        ) {
             Row(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -148,12 +152,12 @@ internal fun ShortsPauseIndicator(
                 fadeOut(MaterialTheme.motionScheme.defaultEffectsSpec()),
         modifier = modifier,
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .size(ShortsOverlayDefaults.PauseIndicatorSize)
-                    .background(PlayerScrimImmersiveBackdrop, CircleShape),
-            contentAlignment = Alignment.Center,
+        GlassSurface(
+            modifier = Modifier.size(ShortsOverlayDefaults.PauseIndicatorSize),
+            shape = CircleShape,
+            containerColor = PlayerScrimImmersiveBackdrop.copy(alpha = 0.78f),
+            borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+            borderWidth = 0.85.dp,
         ) {
             val iconSwapSpec = MaterialTheme.motionScheme.fastSpatialSpec<Float>()
             AnimatedContent(
