@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.khepilabs.khepitube.innertube.pages.renderer.CommunityPost
 import com.khepilabs.khepitube.innertube.pages.renderer.PostAttachment
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.ChannelAvatarImage
 import com.khepilabs.khepitube.ui.components.shared.thumbnailUrlOrNull
 
@@ -37,10 +38,12 @@ fun SearchPostCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedCard(
-        onClick = onClick,
-        modifier = modifier.width(CardWidth),
+    GlassSurface(
+        modifier = modifier.width(CardWidth).clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.64f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.72f),
+        borderWidth = 0.8.dp,
     ) {
         Column(
             modifier = Modifier.padding(CardPadding),
