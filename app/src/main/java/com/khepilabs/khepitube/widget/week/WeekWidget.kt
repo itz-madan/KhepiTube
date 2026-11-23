@@ -37,7 +37,6 @@ import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.Text
 import com.khepilabs.khepitube.R
-import com.khepilabs.khepitube.ui.screens.recap.RecapRoutes
 import com.khepilabs.khepitube.widget.core.action.WidgetDeepLink
 import com.khepilabs.khepitube.widget.core.image.ShapeDecor
 import com.khepilabs.khepitube.widget.core.image.WidgetImageLoader
@@ -103,7 +102,7 @@ private fun WeekContent(
                 .fillMaxSize()
                 .widgetSurface()
                 .padding(14.dp)
-                .clickable(actionStartActivity(WidgetDeepLink.openRoute(context, RecapRoutes.stats()))),
+                .clickable(actionStartActivity(WidgetDeepLink.openRoute(context, "library"))),
     ) {
         Column(modifier = GlanceModifier.defaultWeight().fillMaxHeight()) {
             Text(text = context.getString(R.string.widget_week_title), style = WidgetText.labelMedium(), maxLines = 1)
