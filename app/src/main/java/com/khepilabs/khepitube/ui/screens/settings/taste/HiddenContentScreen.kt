@@ -23,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.ui.components.settings.SettingsListScope
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsPage
 import com.khepilabs.khepitube.ui.components.shared.KhepiEmptyState
 
@@ -119,22 +120,29 @@ internal fun TasteActionRow(
     muted: Boolean = false,
     onAction: () -> Unit,
 ) {
-    SegmentedListItem(
-        verticalAlignment = Alignment.CenterVertically,
-        shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
+    ) {
+        SegmentedListItem(
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = ListItemDefaults.shapes(shape = shape),
+            colors = ListItemDefaults.segmentedColors(containerColor = Color.Transparent),
         supportingContent = supporting?.let { { Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis) } },
         trailingContent = {
             TextButton(onClick = onAction, modifier = Modifier.semantics { contentDescription = actionDescription }) {
                 Text(actionLabel)
             }
         },
-    ) {
-        Text(
-            name,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            color = if (muted) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified,
-        )
+        ) {
+            Text(
+                name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = if (muted) MaterialTheme.colorScheme.onSurfaceVariant else Color.Unspecified,
+            )
+        }
     }
 }
