@@ -104,10 +104,6 @@ class SyncApplier
                             SyncSerialization.encodeBrain(brains.exportBrain(node, hlc))
                         }
 
-                        SyncCollection.MUSIC_BRAIN -> {
-                            SyncSerialization.encodeMusicBrain(brains.exportMusicBrain(node, hlc))
-                        }
-
                         else -> {
                             null
                         }
@@ -232,14 +228,6 @@ class SyncApplier
                     }
                 }
 
-                // Music brain: same stateful CRDT pattern, music twin.
-                fresh[SyncCollection.MUSIC_BRAIN]?.let { rc ->
-                    failedCollection = SyncCollection.MUSIC_BRAIN
-                    SyncSerialization.decodeMusicBrain(rc.lines)?.let { remote ->
-                        brains.mergeMusicBrain(remote, peer.deviceId, node, myDeviceId, hlc)
-                        stats[SyncCollection.MUSIC_BRAIN] = ApplyStats(updated = 1)
-                    }
-                }
                 failedCollection = null
                 for (settle in settles) settle()
 
