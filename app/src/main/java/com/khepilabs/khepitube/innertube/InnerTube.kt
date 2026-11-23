@@ -66,6 +66,7 @@ class InnerTube {
     /** Every change of identity, including a refused one dropped to null, so it can be persisted. */
     var onVisitorDataChanged: ((String?) -> Unit)? = null
     var dataSyncId: String? = null
+    var accessToken: String? = null
     var cookie: String? = null
         set(value) {
             field = value
@@ -255,6 +256,7 @@ class InnerTube {
             append("X-Origin", origin)
             append("Referer", referer)
             visitorData?.let { append("X-Goog-Visitor-Id", it) }
+            accessToken?.let { append("Authorization", "Bearer $it") }
             if (setLogin && client.loginSupported) {
                 cookie?.let { cookie ->
                     append("cookie", cookie)
