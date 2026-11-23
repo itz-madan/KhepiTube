@@ -26,14 +26,14 @@ import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroup
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,6 +49,7 @@ import com.khepilabs.khepitube.innertube.models.ArtistItem
 import com.khepilabs.khepitube.innertube.models.PlaylistItem
 import com.khepilabs.khepitube.innertube.models.SongItem
 import com.khepilabs.khepitube.innertube.models.YTItem
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.music.common.rememberMusicArtworkColors
 import com.khepilabs.khepitube.ui.components.shared.khepiArtistShape
 
@@ -73,7 +74,7 @@ fun TopResultCard(
     val colors = rememberMusicArtworkColors(item.thumbnail)
     val buttonHeight = ButtonDefaults.MediumContainerHeight
 
-    Card(
+    GlassSurface(
         modifier =
             modifier
                 .fillMaxWidth()
@@ -83,12 +84,10 @@ fun TopResultCard(
                     onLongClick = onLongClick,
                 ),
         shape = MaterialTheme.shapes.extraLarge,
-        colors =
-            CardDefaults.cardColors(
-                containerColor = colors.container,
-                contentColor = colors.onContainer,
-            ),
+        containerColor = colors.container.copy(alpha = 0.72f),
+        borderWidth = 0.9.dp,
     ) {
+        CompositionLocalProvider(LocalContentColor provides colors.onContainer) {
         Column(
             modifier =
                 Modifier

@@ -19,11 +19,12 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.model.Channel
 import com.khepilabs.khepitube.data.model.Video
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.ChannelAvatarImage
 import com.khepilabs.khepitube.ui.components.shared.KhepiSubscribeButton
 import com.khepilabs.khepitube.ui.components.shared.KhepiSubscribeButtonSize
@@ -62,12 +64,13 @@ fun SearchChannelHeroCard(
 ) {
     val tint = rememberMediaArtworkTint(channel.thumbnailUrl)
 
-    Surface(
+    GlassSurface(
         modifier = modifier.fillMaxWidth().padding(horizontal = CardMargin, vertical = CardGap),
         shape = MaterialTheme.shapes.large,
-        color = tint.container,
-        contentColor = tint.onContainer,
+        containerColor = tint.container.copy(alpha = 0.72f),
+        borderWidth = 0.9.dp,
     ) {
+        CompositionLocalProvider(LocalContentColor provides tint.onContainer) {
         BoxWithConstraints {
             val actionsInline = maxWidth >= InlineActionsWidth
             val cardWidth = feedStripCardWidth(maxWidth)
