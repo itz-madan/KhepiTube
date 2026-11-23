@@ -5,7 +5,6 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import com.google.common.truth.Truth.assertThat
 import com.khepilabs.khepitube.data.local.BackupRepository
-import com.khepilabs.khepitube.data.recommendation.music.FavouriteArtistsStore
 import com.khepilabs.khepitube.notification.NotificationHelper
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -13,7 +12,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.mockkStatic
-import io.mockk.slot
 import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlinx.coroutines.CompletableDeferred
@@ -23,23 +21,18 @@ import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import java.util.concurrent.CopyOnWriteArrayList
 
 class BackupCoordinatorTest {
     private val context: Context = mockk(relaxed = true)
     private val repository: BackupRepository = mockk(relaxed = true)
     private val first: Uri = mockk()
     private val second: Uri = mockk()
-    private val favourites: FavouriteArtistsStore = mockk(relaxed = true)
 
     private fun coordinator() =
         BackupCoordinator(
             context,
             repository,
             mockk(relaxed = true),
-            mockk(relaxed = true),
-            mockk(relaxed = true),
-            favourites,
             mockk(relaxed = true),
         )
 
@@ -85,7 +78,8 @@ class BackupCoordinatorTest {
     @Test
     fun `a successful export keeps its file`() =
         runBlocking {
-            coEvery { repository.exportSubscriptionsAsNewPipe(first) } returns Result.success(NewPipeSubscriptionExport("{}", skipped = 0))
+            coEvery { repository.exportSubscriptionsAsNewPipe(first) } returns
+                Result.success(NewPipeSubscriptionExport("{}", skipped = 0))
             val coordinator = coordinator()
 
             coordinator.exportNewPipeSubscriptions(first)
@@ -96,16 +90,10 @@ class BackupCoordinatorTest {
         }
 
     @Test
-    fun `the master backup carries the picked artists and restores them`() =
+    fun `master backup export and import use the current repository API`() =
         runBlocking {
-            val picks = "[]".toByteArray()
-            coEvery { favourites.export() } returns picks
-            coEvery { repository.exportMasterBackup(first, any(), any(), picks) } returns Result.success(Unit)
-            val restore = slot<suspend (ByteArray) -> Unit>()
-            coEvery { repository.importMasterBackup(second, any(), any(), capture(restore)) } coAnswers {
-                restore.captured(picks)
-                Result.success(Unit)
-            }
+            coEvery { repository.exportMasterBackup(first) } returns Result.success(Unit)
+            coEvery { repository.importMasterBackup(second) } returns Result.success(Unit)
             val coordinator = coordinator()
 
             coordinator.exportMaster(first)
@@ -114,25 +102,24 @@ class BackupCoordinatorTest {
             coordinator.importMaster(second)
             withTimeout(2_000) { coordinator.operation.first { it is BackupOperation.Succeeded } }
 
-            coVerify { repository.exportMasterBackup(first, any(), any(), picks) }
-            coVerify { favourites.restore(picks) }
+            coVerify { repository.exportMasterBackup(first) }
+            coVerify { repository.importMasterBackup(second) }
         }
 
     @Test
     fun `the outcome is published after the last notification call`() =
         runBlocking {
-            coEvery { repository.importMasterBackup(second, any(), any(), any()) } returns Result.success(Unit)
+            coEvery { repository.importMasterBackup(second) } returns Result.success(Unit)
             val coordinator = coordinator()
-            val seen = CopyOnWriteArrayList<BackupOperation>()
+            var sawSuccessDuringNotification = false
             every { NotificationHelper.hasNotificationPermission(any()) } answers {
-                seen += coordinator.operation.value
+                if (coordinator.operation.value is BackupOperation.Succeeded) sawSuccessDuringNotification = true
                 false
             }
 
             coordinator.importMaster(second)
             withTimeout(2_000) { coordinator.operation.first { it is BackupOperation.Succeeded } }
 
-            assertThat(seen).isNotEmpty()
-            assertThat(seen.filterIsInstance<BackupOperation.Succeeded>()).isEmpty()
+            assertThat(sawSuccessDuringNotification).isFalse()
         }
 }
