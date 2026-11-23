@@ -1,6 +1,7 @@
 package com.khepilabs.khepitube.ui.components.shared
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +27,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+
+/** Enables the settings-only translucent row treatment without changing shared rows elsewhere. */
+val LocalKhepiGlassRows = staticCompositionLocalOf { false }
+
+private val KhepiGlassRowFill get() = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f)
+private val KhepiGlassRowBorder get() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f)
 
 fun khepiRowGroupShape(
     index: Int,
@@ -66,11 +74,15 @@ fun KhepiSelectionRow(
                 .clip(shape)
                 .background(
                     if (selected && showSelectedContainer) {
-                        MaterialTheme.colorScheme.primaryContainer
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (LocalKhepiGlassRows.current) 0.72f else 1f)
+                    } else if (LocalKhepiGlassRows.current) {
+                        KhepiGlassRowFill
                     } else {
                         MaterialTheme.colorScheme.surfaceContainerHigh
                     },
-                ).clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick)
+                )
+                .then(if (LocalKhepiGlassRows.current) Modifier.border(1.dp, KhepiGlassRowBorder, shape) else Modifier)
+                .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -125,7 +137,8 @@ fun KhepiNavRow(
             modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(if (LocalKhepiGlassRows.current) KhepiGlassRowFill else MaterialTheme.colorScheme.surfaceContainerHigh)
+                .then(if (LocalKhepiGlassRows.current) Modifier.border(1.dp, KhepiGlassRowBorder, shape) else Modifier)
                 .clickable(enabled = enabled, onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -195,7 +208,8 @@ fun KhepiSwitchRow(
             modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(if (LocalKhepiGlassRows.current) KhepiGlassRowFill else MaterialTheme.colorScheme.surfaceContainerHigh)
+                .then(if (LocalKhepiGlassRows.current) Modifier.border(1.dp, KhepiGlassRowBorder, shape) else Modifier)
                 .clickable(enabled = enabled, role = Role.Switch) { onCheckedChange(!checked) }
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,

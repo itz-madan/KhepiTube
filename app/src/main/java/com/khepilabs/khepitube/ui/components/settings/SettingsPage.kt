@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.ui.components.glass.GlassScreenHost
+import com.khepilabs.khepitube.ui.components.shared.LocalKhepiGlassRows
 import androidx.compose.ui.graphics.Color
 import com.khepilabs.khepitube.ui.components.layout.LocalKhepiBottomInsets
 import com.khepilabs.khepitube.ui.components.layout.floatAboveBottomChrome
@@ -81,7 +82,7 @@ fun SettingsPage(
         if (index >= 0) listState.animateScrollToItem(index, HIGHLIGHT_VISIBLE_OFFSET_PX)
     }
 
-    CompositionLocalProvider(LocalGlassTokens provides glassTokens) {
+    CompositionLocalProvider(LocalGlassTokens provides glassTokens, LocalKhepiGlassRows provides true) {
         GlassScreenHost(
             modifier = modifier,
             content = {
