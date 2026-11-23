@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.data.auth.YouTubeDeviceAuth
 import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.innertube.YouTube
 import com.khepilabs.khepitube.innertube.models.AccountInfo
@@ -52,6 +53,10 @@ fun AccountSettingsScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val preferences = remember { PlayerPreferences(context) }
+    val deviceAuth = remember { YouTubeDeviceAuth(context) }
+    val savedProfile = remember { deviceAuth.savedProfile() }
+    var isOAuthSignedIn by remember { mutableStateOf(deviceAuth.hasRefreshToken()) }
+    var showDeviceLoginDialog by remember { mutableStateOf(false) }
     val youtubeCookie by preferences.youtubeCookie.collectAsStateWithLifecycle(initialValue = null)
 
     var accountInfo by remember { mutableStateOf<AccountInfo?>(null) }
@@ -59,7 +64,7 @@ fun AccountSettingsScreen(
     var showLoginDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(youtubeCookie) {
-        if (!youtubeCookie.isNullOrBlank()) {
+        if (!youtubeCookie.isNullOrBlank() || isOAuthSignedIn) {
             isLoadingAccount = true
             withContext(Dispatchers.IO) {
                 YouTube.cookie = youtubeCookie
@@ -69,7 +74,7 @@ fun AccountSettingsScreen(
                     isLoadingAccount = false
                 }
             }
-        } else {
+        } else if (!isOAuthSignedIn) {
             accountInfo = null
             isLoadingAccount = false
         }
@@ -96,8 +101,8 @@ fun AccountSettingsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                val avatarUrl = accountInfo?.thumbnailUrl.orEmpty()
-                                val accountName = accountInfo?.name ?: stringResource(R.string.account_signed_in)
+                                val avatarUrl = accountInfo?.thumbnailUrl ?: savedProfile.second.orEmpty()
+                                val accountName = accountInfo?.name ?: savedProfile.first ?: stringResource(R.string.account_signed_in)
                                 ChannelAvatarImage(
                                     url = avatarUrl,
                                     contentDescription = accountName,
@@ -122,6 +127,9 @@ fun AccountSettingsScreen(
                                 onClick = {
                                     coroutineScope.launch {
                                         preferences.setYoutubeCookie(null)
+                                        deviceAuth.signOut()
+                                        isOAuthSignedIn = false
+                                        accountInfo = null
                                         YouTube.cookie = null
                                         CookieManager.getInstance().removeAllCookies(null)
                                         CookieManager.getInstance().flush()
@@ -163,7 +171,7 @@ fun AccountSettingsScreen(
                                 }
                             }
                             Button(
-                                onClick = { showLoginDialog = true },
+                                onClick = { showDeviceLoginDialog = true },
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Icon(
@@ -179,6 +187,27 @@ fun AccountSettingsScreen(
                 }
             }
         }
+    }
+
+
+    if (showDeviceLoginDialog) {
+        YouTubeDeviceLoginDialog(
+            onDismiss = { showDeviceLoginDialog = false },
+            onApproved = { account ->
+                accountInfo = AccountInfo(
+                    name = account.name ?: "YouTube",
+                    email = null,
+                    channelHandle = null,
+                    thumbnailUrl = account.avatarUrl,
+                )
+                isOAuthSignedIn = true
+                showDeviceLoginDialog = false
+            },
+            onUseWebViewFallback = {
+                showDeviceLoginDialog = false
+                showLoginDialog = true
+            },
+        )
     }
 
     if (showLoginDialog) {
