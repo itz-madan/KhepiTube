@@ -94,7 +94,7 @@ class YouTubeDeviceAuth(context: Context) {
         val expires = response.optLong("expires_in", 3600L)
         store.saveRefreshToken(refresh)
         store.saveAccessToken(access, System.currentTimeMillis() + expires * 1000L)
-        val profile = fetchAccountProfile(access)
+        val profile = runCatching { fetchAccountProfile(access) }.getOrDefault(null to null)
         store.saveProfile(profile.first, profile.second)
         store.clearPendingClient()
         return SignedInAccount(access, refresh, expires, profile.first, profile.second)
