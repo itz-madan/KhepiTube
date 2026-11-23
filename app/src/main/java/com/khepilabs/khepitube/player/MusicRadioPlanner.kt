@@ -2,7 +2,10 @@ package com.khepilabs.khepitube.player
 
 import com.khepilabs.khepitube.data.localmedia.LocalMediaIds
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.recommendation.music.primaryArtistKey
+
+/** A stable grouping key for artist diversity in the playback queue. */
+private fun MusicTrack.primaryArtistKey(): String =
+    artist.substringBefore(',').trim().lowercase().ifBlank { videoId }
 
 /**
  * Decides whether a playlist change opens a new radio session or continues the current one.
