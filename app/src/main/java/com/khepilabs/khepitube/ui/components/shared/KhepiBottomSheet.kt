@@ -140,6 +140,7 @@ fun KhepiBottomSheet(
     dismissOnOutsideTap: Boolean = true,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
+    glassContainerColor: Color = Color.Transparent,
     onBack: (() -> Unit)? = null,
     onProgressChange: (Float) -> Unit = {},
     onVisibleHeightChange: (Float) -> Unit = {},
@@ -276,7 +277,7 @@ fun KhepiBottomSheet(
             GlassSurface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = shape,
-                containerColor = Color.Transparent,
+                containerColor = glassContainerColor,
                 borderWidth = 0.75.dp,
             ) {
                 Column(
