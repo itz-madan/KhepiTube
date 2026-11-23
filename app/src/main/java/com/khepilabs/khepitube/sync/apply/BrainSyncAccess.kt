@@ -3,15 +3,11 @@ package com.khepilabs.khepitube.sync.apply
 import android.content.Context
 import com.khepilabs.khepitube.data.recommendation.KhepiNeuroEngine
 import com.khepilabs.khepitube.data.recommendation.NeuroKeySpec
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainStorage
 import com.khepilabs.khepitube.sync.canonical.BrainCounters
 import com.khepilabs.khepitube.sync.canonical.CanonicalBrain
-import com.khepilabs.khepitube.sync.canonical.CanonicalMusicBrain
 import com.khepilabs.khepitube.sync.canonical.GCounter
 import com.khepilabs.khepitube.sync.identity.Hlc
 import com.khepilabs.khepitube.sync.mapping.BrainMapper
-import com.khepilabs.khepitube.sync.mapping.MusicBrainMapper
 import com.khepilabs.khepitube.sync.merge.BrainCrdtState
 import com.khepilabs.khepitube.sync.merge.BrainCrdtStore
 import com.khepilabs.khepitube.sync.merge.BrainKeyRekey
@@ -19,12 +15,8 @@ import com.khepilabs.khepitube.sync.merge.BrainMerger
 import com.khepilabs.khepitube.sync.merge.BrainVectorBlend
 import com.khepilabs.khepitube.sync.merge.CounterOwnership
 import com.khepilabs.khepitube.sync.merge.DeviceVectors
-import com.khepilabs.khepitube.sync.merge.MusicBrainCrdtState
-import com.khepilabs.khepitube.sync.merge.MusicBrainCrdtStore
-import com.khepilabs.khepitube.sync.merge.MusicBrainMerger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,8 +32,6 @@ class BrainSyncAccess
     constructor(
         @ApplicationContext private val context: Context,
         private val brainCrdtStore: BrainCrdtStore,
-        private val musicBrainCrdtStore: MusicBrainCrdtStore,
-        private val musicBrainEngine: MusicBrainEngine,
     ) {
         private val neuroEngine: KhepiNeuroEngine by lazy { KhepiNeuroEngine.getInstance(context) }
 
@@ -171,67 +161,5 @@ class BrainSyncAccess
             )
         }
 
-        // --- music brain (the music twin of the neuro path; no learned vectors to blend) ---
 
-        suspend fun exportMusicBrain(
-            myNode: String,
-            hlc: String,
-        ): CanonicalMusicBrain {
-            val local = exportLocalMusicBrain()
-            val sidecar = attributeLocalMusic(musicBrainCrdtStore.load(), myNode, local, hlc)
-            musicBrainCrdtStore.save(sidecar)
-            return MusicBrainMapper.toCanonical(local, myNode, hlc, sidecar)
-        }
-
-        suspend fun mergeMusicBrain(
-            remote: CanonicalMusicBrain,
-            senderId: String,
-            myNode: String,
-            myDeviceId: String,
-            hlc: String,
-        ) {
-            val local = exportLocalMusicBrain()
-            val sidecar = attributeLocalMusic(musicBrainCrdtStore.load(), myNode, local, hlc)
-            val own = MusicBrainMapper.toCanonical(local, myNode, hlc, sidecar)
-            val merged =
-                CounterOwnership.music(
-                    merged = MusicBrainMerger.merge(own, remote),
-                    local = own,
-                    remote = remote,
-                    own = setOf(myNode, myDeviceId),
-                    sender = setOf(senderId, Hlc.nodeFromDeviceId(senderId)),
-                )
-            val mergedBrain = MusicBrainMapper.writeBack(merged, local)
-            musicBrainEngine.importBrainFromStream(ByteArrayInputStream(MusicBrainMapper.serialize(mergedBrain)))
-            musicBrainCrdtStore.save(MusicBrainCrdtState.afterMerge(merged))
-        }
-
-        private suspend fun exportLocalMusicBrain(): MusicBrainStorage.SerializableMusicBrain {
-            val bytes =
-                ByteArrayOutputStream().use { bos ->
-                    musicBrainEngine.exportBrainToStream(bos)
-                    bos.toByteArray()
-                }
-            return runCatching { MusicBrainMapper.parse(bytes) }
-                .getOrElse { throw IllegalStateException("the local music brain could not be parsed", it) }
-        }
-
-        private fun attributeLocalMusic(
-            state: MusicBrainCrdtState,
-            myNode: String,
-            brain: MusicBrainStorage.SerializableMusicBrain,
-            hlc: String,
-        ): MusicBrainCrdtState =
-            MusicBrainCrdtState.attributeLocal(
-                state = state,
-                myDevice = myNode,
-                totalPlaysScalar = brain.totalPlays.toLong(),
-                artistPlayScalars = brain.artistAffinity.mapValues { it.value.plays.toLong() },
-                artistScores = brain.artistAffinity.mapValues { it.value.score },
-                seenArtists = brain.seenArtists.toSet(),
-                blockedArtists = brain.blockedArtists.toSet(),
-                dislikedArtists = brain.dislikedArtists,
-                appetite = brain.discoveryAppetite,
-                hlc = hlc,
-            )
     }
