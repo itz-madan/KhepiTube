@@ -83,7 +83,7 @@ fun AccountSettingsScreen(
                 isLoadingAccount = true
                 withContext(Dispatchers.IO) {
                     YouTube.cookie = null
-                    val token = deviceAuth.accessToken()
+                    val token = runCatching { deviceAuth.accessToken() }.getOrNull()
                     withContext(Dispatchers.Main) {
                         YouTube.accessToken = token
                         accountInfo = AccountInfo(
