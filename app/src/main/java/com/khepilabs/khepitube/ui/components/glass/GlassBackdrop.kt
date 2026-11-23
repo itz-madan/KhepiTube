@@ -35,11 +35,23 @@ internal val LocalGlassBackdrop = staticCompositionLocalOf<GlassBackdropState?> 
  * Glass surfaces inside [overlay] can sample the recorded content without recursively capturing
  * themselves. This is a Compose-native backdrop source; it avoids View snapshots and bitmap readbacks.
  */
+/**
+ * Hosts a screen's ordinary content below a separate glass-overlay layer.
+ *
+ * Put scrolling content and the screen body in [content]. Put only floating chrome (for example,
+ * a translucent top bar, search field, or floating action controls) in [glassOverlay]. Glass
+ * surfaces in the overlay can sample the content underneath without recording themselves.
+ *
+ * This is deliberately a two-slot API: placing a GlassSurface inside [content] does not make it a
+ * backdrop overlay. Migrate a screen's chrome into [glassOverlay] when that chrome needs live
+ * backdrop sampling. On Android versions without supported render effects, GlassSurface keeps its
+ * readable tinted fallback.
+ */
 @Composable
-internal fun GlassBackdrop(
+fun GlassScreenHost(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
-    overlay: @Composable BoxScope.() -> Unit,
+    glassOverlay: @Composable BoxScope.() -> Unit,
 ) {
     val source = rememberGraphicsLayer()
     val backdrop = remember(source) { GlassBackdropState(source) }
@@ -64,8 +76,22 @@ internal fun GlassBackdrop(
         CompositionLocalProvider(LocalGlassBackdrop provides backdrop) {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                content = overlay,
+                content = glassOverlay,
             )
         }
     }
+}
+
+/** Internal adapter retained for the app-level navigation chrome host. */
+@Composable
+internal fun GlassBackdrop(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+    overlay: @Composable BoxScope.() -> Unit,
+) {
+    GlassScreenHost(
+        modifier = modifier,
+        content = content,
+        glassOverlay = overlay,
+    )
 }
