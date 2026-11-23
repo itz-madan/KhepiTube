@@ -57,7 +57,7 @@ fun KhepiAlertDialog(
     properties: DialogProperties = DialogProperties(),
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest, modifier = modifier, properties = properties) {
-        val windowBlurEnabled = rememberDialogWindowBlurEnabled()
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
         Surface(
             shape = AlertDialogDefaults.shape,
             color = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.86f) else AlertDialogDefaults.containerColor,
@@ -138,7 +138,7 @@ private fun ProvideStyle(
 
 
 @Composable
-private fun rememberDialogWindowBlurEnabled(): Boolean {
+internal fun rememberKhepiWindowBlurEnabled(): Boolean {
     val context = LocalContext.current
     val density = LocalDensity.current
     val view = LocalView.current

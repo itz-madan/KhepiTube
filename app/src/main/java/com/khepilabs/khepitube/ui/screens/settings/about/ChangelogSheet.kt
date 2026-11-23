@@ -32,7 +32,10 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
+import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -71,6 +74,7 @@ private const val CHANGELOG_DIR = "changelog"
 private const val RELEASES_URL = "https://github.com/itz-madan/KhepiTube/releases"
 
 private val ListPadding = 16.dp
+private val SheetGlassShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 private val RowPadding = 16.dp
 private val HeaderVerticalPadding = 14.dp
 private val SectionTopPadding = 12.dp
@@ -99,8 +103,16 @@ internal fun ChangelogSheet(onDismiss: () -> Unit) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberKhepiSheetState(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
     ) {
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = SheetGlassShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (windowBlurEnabled) 0.84f else 1f),
+            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.38f),
+        ) {
+            Column {
         KhepiSheetHeader(
             title = stringResource(R.string.about_changelog),
             subtitle = stringResource(R.string.whats_new_in_KhepiTube),
@@ -165,6 +177,7 @@ internal fun ChangelogSheet(onDismiss: () -> Unit) {
                         }
                     }
                 }
+            }
             }
         }
     }
