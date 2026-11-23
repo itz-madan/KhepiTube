@@ -3764,6 +3764,37 @@ class PlayerPreferences(
 
     // AUTO-BACKUP SETTINGS
 
+    /** Export primitive player preferences using the shared backup representation. */
+    suspend fun getExportData(): SettingsBackup {
+        val values = context.playerPreferencesDataStore.data.first().asMap()
+        val strings = mutableMapOf<String, String>()
+        val booleans = mutableMapOf<String, Boolean>()
+        val ints = mutableMapOf<String, Int>()
+        val floats = mutableMapOf<String, Float>()
+        val longs = mutableMapOf<String, Long>()
+        values.forEach { (key, value) ->
+            when (value) {
+                is String -> strings[key.name] = value
+                is Boolean -> booleans[key.name] = value
+                is Int -> ints[key.name] = value
+                is Float -> floats[key.name] = value
+                is Long -> longs[key.name] = value
+            }
+        }
+        return SettingsBackup(strings, booleans, ints, floats, longs)
+    }
+
+    /** Restore only primitive preference types represented by SettingsBackup. */
+    suspend fun restoreData(backup: SettingsBackup) {
+        context.playerPreferencesDataStore.edit { preferences ->
+            backup.strings.forEach { (key, value) -> preferences[stringPreferencesKey(key)] = value }
+            backup.booleans.forEach { (key, value) -> preferences[booleanPreferencesKey(key)] = value }
+            backup.ints.forEach { (key, value) -> preferences[intPreferencesKey(key)] = value }
+            backup.floats.forEach { (key, value) -> preferences[floatPreferencesKey(key)] = value }
+            backup.longs.forEach { (key, value) -> preferences[longPreferencesKey(key)] = value }
+        }
+    }
+
 }
 
 /** Action to take when a SponsorBlock segment is encountered. */
