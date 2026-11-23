@@ -2,6 +2,7 @@ package com.khepilabs.khepitube.ui.screens.music.collection
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -65,6 +66,7 @@ internal fun MusicAddSongsSheet(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
             borderWidth = 0.75.dp,
         ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.ui_add_songs),
             style = MaterialTheme.typography.titleLarge,
@@ -121,7 +123,7 @@ internal fun MusicAddSongsSheet(
                     }
                 }
             }
-        }
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.khepilabs.khepitube.ui.screens.onboarding
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +47,7 @@ internal fun ImportSourceSheet(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
             borderWidth = 0.75.dp,
         ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
         KhepiSheetHeader(
             title = stringResource(source.titleRes),
             onClose = onDismiss,
@@ -63,6 +65,7 @@ internal fun ImportSourceSheet(
                 )
             }
         }
+            }
         }
     }
 }
