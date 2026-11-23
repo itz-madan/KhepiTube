@@ -79,8 +79,9 @@ fun SettingsPage(
 ) {
     val keys = remember { SettingsKeyRecorder() }
     val glassTokens = rememberGlassTokens()
-    var headerHeightPx by remember { mutableIntStateOf(0) }
-    val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
+    val density = LocalDensity.current
+    var headerHeightPx by remember { mutableIntStateOf(if (header != null) with(density) { SettingsTopBarHeight.roundToPx() } else 0) }
+    val contentTopPadding = with(density) { headerHeightPx.toDp() }.coerceAtLeast(SettingsTopBarHeight)
 
     LaunchedEffect(highlight) {
         if (highlight == null) return@LaunchedEffect
@@ -107,7 +108,7 @@ fun SettingsPage(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .padding(top = SettingsTopBarHeight + headerHeight)
+                                .padding(top = contentTopPadding)
                                 .padding(padding),
                     ) {
                         val onTv = LocalDpadNavigation.current
