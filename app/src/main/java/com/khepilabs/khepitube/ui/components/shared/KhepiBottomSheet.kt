@@ -270,7 +270,7 @@ fun KhepiBottomSheet(
                         translationY = dragRangePx(size.height) * (1f - progress.value)
                     },
             shape = shape,
-            color = containerColor,
+            color = Color.Transparent,
             tonalElevation = 0.dp,
         ) {
             GlassSurface(
