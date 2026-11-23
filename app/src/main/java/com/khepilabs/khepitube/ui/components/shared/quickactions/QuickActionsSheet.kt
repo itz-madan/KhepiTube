@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.ButtonShapes
@@ -35,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiModalSheetDefaults
 import com.khepilabs.khepitube.ui.components.shared.KhepiRowGroup
 import com.khepilabs.khepitube.ui.components.shared.KhepiSectionHeader
@@ -133,16 +136,25 @@ fun QuickActionsSheet(
         properties = properties,
         modifier = KhepiModalSheetDefaults.modifier,
         contentWindowInsets = KhepiModalSheetDefaults.contentWindowInsets,
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
     ) {
         BackHandler(enabled = onBack != null) { onBack?.invoke() }
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(scrollState)
-                    .padding(bottom = QuickActionsDefaults.BottomPadding),
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = BottomSheetDefaults.ExpandedShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+            borderWidth = 0.75.dp,
         ) {
-            content(controller)
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(scrollState)
+                        .padding(bottom = QuickActionsDefaults.BottomPadding),
+            ) {
+                content(controller)
+            }
         }
     }
 }
