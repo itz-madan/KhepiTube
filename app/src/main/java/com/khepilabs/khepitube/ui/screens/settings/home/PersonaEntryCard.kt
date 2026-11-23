@@ -113,7 +113,7 @@ internal fun PersonaEntryCard(
 
             Surface(
                 shape = CircleShape,
-                color = colors.surfaceContainerHigh,
+                color = colors.surfaceContainerHigh.copy(alpha = 0.62f),
                 modifier = Modifier.size(ChevronBadgeSize),
             ) {
                 Box(contentAlignment = Alignment.Center) {
