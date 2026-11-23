@@ -6,11 +6,7 @@ import com.khepilabs.khepitube.data.model.PlaylistInfo
 import com.khepilabs.khepitube.data.model.toMusicTrack
 import com.khepilabs.khepitube.data.music.DownloadManager
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.music.model.audioMusicOnly
 import com.khepilabs.khepitube.data.music.model.toMusicTrack
-import com.khepilabs.khepitube.data.newmusic.InnertubeMusicService
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
-import com.khepilabs.khepitube.data.recommendation.music.onRepeatShelf
 import com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
@@ -27,7 +23,6 @@ import com.khepilabs.khepitube.data.music.PlaylistRepository as MusicHistoryRepo
 class AutoLibrary
     @Inject
     constructor(
-        private val musicBrain: MusicBrainEngine,
         private val liked: LikedVideosRepository,
         private val downloads: DownloadManager,
         private val musicHistory: MusicHistoryRepository,
@@ -50,9 +45,7 @@ class AutoLibrary
             }
             AutoBrowseTree.searchQueryOf(parentId)?.let { return search(it) }
             return when (parentId) {
-                AutoBrowseTree.ON_REPEAT -> musicBrain.onRepeatShelf()
-                AutoBrowseTree.RIGHT_NOW -> musicBrain.timeOfDayTracks(MIX_SIZE).audioMusicOnly()
-                AutoBrowseTree.REDISCOVER -> musicBrain.rediscoverTracks(MIX_SIZE).audioMusicOnly()
+                AutoBrowseTree.ON_REPEAT, AutoBrowseTree.RIGHT_NOW, AutoBrowseTree.REDISCOVER -> emptyList()
                 AutoBrowseTree.LIKED -> liked.getLikedMusicFlow().first().map { it.toMusicTrack() }
                 AutoBrowseTree.DOWNLOADS -> downloads.downloadedTracks.first().map { it.track }
                 AutoBrowseTree.RECENT -> musicHistory.history.first()
@@ -68,7 +61,7 @@ class AutoLibrary
             return searchLock.withLock {
                 val now = System.currentTimeMillis()
                 searches[key]?.takeIf { now - it.at < SEARCH_TTL_MS }?.let { return@withLock it.tracks }
-                val tracks = InnertubeMusicService.searchMusic(query.trim())
+                val tracks = emptyList<MusicTrack>()
                 searches[key] = CachedSearch(now, tracks)
                 while (searches.size > MAX_CACHED_SEARCHES) searches.remove(searches.keys.first())
                 tracks
