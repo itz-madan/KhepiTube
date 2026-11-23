@@ -22,8 +22,6 @@ import com.khepilabs.khepitube.data.local.entity.DownloadCollectionItemEntity
 import com.khepilabs.khepitube.data.local.entity.DownloadEntity
 import com.khepilabs.khepitube.data.local.entity.DownloadItemEntity
 import com.khepilabs.khepitube.data.local.entity.HomeFeedCacheEntity
-import com.khepilabs.khepitube.data.local.entity.MusicHomeCacheEntity
-import com.khepilabs.khepitube.data.local.entity.MusicHomeChipEntity
 import com.khepilabs.khepitube.data.local.entity.NoteEntity
 import com.khepilabs.khepitube.data.local.entity.NotificationEntity
 import com.khepilabs.khepitube.data.local.entity.PlaylistEntity
@@ -45,8 +43,6 @@ import com.khepilabs.khepitube.data.local.migrations.Migration24To25
         PlaylistVideoCrossRef::class,
         NotificationEntity::class,
         SubscriptionFeedEntity::class,
-        MusicHomeCacheEntity::class,
-        MusicHomeChipEntity::class,
         DownloadEntity::class,
         DownloadItemEntity::class,
         WatchHistoryEntity::class,
@@ -70,7 +66,7 @@ import com.khepilabs.khepitube.data.local.migrations.Migration24To25
         AutoMigration(from = 31, to = 32),
         AutoMigration(from = 32, to = 33),
     ],
-    version = 34,
+    version = 35,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
