@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.local.SponsorBlockAction
 import com.khepilabs.khepitube.data.model.SponsorBlockCategories
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsListScope
 import com.khepilabs.khepitube.ui.components.settings.switch
 import com.khepilabs.khepitube.ui.components.shared.KhepiNavRow
@@ -101,12 +102,18 @@ private fun SegmentRow(
     val colour = setting?.colorArgb?.let(::Color) ?: defaultSponsorBlockColor(category)
     val action = setting?.action ?: SponsorBlockCategories.defaultAction(category)
 
-    SegmentedListItem(
-        verticalAlignment = Alignment.CenterVertically,
-        onClick = { menuOpen = true },
-        shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        leadingContent = {
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
+    ) {
+        SegmentedListItem(
+            verticalAlignment = Alignment.CenterVertically,
+            onClick = { menuOpen = true },
+            shapes = ListItemDefaults.shapes(shape = shape),
+            colors = ListItemDefaults.segmentedColors(containerColor = Color.Transparent),
+            leadingContent = {
             IconButton(onClick = onPickColour) {
                 Box(
                     modifier =
@@ -134,8 +141,9 @@ private fun SegmentRow(
                 }
             }
         },
-    ) {
-        Text(label)
+        ) {
+            Text(label)
+        }
     }
 }
 
