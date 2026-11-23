@@ -33,8 +33,11 @@ import androidx.compose.ui.unit.dp
 /** Enables the settings-only translucent row treatment without changing shared rows elsewhere. */
 val LocalKhepiGlassRows = staticCompositionLocalOf { false }
 
-private val KhepiGlassRowFill get() = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f)
-private val KhepiGlassRowBorder get() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f)
+@Composable
+private fun khepiGlassRowFill() = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f)
+
+@Composable
+private fun khepiGlassRowBorder() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f)
 
 @Composable
 private fun SettingsGlassRowFrame(
@@ -49,7 +52,7 @@ private fun SettingsGlassRowFrame(
             modifier = modifier,
             shape = shape,
             containerColor = containerColor,
-            borderColor = KhepiGlassRowBorder,
+            borderColor = khepiGlassRowBorder(),
             content = content,
         )
     } else {
@@ -93,7 +96,7 @@ fun KhepiSelectionRow(
     val glass = LocalKhepiGlassRows.current
     val fill = if (selected && showSelectedContainer) {
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (glass) 0.72f else 1f)
-    } else if (glass) KhepiGlassRowFill else MaterialTheme.colorScheme.surfaceContainerHigh
+    } else if (glass) khepiGlassRowFill() else MaterialTheme.colorScheme.surfaceContainerHigh
     SettingsGlassRowFrame(
         modifier = modifier.fillMaxWidth().clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
         shape = shape,
