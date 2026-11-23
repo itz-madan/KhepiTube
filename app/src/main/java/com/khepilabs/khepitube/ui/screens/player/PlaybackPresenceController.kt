@@ -123,6 +123,7 @@ internal class PlaybackPresenceController(
             it.copy(
                 shouldDismissPlayer = false,
                 isBackgroundPlaybackMode = false,
+                resumedInMiniPlayer = true,
             )
         }
     }
