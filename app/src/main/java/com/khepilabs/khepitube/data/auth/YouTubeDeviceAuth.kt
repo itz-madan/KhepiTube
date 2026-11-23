@@ -95,6 +95,7 @@ class YouTubeDeviceAuth(context: Context) {
         store.saveRefreshToken(refresh)
         store.saveAccessToken(access, System.currentTimeMillis() + expires * 1000L)
         val profile = fetchAccountProfile(access)
+        store.saveProfile(profile.first, profile.second)
         store.clearPendingClient()
         return SignedInAccount(access, refresh, expires, profile.first, profile.second)
     }
@@ -161,6 +162,8 @@ class YouTubeDeviceAuth(context: Context) {
         return token
     }
 
+    fun savedProfile(): Pair<String?, String?> = store.profile()
+    fun hasRefreshToken(): Boolean = !store.refreshToken().isNullOrBlank()
     fun signOut() = store.clearAll()
 
     private fun discoverOAuthClient(): OAuthClient {
@@ -259,6 +262,11 @@ class YouTubeDeviceAuth(context: Context) {
         fun saveAccessToken(value: String, expiry: Long) { putSecret("access_token", value); prefs.edit().putLong("access_expiry", expiry).apply() }
         fun accessToken(): String? = getSecret("access_token")
         fun accessTokenExpiry(): Long = prefs.getLong("access_expiry", 0L)
+        fun saveProfile(name: String?, avatar: String?) {
+            putSecret("profile_name", name)
+            putSecret("profile_avatar", avatar)
+        }
+        fun profile(): Pair<String?, String?> = getSecret("profile_name") to getSecret("profile_avatar")
         fun clearAll() { prefs.edit().clear().apply() }
     }
 
