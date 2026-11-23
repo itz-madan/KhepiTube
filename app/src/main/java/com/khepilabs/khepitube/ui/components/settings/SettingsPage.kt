@@ -1,5 +1,6 @@
 package com.khepilabs.khepitube.ui.components.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,6 +94,13 @@ fun SettingsPage(
     CompositionLocalProvider(LocalGlassTokens provides glassTokens, LocalKhepiGlassRows provides true) {
         GlassScreenHost(
             modifier = modifier,
+            contentBackdrop = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                )
+            },
             content = {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),

@@ -52,27 +52,49 @@ fun GlassScreenHost(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
     glassOverlay: @Composable BoxScope.() -> Unit,
+    contentBackdrop: @Composable BoxScope.() -> Unit = {},
 ) {
     val source = rememberGraphicsLayer()
+    val contentSource = rememberGraphicsLayer()
     val backdrop = remember(source) { GlassBackdropState(source) }
+    val contentBackdropState = remember(contentSource) { GlassBackdropState(contentSource) }
 
     Box(
         modifier = modifier.onGloballyPositioned {
-            backdrop.originInRoot = it.positionInRoot()
+            val origin = it.positionInRoot()
+            backdrop.originInRoot = origin
+            contentBackdropState.originInRoot = origin
         },
     ) {
+        // A separate, non-recursive backdrop source for glass surfaces embedded in scrolling
+        // content. It is recorded independently from the foreground, so rows never sample
+        // themselves or their own text while drawing.
         Box(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .drawWithContent {
-                        source.record {
+                        contentSource.record {
                             this@drawWithContent.drawContent()
                         }
-                        drawLayer(source)
+                        drawLayer(contentSource)
                     },
-            content = content,
+            content = contentBackdrop,
         )
+        CompositionLocalProvider(LocalGlassBackdrop provides contentBackdropState) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .drawWithContent {
+                            source.record {
+                                this@drawWithContent.drawContent()
+                            }
+                            drawLayer(source)
+                        },
+                content = content,
+            )
+        }
         CompositionLocalProvider(LocalGlassBackdrop provides backdrop) {
             Box(
                 modifier = Modifier.fillMaxSize(),
