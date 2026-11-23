@@ -7,16 +7,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.khepilabs.khepitube.ui.theme.PlayerScrim
 import com.khepilabs.khepitube.ui.theme.PlayerScrimContent
 import com.khepilabs.khepitube.ui.theme.PlayerScrimPanel
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.utils.formatMultiplierLabel
 
 @Composable
@@ -35,8 +34,10 @@ internal fun SpeedBoostOverlay(
                 shrinkVertically(MaterialTheme.motionScheme.fastSpatialSpec(), shrinkTowards = Alignment.Top),
         modifier = modifier,
     ) {
-        Surface(
-            color = PlayerScrimPanel,
+        GlassSurface(
+            containerColor = PlayerScrimPanel.copy(alpha = 0.8f),
+            borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+            borderWidth = 0.8.dp,
             shape = CircleShape,
             modifier = Modifier.wrapContentSize(),
         ) {
