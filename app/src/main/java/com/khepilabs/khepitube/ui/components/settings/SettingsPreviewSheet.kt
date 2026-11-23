@@ -18,6 +18,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,11 +29,13 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.ui.components.shared.KhepiSheetHeader
 import com.khepilabs.khepitube.ui.components.shared.rememberKhepiSheetState
+import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 
 private val OptionHorizontalPadding = 24.dp
 private val OptionVerticalPadding = 12.dp
 private val OptionSpacing = 8.dp
 private val SheetBottomPadding = 16.dp
+private val SheetGlassShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 
 /**
  * A single choice where every option is shown, not just named: each row carries a live preview of
@@ -51,8 +56,16 @@ fun <T> SettingsPreviewSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberKhepiSheetState(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
     ) {
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = SheetGlassShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (windowBlurEnabled) 0.84f else 1f),
+            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.38f),
+        ) {
+            Column {
         KhepiSheetHeader(title = title, subtitle = subtitle, onClose = onDismiss, showDragHandle = false)
         LazyColumn(
             contentPadding =
@@ -83,6 +96,8 @@ fun <T> SettingsPreviewSheet(
                     }
                     preview(option)
                 }
+            }
+        }
             }
         }
     }
