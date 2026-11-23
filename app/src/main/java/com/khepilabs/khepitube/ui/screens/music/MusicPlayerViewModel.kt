@@ -19,8 +19,6 @@ import com.khepilabs.khepitube.data.music.YouTubeMusicService
 import com.khepilabs.khepitube.data.music.model.MUSIC_GENRE_SOURCE_PREFIX
 import com.khepilabs.khepitube.data.music.model.MusicTrack
 import com.khepilabs.khepitube.data.newmusic.InnertubeMusicService
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
-import com.khepilabs.khepitube.data.recommendation.music.onRepeatShelf
 import com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
 import com.khepilabs.khepitube.ui.components.musicplayer.queue.QueueSwipes
 import com.khepilabs.khepitube.utils.PerformanceDispatcher
@@ -49,7 +47,6 @@ class MusicPlayerViewModel
         private val downloadManager: DownloadManager,
         private val likedVideosRepository: LikedVideosRepository,
         private val viewHistory: ViewHistory,
-        private val musicBrain: MusicBrainEngine,
         private val lyricsHelper: LyricsHelper,
         localLyrics: LocalLyricsReader,
     ) : ViewModel() {
@@ -93,7 +90,6 @@ class MusicPlayerViewModel
                 playlistRepository,
                 likedVideosRepository,
                 downloadManager,
-                musicBrain,
                 playerPreferences,
             )
 
@@ -384,11 +380,7 @@ class MusicPlayerViewModel
             return true
         }
 
-        /** Plays the On Repeat shelf in a shuffled order, as the widget's Shuffle asks. */
-        suspend fun shuffleOnRepeat(sourceName: String) {
-            val tracks = musicBrain.onRepeatShelf().shuffled()
-            loadAndPlayTrack(tracks.firstOrNull() ?: return, tracks, sourceName)
-        }
+        suspend fun shuffleOnRepeat(sourceName: String) = Unit
 
         /**
          * Starts a station seeded from this track alone. The seed is flagged for the service,
