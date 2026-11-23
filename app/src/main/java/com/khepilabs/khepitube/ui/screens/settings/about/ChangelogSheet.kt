@@ -183,6 +183,8 @@ internal fun ChangelogSheet(onDismiss: () -> Unit) {
     }
 }
 
+}
+
 /** A release as lazy items: its header, then while [expanded] each heading and change in turn. */
 private fun LazyListScope.releaseItems(
     release: ChangelogRelease,
