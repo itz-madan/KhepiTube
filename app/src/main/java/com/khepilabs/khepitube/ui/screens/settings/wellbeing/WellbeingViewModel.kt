@@ -4,10 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.khepilabs.khepitube.data.local.LocalDataManager
 import com.khepilabs.khepitube.data.local.ViewHistory
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
-import com.khepilabs.khepitube.data.recommendation.music.MusicStatsStorage
-import com.khepilabs.khepitube.data.stats.RecapAggregates
-import com.khepilabs.khepitube.data.stats.VideoStatsRecorder
 import com.khepilabs.khepitube.notification.ReminderManager
 import com.khepilabs.khepitube.ui.screens.settings.SettingsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,25 +26,13 @@ class WellbeingViewModel
         @ApplicationContext private val context: Context,
         private val viewHistory: ViewHistory,
         private val localData: LocalDataManager,
-        private val videoStats: VideoStatsRecorder,
-        private val musicBrain: MusicBrainEngine,
     ) : SettingsViewModel() {
-        /**
-         * Measured once per visit. The recap ledgers' real watching time is used once they cover the
-         * whole week; until then the history estimate (last position on the last-watched day) stands in.
-         */
+        /** A lightweight estimate from local watch history; no recap or music-brain dependency. */
         val summary =
             flow {
                 val today = LocalDate.now()
-                val video = runCatching { videoStats.snapshot() }.getOrNull()
-                val ledger =
-                    video?.let {
-                        val music = runCatching { musicBrain.listeningStats() }.getOrDefault(MusicStatsStorage.SerializableStats())
-                        val days = RecapAggregates.dailyTime(it, music, today.minusDays((WEEK_DAYS - 1).toLong()), today)
-                        summarizeLedgerTime(days, RecapAggregates.videoLedgerStart(it), today)
-                    }
                 emit(
-                    ledger ?: summarizeWatchTime(
+                    summarizeWatchTime(
                         viewHistory.getAllHistory().first().map { WatchRecord(it.timestamp, it.position) },
                         today,
                         ZoneId.systemDefault(),
