@@ -63,20 +63,42 @@ fun AccountSettingsScreen(
     var isLoadingAccount by remember { mutableStateOf(false) }
     var showLoginDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(youtubeCookie) {
-        if (!youtubeCookie.isNullOrBlank() || isOAuthSignedIn) {
-            isLoadingAccount = true
-            withContext(Dispatchers.IO) {
-                YouTube.cookie = youtubeCookie
-                val result = YouTube.accountInfo()
-                withContext(Dispatchers.Main) {
-                    accountInfo = result.getOrNull()
-                    isLoadingAccount = false
+    LaunchedEffect(youtubeCookie, isOAuthSignedIn) {
+        when {
+            !youtubeCookie.isNullOrBlank() -> {
+                isLoadingAccount = true
+                withContext(Dispatchers.IO) {
+                    YouTube.accessToken = null
+                    YouTube.cookie = youtubeCookie
+                    val result = YouTube.accountInfo()
+                    withContext(Dispatchers.Main) {
+                        accountInfo = result.getOrNull()
+                        isLoadingAccount = false
+                    }
                 }
             }
-        } else if (!isOAuthSignedIn) {
-            accountInfo = null
-            isLoadingAccount = false
+            isOAuthSignedIn -> {
+                isLoadingAccount = true
+                withContext(Dispatchers.IO) {
+                    YouTube.cookie = null
+                    val token = deviceAuth.accessToken()
+                    withContext(Dispatchers.Main) {
+                        YouTube.accessToken = token
+                        accountInfo = AccountInfo(
+                            name = savedProfile.first ?: "YouTube",
+                            email = null,
+                            channelHandle = null,
+                            thumbnailUrl = savedProfile.second,
+                        )
+                        isLoadingAccount = false
+                    }
+                }
+            }
+            else -> {
+                YouTube.accessToken = null
+                accountInfo = null
+                isLoadingAccount = false
+            }
         }
     }
 
@@ -96,7 +118,7 @@ fun AccountSettingsScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        if (!youtubeCookie.isNullOrBlank()) {
+                        if (!youtubeCookie.isNullOrBlank() || isOAuthSignedIn) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth(),
@@ -131,6 +153,7 @@ fun AccountSettingsScreen(
                                         isOAuthSignedIn = false
                                         accountInfo = null
                                         YouTube.cookie = null
+                                        YouTube.accessToken = null
                                         CookieManager.getInstance().removeAllCookies(null)
                                         CookieManager.getInstance().flush()
                                     }
@@ -201,6 +224,7 @@ fun AccountSettingsScreen(
                     thumbnailUrl = account.avatarUrl,
                 )
                 isOAuthSignedIn = true
+                YouTube.accessToken = account.accessToken
                 showDeviceLoginDialog = false
             },
             onUseWebViewFallback = {
