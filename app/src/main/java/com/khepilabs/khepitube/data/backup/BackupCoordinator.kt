@@ -119,38 +119,6 @@ class BackupCoordinator
                 )
             }
 
-        /** Writes the automatic backup now, into the chosen folder, and records when it ran. */
-        fun backUpNow(
-            type: LocalDataManager.AutoBackupType,
-            folder: Uri,
-        ) = run(context.getString(R.string.auto_backup_run_now), notify = false) {
-            val result =
-                when (type) {
-                    LocalDataManager.AutoBackupType.APP_DATA -> {
-                        repository.exportDataToFolder(folder)
-                    }
-
-                    LocalDataManager.AutoBackupType.BRAIN -> {
-                        repository.exportBrainToFolder(folder)
-                    }
-
-                    LocalDataManager.AutoBackupType.MASTER -> {
-                        repository.exportMasterToFolder(
-                            folder,
-                            musicBrain = musicBrainBytes(),
-                            recap = recapBytes(),
-                            favouriteArtists = favouriteArtists.export(),
-                        )
-                    }
-                }
-            if (result.isSuccess) {
-                localDataManager.setAutoBackupLastRun(System.currentTimeMillis())
-                BackupOperation.Succeeded(context.getString(R.string.auto_backup_success))
-            } else {
-                BackupOperation.Failed(context.getString(R.string.auto_backup_failed))
-            }
-        }
-
         fun importFlowBackup(uri: Uri) =
             run(context.getString(R.string.import_KhepiTube_backup_item_title)) {
                 val result = repository.importData(uri)
