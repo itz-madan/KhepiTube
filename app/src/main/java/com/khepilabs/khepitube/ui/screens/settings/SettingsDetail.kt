@@ -15,7 +15,6 @@ import com.khepilabs.khepitube.ui.screens.settings.appearance.theme.CustomThemes
 import com.khepilabs.khepitube.ui.screens.settings.appearance.theme.ThemeScreen
 import com.khepilabs.khepitube.ui.screens.settings.content.ContentSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.content.LibrarySettingsScreen
-import com.khepilabs.khepitube.ui.screens.settings.content.MusicHomeSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.diagnostics.DiagnosticsScreen
 import com.khepilabs.khepitube.ui.screens.settings.downloads.DownloadSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.history.HistorySettingsScreen
@@ -80,10 +79,6 @@ internal fun SettingsDetail(
 
         SettingsDestination.CONTENT -> {
             ContentSettingsScreen(onBack = onBack, highlight = target.highlight, onNavigate = onNavigate)
-        }
-
-        SettingsDestination.MUSIC_HOME -> {
-            MusicHomeSettingsScreen(onBack = onBack, highlight = target.highlight)
         }
 
         SettingsDestination.LIBRARY -> {
