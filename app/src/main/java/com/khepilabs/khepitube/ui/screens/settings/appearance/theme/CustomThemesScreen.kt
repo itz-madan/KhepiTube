@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsDestination
 import com.khepilabs.khepitube.ui.components.settings.SettingsPage
 import com.khepilabs.khepitube.ui.components.settings.SettingsTarget
@@ -271,12 +272,18 @@ private fun CustomThemeRow(
     val swatch = remember(theme, variant) { theme.colorsFor(variant).toColorScheme(variant).toSwatch() }
     var menuOpen by remember { mutableStateOf(false) }
 
-    SegmentedListItem(
-        onClick = onEdit,
-        verticalAlignment = Alignment.CenterVertically,
-        shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        leadingContent = { ThemeSwatchTile(swatch) },
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
+    ) {
+        SegmentedListItem(
+            onClick = onEdit,
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = ListItemDefaults.shapes(shape = shape),
+            colors = ListItemDefaults.segmentedColors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+            leadingContent = { ThemeSwatchTile(swatch) },
         supportingContent = {
             Text(stringResource(if (inUse) R.string.settings_custom_theme_in_use else R.string.settings_custom_theme_card_description))
         },
@@ -306,8 +313,9 @@ private fun CustomThemeRow(
                 }
             }
         },
-    ) {
-        Text(theme.name)
+        ) {
+            Text(theme.name)
+        }
     }
 }
 

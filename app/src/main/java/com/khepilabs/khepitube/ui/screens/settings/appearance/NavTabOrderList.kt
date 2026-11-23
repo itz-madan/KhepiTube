@@ -15,7 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -82,9 +82,15 @@ internal fun NavTabOrderList(
         ) { index, tab, isDragging ->
             key(tab) {
                 ReorderableItem {
-                    Surface(
-                        color = if (isDragging) MaterialTheme.colorScheme.surfaceContainerHighest else Color.Transparent,
+                    GlassSurface(
+                        modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.medium,
+                        containerColor = if (isDragging) {
+                            MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.78f)
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f)
+                        },
+                        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
                     ) {
                         Row(
                             modifier =
