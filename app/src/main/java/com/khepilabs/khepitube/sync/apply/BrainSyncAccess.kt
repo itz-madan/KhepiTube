@@ -1,5 +1,7 @@
 package com.khepilabs.khepitube.sync.apply
 
+import java.io.ByteArrayOutputStream
+
 import android.content.Context
 import com.khepilabs.khepitube.data.recommendation.KhepiNeuroEngine
 import com.khepilabs.khepitube.data.recommendation.NeuroKeySpec
