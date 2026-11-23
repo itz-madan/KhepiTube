@@ -97,7 +97,7 @@ internal class PopupPlayerWindow(
                 text = "🎧"
                 textSize = 22f
                 gravity = Gravity.CENTER
-                contentDescription = context.getString(R.string.audio_only_mode)
+                contentDescription = context.getString(R.string.ui_audio_only)
                 setBackgroundColor(0x99000000.toInt())
                 setOnClickListener { onAudioOnly() }
             }
