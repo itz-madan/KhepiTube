@@ -57,6 +57,7 @@ import com.khepilabs.khepitube.data.video.downloader.work.RetagStatus
 import com.khepilabs.khepitube.data.video.storage.DownloadFiles
 import com.khepilabs.khepitube.data.video.storage.DownloadLocation
 import com.khepilabs.khepitube.data.video.storage.StorageAccess
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsDestination
 import com.khepilabs.khepitube.ui.components.settings.SettingsPage
 import com.khepilabs.khepitube.ui.components.settings.SettingsTarget
@@ -350,10 +351,16 @@ private fun StorageUsageRow(
     usedFraction: Float?,
     shape: Shape,
 ) {
-    SegmentedListItem(
-        verticalAlignment = Alignment.CenterVertically,
-        shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
+    ) {
+        SegmentedListItem(
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = ListItemDefaults.shapes(shape = shape),
+            colors = ListItemDefaults.segmentedColors(containerColor = Color.Transparent),
         leadingContent = { Icon(Icons.Outlined.SdStorage, contentDescription = null) },
         supportingContent = {
             Column(verticalArrangement = Arrangement.spacedBy(UsageSpacing)) {
@@ -361,8 +368,9 @@ private fun StorageUsageRow(
                 usedFraction?.let { LinearProgressIndicator(progress = { it }, modifier = Modifier.fillMaxWidth()) }
             }
         },
-    ) {
-        Text(stringResource(DownloadsIndex.usage.title))
+        ) {
+            Text(stringResource(DownloadsIndex.usage.title))
+        }
     }
 }
 

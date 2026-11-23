@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsDestination
 import com.khepilabs.khepitube.ui.components.settings.SettingsPage
 import com.khepilabs.khepitube.ui.components.settings.SettingsTarget
@@ -247,8 +248,14 @@ private fun KhepiLabsRow(
     shape: Shape,
     onClick: () -> Unit,
 ) {
-    SegmentedListItem(
-        onClick = onClick,
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
+    ) {
+        SegmentedListItem(
+            onClick = onClick,
         verticalAlignment = Alignment.CenterVertically,
         shapes = ListItemDefaults.shapes(shape = shape),
         colors =
@@ -288,6 +295,7 @@ private fun KhepiLabsRow(
             text = "Itz Madan",
             style = MaterialTheme.typography.titleMedium,
         )
+        }
     }
 }
 
@@ -299,8 +307,14 @@ private fun OriginalCreatorRow(
 ) {
     var avatarLoaded by remember { mutableStateOf(false) }
 
-    SegmentedListItem(
-        onClick = onClick,
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
+    ) {
+        SegmentedListItem(
+            onClick = onClick,
         verticalAlignment = Alignment.CenterVertically,
         shapes = ListItemDefaults.shapes(shape = shape),
         colors =
@@ -350,5 +364,6 @@ private fun OriginalCreatorRow(
             text = "Flow / A-EDev",
             style = MaterialTheme.typography.titleMedium,
         )
+        }
     }
 }
