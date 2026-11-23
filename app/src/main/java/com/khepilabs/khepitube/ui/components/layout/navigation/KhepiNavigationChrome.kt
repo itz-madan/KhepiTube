@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassBackdrop
 import com.khepilabs.khepitube.ui.utils.LocalWindowSizeClass
 import com.khepilabs.khepitube.ui.utils.isExpandedWidth
 import com.khepilabs.khepitube.ui.utils.isMediumHeight
@@ -84,29 +85,35 @@ fun KhepiNavigationChrome(
                         .onSizeChanged { onRailWidthChanged(with(density) { it.width.toDp() }) },
             )
         }
-        Box(
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .then(
-                        if (showRail) {
-                            Modifier.consumeWindowInsets(railInsets.only(WindowInsetsSides.Start))
-                        } else {
-                            Modifier
-                        },
-                    ),
-        ) {
-            content()
-            if (!usesRail) {
-                NavigationBarSlot(
-                    tabs = tabs,
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                    onTrendingClick = onTrendingClick,
-                    visible = barVisible,
-                    onHeightChanged = onBarHeightChanged,
+        val contentModifier =
+            Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .then(
+                    if (showRail) {
+                        Modifier.consumeWindowInsets(railInsets.only(WindowInsetsSides.Start))
+                    } else {
+                        Modifier
+                    },
                 )
+        if (!usesRail) {
+            GlassBackdrop(
+                modifier = contentModifier,
+                content = content,
+                overlay = {
+                    NavigationBarSlot(
+                        tabs = tabs,
+                        selectedTab = selectedTab,
+                        onTabSelected = onTabSelected,
+                        onTrendingClick = onTrendingClick,
+                        visible = barVisible,
+                        onHeightChanged = onBarHeightChanged,
+                    )
+                },
+            )
+        } else {
+            Box(modifier = contentModifier) {
+                content()
             }
         }
     }
