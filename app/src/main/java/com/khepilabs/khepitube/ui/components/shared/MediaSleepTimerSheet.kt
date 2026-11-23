@@ -258,6 +258,7 @@ private fun FlowSleepTimerBottomSheet(
         dismissOnOutsideTap = false,
         shape = RectangleShape,
         containerColor = MaterialTheme.colorScheme.surface,
+        glassContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.58f),
         onProgressChange = onSheetProgressChange,
         header = { dragModifier ->
             KhepiSheetHeader(
