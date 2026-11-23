@@ -20,6 +20,7 @@ import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.data.video.DownloadStreamPolicy
 import com.khepilabs.khepitube.data.video.downloader.request.DownloadSubtitle
+import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 import com.khepilabs.khepitube.player.state.SubtitleOption
 import com.khepilabs.khepitube.player.stream.VideoCodecUtils
 
@@ -47,13 +48,14 @@ fun MediaDownloadDialog(
     }
 
     BasicAlertDialog(onDismissRequest = onDismiss) {
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
         Surface(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
             shape = AlertDialogDefaults.shape,
-            color = AlertDialogDefaults.containerColor,
+            color = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.86f) else AlertDialogDefaults.containerColor,
             tonalElevation = AlertDialogDefaults.TonalElevation,
         ) {
             Column(
