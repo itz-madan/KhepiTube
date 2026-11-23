@@ -212,6 +212,7 @@ class InnerTube {
                 header("Accept", "application/json")
                 header("Accept-Language", "en-US,en;q=0.9")
                 header("Cache-Control", "no-cache")
+                accessToken?.let { header("Authorization", "Bearer $it") }
             }
         }
 
@@ -256,7 +257,6 @@ class InnerTube {
             append("X-Origin", origin)
             append("Referer", referer)
             visitorData?.let { append("X-Goog-Visitor-Id", it) }
-            accessToken?.let { append("Authorization", "Bearer $it") }
             if (setLogin && client.loginSupported) {
                 cookie?.let { cookie ->
                     append("cookie", cookie)
