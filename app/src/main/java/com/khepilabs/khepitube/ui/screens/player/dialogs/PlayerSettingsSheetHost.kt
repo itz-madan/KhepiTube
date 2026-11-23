@@ -157,6 +157,10 @@ internal fun PlayerSettingsSheetHost(
                 )
             }
         },
+        onFloatingPlayerClick = {
+            onDismiss()
+            PictureInPictureHelper.requestFloatingPlayerMode(context as ComponentActivity)
+        },
         onSleepTimerClick = { screenState.open(PlayerSheet.SleepTimer) },
         sponsorBlockSegmentCount = if (sponsorBlockEnabled) sponsorSegments.count { it.endTime > it.startTime } else 0,
         sponsorBlockOffForVideo = sponsorBlockOffForVideo,
