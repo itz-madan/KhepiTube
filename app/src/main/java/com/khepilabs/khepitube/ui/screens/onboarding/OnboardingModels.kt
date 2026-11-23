@@ -16,7 +16,6 @@ enum class OnboardingStep(
     WELCOME(null),
     INTERESTS(R.string.onboarding_step_interests),
     CHANNELS(R.string.onboarding_step_channels),
-    ARTISTS(R.string.onboarding_step_artists),
     ALERTS(R.string.onboarding_step_alerts),
     IMPORT(R.string.onboarding_step_import),
     READY(null),
