@@ -66,6 +66,7 @@
     <string name="library_saved_shorts_label">Saved Shorts</string>
     <string name="library_watch_later_label">Watch Later</string>
     <string name="library_downloads_label">Downloads</string>
+    <string name="music_track_not_downloaded">Only local or downloaded audio can be played.</string>
     <string name="library_local_media_label">Local media</string>
     <string name="library_local_media_subtitle">Play videos and music on this device</string>
     <string name="local_media_history">Local Media Watch History</string>
