@@ -43,6 +43,9 @@ class YouTubeDeviceAuth(context: Context) {
 
     private val appContext = context.applicationContext
     private val store = SecureTokenStore(appContext)
+    @Volatile private var currentPollIntervalSeconds = 5L
+    fun nextPollIntervalSeconds(): Long = currentPollIntervalSeconds
+
     private val http = OkHttpClient.Builder()
         .connectTimeout(20, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -59,13 +62,17 @@ class YouTubeDeviceAuth(context: Context) {
             .put("model_name", "ytlr::")
             .put("scope", "http://gdata.youtube.com https://www.googleapis.com/auth/youtube-paid-content")
         val response = postJson("https://www.youtube.com/o/oauth2/device/code", payload)
+        currentPollIntervalSeconds = 5L
         return DeviceCode(
             deviceCode = response.getString("device_code"),
             userCode = response.getString("user_code"),
             verificationUrl = response.optString("verification_url").ifBlank { "https://youtube.com/activate" },
             expiresInSeconds = response.optLong("expires_in", 1800L),
             pollIntervalSeconds = response.optLong("interval", 5L).coerceAtLeast(1L),
-        ).also { store.savePendingClient(client.id, client.secret) }
+        ).also {
+            currentPollIntervalSeconds = it.pollIntervalSeconds
+            store.savePendingClient(client.id, client.secret)
+        }
     }
 
     /**
@@ -81,7 +88,8 @@ class YouTubeDeviceAuth(context: Context) {
             .put("grant_type", "http://oauth.net/grant_type/device/1.0")
         val response = postJsonAllowOAuthErrors("https://www.youtube.com/o/oauth2/token", payload)
         when (response.optString("error")) {
-            "authorization_pending", "slow_down" -> return null
+            "authorization_pending" -> return null
+            "slow_down" -> { currentPollIntervalSeconds += 5L; return null }
             "expired_token" -> error("Activation code expired. Please try again.")
             "access_denied" -> error("Google sign-in was denied.")
             "" -> Unit
