@@ -10,8 +10,6 @@ import com.khepilabs.khepitube.data.model.toVideo
 import com.khepilabs.khepitube.data.notes.NotesRepository
 import com.khepilabs.khepitube.data.playlist.sortedFor
 import com.khepilabs.khepitube.data.shorts.ShortsContentFilter
-import com.khepilabs.khepitube.data.stats.RecapPeriod
-import com.khepilabs.khepitube.data.stats.RecapReadiness
 import com.khepilabs.khepitube.data.video.VideoDownloadManager
 import com.khepilabs.khepitube.innertube.YouTube
 import com.khepilabs.khepitube.innertube.models.AccountInfo
@@ -70,7 +68,6 @@ class LibraryViewModel
         musicDownloadManager: MusicDownloadManager,
         shortsContentFilter: ShortsContentFilter,
         private val playerPreferences: PlayerPreferences,
-        private val recapReadiness: RecapReadiness,
         notesRepository: NotesRepository,
     ) : ViewModel() {
         private val sharing = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000L)
@@ -82,12 +79,7 @@ class LibraryViewModel
         private val _accountInfo = MutableStateFlow<AccountInfo?>(null)
         val accountInfo: StateFlow<AccountInfo?> = _accountInfo.asStateFlow()
 
-        private val _recapReady = MutableStateFlow<RecapPeriod?>(null)
-        /** A month or year that just closed with a recap waiting; checked once each time Library is created. */
-        val recapReady: StateFlow<RecapPeriod?> = _recapReady.asStateFlow()
-
         init {
-            viewModelScope.launch { _recapReady.value = runCatching { recapReadiness.readyPeriod() }.getOrNull() }
             viewModelScope.launch(Dispatchers.IO) {
                 youtubeCookie.collect { cookie ->
                     if (!cookie.isNullOrBlank()) {
@@ -113,13 +105,6 @@ class LibraryViewModel
             combine(playerPreferences.notesEnabled, notesRepository.observeCount()) { enabled, count -> count.takeIf { enabled } }
                 .distinctUntilChanged()
                 .stateIn(viewModelScope, sharing, null)
-
-        /** The waiting recap was opened or dismissed; it is not offered again. */
-        fun onRecapHandled() {
-            val period = _recapReady.value ?: return
-            _recapReady.value = null
-            viewModelScope.launch { recapReadiness.markShown(period) }
-        }
 
         private fun <T> Flow<T>.shared(): StateFlow<T?> {
             val upstream: Flow<T?> = this
