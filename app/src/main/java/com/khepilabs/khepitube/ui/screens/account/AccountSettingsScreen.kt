@@ -55,7 +55,7 @@ fun AccountSettingsScreen(
     val coroutineScope = rememberCoroutineScope()
     val preferences = remember { PlayerPreferences(context) }
     val deviceAuth = remember { YouTubeDeviceAuth(context) }
-    val savedProfile = remember { deviceAuth.savedProfile() }
+    var savedProfile by remember { mutableStateOf(deviceAuth.savedProfile()) }
     var isOAuthSignedIn by remember { mutableStateOf(deviceAuth.hasRefreshToken()) }
     var showDeviceLoginDialog by remember { mutableStateOf(false) }
     val youtubeCookie by preferences.youtubeCookie.collectAsStateWithLifecycle(initialValue = null)
@@ -220,6 +220,7 @@ fun AccountSettingsScreen(
         YouTubeDeviceLoginDialog(
             onDismiss = { showDeviceLoginDialog = false },
             onApproved = { account ->
+                savedProfile = account.name to account.avatarUrl
                 accountInfo = AccountInfo(
                     name = account.name ?: "YouTube",
                     email = null,
