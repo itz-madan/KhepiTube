@@ -3,7 +3,6 @@ package com.khepilabs.khepitube.ui.screens.settings.home
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ManageSearch
 import androidx.compose.material.icons.outlined.BugReport
-import androidx.compose.material.icons.outlined.CloudSync
 import androidx.compose.material.icons.outlined.Devices
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Extension
@@ -15,7 +14,6 @@ import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.PlayCircle
-import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.outlined.SelfImprovement
 import androidx.compose.material.icons.outlined.Settings
@@ -33,7 +31,6 @@ import com.khepilabs.khepitube.ui.components.settings.SettingsDestination
 internal fun destinationIcon(destination: SettingsDestination): ImageVector =
     when (destination.root) {
         SettingsDestination.HOME -> Icons.Outlined.Settings
-        SettingsDestination.TASTE -> Icons.Outlined.Psychology
         SettingsDestination.APPEARANCE -> Icons.Outlined.Palette
         SettingsDestination.LANGUAGE_REGION -> Icons.Outlined.Language
         SettingsDestination.PLAYBACK -> Icons.Outlined.PlayCircle
@@ -41,7 +38,6 @@ internal fun destinationIcon(destination: SettingsDestination): ImageVector =
         SettingsDestination.CONTENT -> Icons.Outlined.ViewAgenda
         SettingsDestination.TOPICS -> Icons.Outlined.FilterAlt
         SettingsDestination.INTEGRATIONS -> Icons.Outlined.Extension
-        SettingsDestination.BACKUP -> Icons.Outlined.CloudSync
         SettingsDestination.SYNC -> Icons.Outlined.Devices
         SettingsDestination.HISTORY -> Icons.Outlined.History
         SettingsDestination.DOWNLOADS -> Icons.Outlined.Download
