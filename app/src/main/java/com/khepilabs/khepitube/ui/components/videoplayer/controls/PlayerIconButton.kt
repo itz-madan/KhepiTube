@@ -40,13 +40,13 @@ internal fun PlayerPillIconButton(
     interactionSource: MutableInteractionSource? = null,
 ) {
     val haptics = LocalHapticFeedback.current
+    val buttonInteraction = interactionSource ?: remember { MutableInteractionSource() }
     GlassSurface(
         modifier =
             modifier
                 .size(buttonSize)
                 .clickable(
-                    interactionSource = interactionSource ?: remember { MutableInteractionSource() },
-                    indication = null,
+                    interactionSource = buttonInteraction,
                     onClick = {
                         haptic?.let(haptics::performHapticFeedback)
                         onClick()
