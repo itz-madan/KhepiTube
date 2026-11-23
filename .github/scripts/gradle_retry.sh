@@ -8,10 +8,11 @@ fi
 
 for attempt in 1 2 3; do
   echo "Gradle attempt ${attempt}/3: $*"
-  if ./gradlew "$@" --no-daemon --stacktrace; then
+  ./gradlew "$@" --no-daemon --stacktrace
+  status=$?
+  if [[ $status -eq 0 ]]; then
     exit 0
   fi
-  status=$?
   if [[ $attempt -lt 3 ]]; then
     delay=$((attempt * 15))
     echo "Gradle attempt failed (exit ${status}); retrying in ${delay}s." >&2
