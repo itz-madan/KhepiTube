@@ -7,7 +7,6 @@
 package com.khepilabs.khepitube.data.music.model
 
 import com.google.common.truth.Truth.assertThat
-import com.khepilabs.khepitube.data.recommendation.music.primaryArtistKey
 import org.junit.Test
 
 /**
