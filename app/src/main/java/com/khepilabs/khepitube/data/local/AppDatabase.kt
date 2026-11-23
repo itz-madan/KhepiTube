@@ -8,7 +8,6 @@ import com.khepilabs.khepitube.data.local.dao.CacheDao
 import com.khepilabs.khepitube.data.local.dao.DownloadCollectionDao
 import com.khepilabs.khepitube.data.local.dao.DownloadDao
 import com.khepilabs.khepitube.data.local.dao.HomeFeedCacheDao
-import com.khepilabs.khepitube.data.local.dao.MusicGraphDao
 import com.khepilabs.khepitube.data.local.dao.NoteDao
 import com.khepilabs.khepitube.data.local.dao.NotificationDao
 import com.khepilabs.khepitube.data.local.dao.PlaylistDao
@@ -23,11 +22,6 @@ import com.khepilabs.khepitube.data.local.entity.DownloadCollectionItemEntity
 import com.khepilabs.khepitube.data.local.entity.DownloadEntity
 import com.khepilabs.khepitube.data.local.entity.DownloadItemEntity
 import com.khepilabs.khepitube.data.local.entity.HomeFeedCacheEntity
-import com.khepilabs.khepitube.data.local.entity.MusicGraphAlbumEntity
-import com.khepilabs.khepitube.data.local.entity.MusicGraphArtistEntity
-import com.khepilabs.khepitube.data.local.entity.MusicGraphEdgeEntity
-import com.khepilabs.khepitube.data.local.entity.MusicGraphPlaylistEntity
-import com.khepilabs.khepitube.data.local.entity.MusicGraphTrackEntity
 import com.khepilabs.khepitube.data.local.entity.MusicHomeCacheEntity
 import com.khepilabs.khepitube.data.local.entity.MusicHomeChipEntity
 import com.khepilabs.khepitube.data.local.entity.NoteEntity
@@ -61,11 +55,6 @@ import com.khepilabs.khepitube.data.local.migrations.Migration24To25
         RecognitionHistoryEntity::class,
         SyncLogEntity::class,
         SyncPeerEntity::class,
-        MusicGraphTrackEntity::class,
-        MusicGraphArtistEntity::class,
-        MusicGraphAlbumEntity::class,
-        MusicGraphPlaylistEntity::class,
-        MusicGraphEdgeEntity::class,
         NoteEntity::class,
         DownloadCollectionEntity::class,
         DownloadCollectionItemEntity::class,
@@ -81,7 +70,7 @@ import com.khepilabs.khepitube.data.local.migrations.Migration24To25
         AutoMigration(from = 31, to = 32),
         AutoMigration(from = 32, to = 33),
     ],
-    version = 33,
+    version = 34,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -111,7 +100,6 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun syncPeerDao(): SyncPeerDao
 
-    abstract fun musicGraphDao(): MusicGraphDao
 
     companion object {
         @Volatile
