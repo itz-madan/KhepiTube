@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.data.video.DownloadStreamPolicy
 import com.khepilabs.khepitube.data.video.downloader.request.DownloadSubtitle
@@ -48,14 +49,13 @@ fun MediaDownloadDialog(
 
     BasicAlertDialog(onDismissRequest = onDismiss) {
         val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
-        Surface(
+        GlassSurface(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
             shape = AlertDialogDefaults.shape,
-            color = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.86f) else AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
+            containerColor = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.72f) else AlertDialogDefaults.containerColor.copy(alpha = 0.90f),
         ) {
             Column(
                 modifier =
