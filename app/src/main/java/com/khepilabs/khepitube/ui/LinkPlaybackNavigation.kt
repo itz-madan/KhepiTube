@@ -14,7 +14,6 @@ import androidx.navigation.navArgument
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.player.GlobalPlayerState
 import com.khepilabs.khepitube.ui.components.videoplayer.PlayerDraggableState
-import com.khepilabs.khepitube.ui.screens.music.sharedMusicPlayerViewModel
 import com.khepilabs.khepitube.ui.screens.player.VideoPlayerViewModel
 import com.khepilabs.khepitube.ui.screens.player.state.VideoPlayerUiState
 import com.khepilabs.khepitube.ui.screens.player.state.shouldExpandInsteadOfPlaying
@@ -29,42 +28,7 @@ internal fun NavGraphBuilder.linkPlaybackRoutes(
     playerSheetState: PlayerDraggableState,
     playerVisibleState: MutableState<Boolean>,
     defaultStartRoute: String,
-    onMusicStarted: () -> Unit,
 ) {
-    // A YouTube Music link: the song plays in the music player, and this route leaves at once.
-    composable(
-        route = MUSIC_PLAYER_ROUTE_PATTERN,
-        arguments =
-            listOf(
-                navArgument(MUSIC_PLAYER_ROUTE_ARG) { type = NavType.StringType },
-                navArgument(MUSIC_PLAYER_LIST_ARG) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-            ),
-    ) { backStackEntry ->
-        currentRoute.value = "musicPlayer"
-        val musicPlayerViewModel = sharedMusicPlayerViewModel()
-        val links: LinkedPlaylistViewModel = hiltViewModel()
-        val videoId = backStackEntry.arguments?.getString(MUSIC_PLAYER_ROUTE_ARG).orEmpty()
-        val playlistId = backStackEntry.arguments?.getString(MUSIC_PLAYER_LIST_ARG)
-
-        LaunchedEffect(videoId, playlistId) {
-            // The music player stays hidden while a video is loaded, so a music link closes it first.
-            if (playerViewModel.uiState.value.cachedVideo != null) GlobalPlayerState.requestDismiss()
-            val queue = playlistId?.takeUnless(::isMix)?.let { links.musicQueue(videoId, it) }
-            if (queue != null) {
-                musicPlayerViewModel.loadAndPlayTrack(queue.items[queue.startIndex], queue.items)
-            } else {
-                musicPlayerViewModel.playFromLink(videoId)
-            }
-            onMusicStarted()
-            withFrameNanos { }
-            navController.popTransientRouteOrNavigateStart(defaultStartRoute)
-        }
-    }
-
     // A video linked from inside a playlist: it plays with the playlist as its queue, then this route leaves.
     composable(
         route = LINKED_PLAYLIST_ROUTE_PATTERN,
