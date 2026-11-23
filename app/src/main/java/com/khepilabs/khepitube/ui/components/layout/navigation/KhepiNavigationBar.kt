@@ -3,7 +3,6 @@ package com.khepilabs.khepitube.ui.components.layout.navigation
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,7 +30,6 @@ import androidx.compose.material3.DropdownMenuPopup
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,7 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
@@ -52,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 private const val MAX_BAR_TABS = 4
 
@@ -94,7 +92,7 @@ internal fun KhepiNavigationBar(
         contentAlignment = Alignment.BottomCenter,
     ) {
         // Dark liquid glass floating pill container
-        Surface(
+        GlassSurface(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
@@ -105,16 +103,11 @@ internal fun KhepiNavigationBar(
                     ambientColor = Color.Black.copy(alpha = 0.2f),
                 )
                 .clip(RoundedCornerShape(26.dp)),
-            color = Color(0xF118181A), // Dark translucent pill
-            border = BorderStroke(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.15f),
-                        Color.White.copy(alpha = 0.04f),
-                    ),
-                ),
-            ),
+            shape = RoundedCornerShape(26.dp),
+            containerColor = Color(0x99121212),
+            borderColor = Color.White,
+            highlightColor = Color.White,
+            borderWidth = 1.dp,
         ) {
             Row(
                 modifier = Modifier
@@ -122,7 +115,6 @@ internal fun KhepiNavigationBar(
                     .padding(horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Left Section (50% of available space)
                 Row(
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -137,10 +129,8 @@ internal fun KhepiNavigationBar(
                     }
                 }
 
-                // Reserved center gap for the Flame FAB
                 Spacer(modifier = Modifier.width(64.dp))
 
-                // Right Section (50% of available space)
                 Row(
                     modifier = Modifier.weight(1f),
                     horizontalArrangement = Arrangement.SpaceEvenly,

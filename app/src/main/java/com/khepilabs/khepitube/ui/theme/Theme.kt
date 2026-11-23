@@ -185,7 +185,15 @@ fun KhepiTheme(
             shortsAccent = YouTubeRed,
         )
 
-    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
+    val glassTokens = rememberGlassTokens(
+        containerColor = colorScheme.surfaceContainerHigh,
+        borderColor = colorScheme.outlineVariant,
+    )
+
+    CompositionLocalProvider(
+        LocalExtendedColors provides extendedColors,
+        LocalGlassTokens provides glassTokens,
+    ) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
             motionScheme = MotionScheme.expressive(),
