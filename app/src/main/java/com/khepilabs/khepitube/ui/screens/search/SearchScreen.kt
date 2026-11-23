@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -121,7 +122,7 @@ fun SearchScreen(
     // Back leaves the screen, but a query typed over a finished search returns to that search first.
     BackHandler(enabled = state.isTyping && uiState.query.isNotBlank()) { state.stopTyping() }
 
-    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+    Surface(modifier = modifier.fillMaxSize(), color = Color.Transparent) {
         Column(modifier = Modifier.fillMaxSize()) {
             SearchTopBar(
                 textFieldState = state.textFieldState,
