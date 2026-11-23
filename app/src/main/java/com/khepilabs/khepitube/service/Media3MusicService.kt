@@ -55,7 +55,6 @@ import com.khepilabs.khepitube.data.localmedia.LocalMediaIds
 import com.khepilabs.khepitube.data.music.YouTubeMusicService
 import com.khepilabs.khepitube.data.music.model.MusicTrack
 import com.khepilabs.khepitube.data.newmusic.InnertubeMusicService
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
 import com.khepilabs.khepitube.extensions.setOffloadEnabled
 import com.khepilabs.khepitube.innertube.YouTube
 import com.khepilabs.khepitube.innertube.models.WatchEndpoint
@@ -222,9 +221,6 @@ class Media3MusicService : MediaLibraryService() {
 
     @Inject
     lateinit var widgetPublisher: com.khepilabs.khepitube.widget.nowplaying.NowPlayingWidgetPublisher
-
-    @Inject
-    lateinit var musicBrain: MusicBrainEngine
 
     @Inject
     lateinit var videoSwitch: MusicVideoSwitch
@@ -496,11 +492,7 @@ class Media3MusicService : MediaLibraryService() {
                     val versionSwap =
                         videoSwitch.consumeSwap(mediaItem?.mediaId) &&
                             reason == Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED
-                    if (!versionSwap) {
-                        finalizeListenSession()
-                        startListenSession(mediaItem?.mediaId)
-                        if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED) failureStreak.reset()
-                    }
+                    if (!versionSwap && reason == Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED) failureStreak.reset()
                     applyLoudnessGain()
 
                     mediaItem?.let { item ->
@@ -563,11 +555,6 @@ class Media3MusicService : MediaLibraryService() {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     updateLocks(isPlaybackActive())
                     widgetPublisher.publish(player)
-                    if (playbackState == Player.STATE_ENDED || playbackState == Player.STATE_IDLE) {
-                        // ENDED: the queue ran out — no transition fires for the last track.
-                        // IDLE: player.stop() from a dismiss/stop path — same deal.
-                        finalizeListenSession()
-                    }
                     if (playbackState == Player.STATE_ENDED) {
                         // Radio raced the queue end: append now and keep playing.
                         maybeExtendRadio()
@@ -577,7 +564,6 @@ class Media3MusicService : MediaLibraryService() {
                         }
                     }
                     if (playbackState == Player.STATE_READY) {
-                        refreshLearnDuration()
                         applyLoudnessGain()
                         failureStreak.reset()
                         player.currentMediaItem?.mediaId?.let { mediaId ->
@@ -640,15 +626,6 @@ class Media3MusicService : MediaLibraryService() {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     updateLocks(isPlaybackActive())
                     widgetPublisher.publish(player)
-                    if (isPlaying) {
-                        val playingId = player.currentMediaItem?.mediaId
-                        if (learnMediaId == null) learnMediaId = playingId?.let(videoSwitch::listenId)
-                        if (learnTrack?.videoId != learnMediaId) learnTrack = listenTrack(playingId)
-                        refreshLearnDuration()
-                        learnPlayingSinceMs = android.os.SystemClock.elapsedRealtime()
-                    } else {
-                        closePlayingSegment()
-                    }
                 }
             },
         )
@@ -669,48 +646,6 @@ class Media3MusicService : MediaLibraryService() {
         )
     }
 
-    // ── Listen-session accounting (feeds MusicBrainEngine) ──
-    // Hand-rolled instead of Media3's PlaybackStatsListener, whose internal state
-    // machine throws IllegalArgumentException on some transition orders (seen on
-    // device with our seekTo(0)-on-transition). Wall-clock time while isPlaying is
-    // pause-free and seek-immune; a repeat loop finalizes and restarts a session,
-    // so relistens still count once each.
-
-    private var learnMediaId: String? = null
-    private var learnTrack: MusicTrack? = null
-    private var learnGenre: String? = null
-    private var learnDurationMs = 0L
-    private var learnPlayedMs = 0L
-    private var learnPlayingSinceMs = -1L
-    private var learnStartedAtMs = 0L
-
-    private fun closePlayingSegment() {
-        if (learnPlayingSinceMs >= 0) {
-            learnPlayedMs += android.os.SystemClock.elapsedRealtime() - learnPlayingSinceMs
-            learnPlayingSinceMs = -1L
-        }
-    }
-
-    // Queue metadata often ships duration=0 (related/next payloads omit it), so the
-    // player's own duration — valid once READY — is the reliable denominator.
-    private fun refreshLearnDuration() {
-        if (!::player.isInitialized) return
-        if (player.currentMediaItem?.mediaId != learnMediaId) return
-        val d = player.duration
-        if (d > 0) learnDurationMs = d
-    }
-
-    private fun resolveLearnTrack(mediaId: String?): MusicTrack? {
-        if (mediaId.isNullOrBlank()) return null
-        val manager = com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
-        return manager.queue.value.firstOrNull { it.videoId == mediaId }
-            ?: manager.currentTrack.value?.takeIf { it.videoId == mediaId }
-            ?: manager.automixItems.value.firstOrNull { it.videoId == mediaId }
-    }
-
-    /** The track a listen of [mediaId] counts toward: the song when it plays as its swapped-in video. */
-    private fun listenTrack(mediaId: String?): MusicTrack? = mediaId?.let(videoSwitch::songFor) ?: resolveLearnTrack(mediaId)
-
     private fun setVideoDecoding(enabled: Boolean) {
         val parameters = player.trackSelectionParameters
         val disabled = C.TRACK_TYPE_VIDEO in parameters.disabledTrackTypes
@@ -720,61 +655,6 @@ class Media3MusicService : MediaLibraryService() {
                 .buildUpon()
                 .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, !enabled)
                 .build()
-    }
-
-    private fun startListenSession(mediaId: String?) {
-        learnMediaId = mediaId?.let(videoSwitch::listenId)
-        // Pin the track now: by finalize time a new playlist may have replaced the
-        // queue and the outgoing track would no longer resolve.
-        learnTrack = listenTrack(mediaId)
-        // Pin the genre context too — it belongs to the queue this track started in.
-        learnGenre =
-            com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
-                .playContextGenre
-        learnDurationMs = 0L
-        learnPlayedMs = 0L
-        learnStartedAtMs = System.currentTimeMillis()
-        learnPlayingSinceMs =
-            if (::player.isInitialized && player.isPlaying) SystemClock.elapsedRealtime() else -1L
-        refreshLearnDuration()
-    }
-
-    private fun finalizeListenSession() {
-        closePlayingSegment()
-        val mediaId = learnMediaId
-        val pinnedTrack = learnTrack
-        val pinnedDurationMs = learnDurationMs
-        val playedMs = learnPlayedMs
-        val pinnedGenre = learnGenre
-        learnMediaId = null
-        learnTrack = null
-        learnGenre = null
-        learnDurationMs = 0L
-        learnPlayedMs = 0L
-        if (mediaId.isNullOrBlank() || playedMs <= 0) {
-            Log.d(TAG, "listen finalize skipped: id=$mediaId playedMs=$playedMs")
-            return
-        }
-
-        val track = pinnedTrack?.takeIf { it.videoId == mediaId } ?: resolveLearnTrack(mediaId)
-        if (track == null) {
-            Log.w(TAG, "listen finalize: no track match for $mediaId")
-            return
-        }
-        val durationMs = if (track.duration > 0) track.duration.toLong() * 1000 else pinnedDurationMs
-        if (durationMs <= 0) {
-            Log.w(TAG, "listen finalize: no duration for $mediaId")
-            return
-        }
-
-        Log.d(TAG, "listen finalize: $mediaId playedMs=$playedMs pct=${playedMs.toDouble() / durationMs}")
-        // Engine-scoped, NOT lifecycleScope: the finalize from onDestroy runs after
-        // this service's scope is already cancelled, and the session must still land.
-        musicBrain.onListenSessionAsync(track, playedMs.toDouble() / durationMs, pinnedGenre, playedMs)
-        widgetContentSync.get().run {
-            request(com.khepilabs.khepitube.widget.core.refresh.WidgetContentKey.ON_REPEAT)
-            request(com.khepilabs.khepitube.widget.core.refresh.WidgetContentKey.WEEK)
-        }
     }
 
     /**
@@ -1319,7 +1199,6 @@ class Media3MusicService : MediaLibraryService() {
     override fun onDestroy() {
         MusicServiceState.isRunning = false
         // Flush the in-flight listen session before the player goes away.
-        finalizeListenSession()
 
         // Clear audio session ID so external processors know we're gone
         audioSessionAnnouncer?.detach()
@@ -1501,12 +1380,7 @@ class Media3MusicService : MediaLibraryService() {
 
                     // Ordered once, here: the pool IS the up-next list the user reads, so the
                     // queue must be able to take it from the head without re-sequencing.
-                    val ranked =
-                        musicBrain.sequenceRadioBatch(
-                            musicBrain.rankTracks(mapped, "radio"),
-                            com.khepilabs.khepitube.player.EnhancedMusicPlayerManager.currentTrack.value,
-                            MusicRadioPlanner.MAX_POOL_SIZE,
-                        )
+                    val ranked = mapped.take(MusicRadioPlanner.MAX_POOL_SIZE)
                     Log.d(TAG, "Radio seeded from $seedId: ${ranked.size} tracks, continuation=${radioContinuation != null}")
                     if (ranked.isNotEmpty()) {
                         com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
@@ -1605,13 +1479,7 @@ class Media3MusicService : MediaLibraryService() {
                         page.items
                             .mapNotNull { InnertubeMusicService.convertToMusicTrack(it) }
                             .distinctBy { it.videoId }
-                    val tail = manager.automixItems.value.lastOrNull() ?: manager.queue.value.lastOrNull()
-                    val ranked =
-                        musicBrain.sequenceRadioBatch(
-                            musicBrain.rankTracks(mapped, "radio"),
-                            tail,
-                            MusicRadioPlanner.MAX_POOL_SIZE,
-                        )
+                    val ranked = mapped.take(MusicRadioPlanner.MAX_POOL_SIZE)
                     Log.d(TAG, "Radio pool topped up with ${ranked.size} tracks, continuation=${radioContinuation != null}")
                     if (ranked.isNotEmpty()) {
                         manager.appendAutomixItems(ranked)
