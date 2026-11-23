@@ -2407,6 +2407,7 @@
     <string name="btn_minimize">Minimize</string>
     <string name="captions">Captions</string>
     <string name="pip_mode">Picture-in-Picture</string>
+    <string name="floating_player">Floating player</string>
     <string name="previous_frame">Previous frame</string>
     <string name="next_frame">Next frame</string>
     <string name="previous_video">Previous Video</string>
