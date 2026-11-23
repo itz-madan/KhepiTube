@@ -10,7 +10,6 @@ import androidx.compose.material.icons.automirrored.outlined.ManageSearch
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -19,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 /**
  * Offered on an empty Downloads screen when Flow can't read shared media: downloads an earlier
@@ -30,10 +30,11 @@ internal fun DownloadsRecoveryCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    GlassSurface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.64f),
+        borderWidth = 0.75.dp,
     ) {
         Column(
             modifier = Modifier.padding(CardPadding),

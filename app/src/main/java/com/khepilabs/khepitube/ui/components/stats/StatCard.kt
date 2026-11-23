@@ -13,7 +13,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 private val CardPadding = 20.dp
 private val CardSpacing = 16.dp
@@ -44,10 +44,11 @@ fun StatCard(
     subtitle: String? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Surface(
+    GlassSurface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.64f),
+        borderWidth = 0.75.dp,
     ) {
         Column(Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(CardSpacing)) {
             Column {
