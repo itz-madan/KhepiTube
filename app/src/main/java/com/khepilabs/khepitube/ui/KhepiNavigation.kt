@@ -476,7 +476,6 @@ fun NavGraphBuilder.khepiAppGraph(
             start = SettingsTarget.decode(backStackEntry.arguments?.getString("target")),
             onExit = { navController.popBackStack() },
             onOpenDonations = {},
-            onOpenRecap = { },
             onOpenUpdate = {},
         )
     }
