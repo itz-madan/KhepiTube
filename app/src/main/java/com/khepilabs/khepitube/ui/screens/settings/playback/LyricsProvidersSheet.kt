@@ -172,6 +172,8 @@ internal fun LyricsProvidersSheet(
     }
 }
 
+}
+
 private class ProviderLabel(
     @param:StringRes val name: Int,
     @param:StringRes val description: Int,
