@@ -16,6 +16,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedListItem
 import androidx.compose.material3.Surface
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -75,10 +76,11 @@ internal fun PersonaHeroCard(
     persona: KhepiPersona,
     maturity: Float,
 ) {
-    Surface(
+    GlassSurface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
         Column(
             modifier = Modifier.padding(HeroPadding),
@@ -128,10 +130,11 @@ internal fun TasteShapeCard(
     now: TasteTraits,
 ) {
     val description = stringResource(R.string.taste_shape_description)
-    Surface(
+    GlassSurface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
         Column(
             modifier = Modifier.padding(HeroPadding),
@@ -241,7 +244,7 @@ internal fun TasteMeterRow(
     SegmentedListItem(
         verticalAlignment = Alignment.CenterVertically,
         shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f)),
         supportingContent = {
             Column(verticalArrangement = Arrangement.spacedBy(MeterSpacing), modifier = Modifier.padding(top = MeterSpacing)) {
                 value?.let { LinearProgressIndicator(progress = { it.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth()) }

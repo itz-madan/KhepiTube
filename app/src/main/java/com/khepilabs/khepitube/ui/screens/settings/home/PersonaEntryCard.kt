@@ -1,6 +1,6 @@
 package com.khepilabs.khepitube.ui.screens.settings.home
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +18,9 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,13 +51,14 @@ internal fun PersonaEntryCard(
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
-    Surface(
-        onClick = onOpen,
-        selected = selected,
-        modifier = modifier.fillMaxWidth(),
+    GlassSurface(
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics { this.selected = selected }
+            .clickable(onClick = onOpen),
         shape = MaterialTheme.shapes.extraLarge,
-        color = if (selected) colors.primaryContainer.copy(alpha = 0.3f) else colors.surfaceContainer,
-        border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.5f)),
+        containerColor = if (selected) colors.primaryContainer.copy(alpha = 0.3f) else colors.surfaceContainer.copy(alpha = 0.62f),
+        borderColor = colors.outlineVariant.copy(alpha = 0.5f),
     ) {
         Row(
             modifier = Modifier.padding(CardPadding),
