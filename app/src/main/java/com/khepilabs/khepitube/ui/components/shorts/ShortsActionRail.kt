@@ -6,9 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.ChannelAvatarImage
 import com.khepilabs.khepitube.ui.components.videoplayer.controls.PlayerPillIconButton
 import com.khepilabs.khepitube.ui.theme.PlayerScrimContent
@@ -157,12 +156,12 @@ private fun ShortsSoundDisc(
     channelName: String,
     spinning: Boolean,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .size(SoundDiscSize)
-                .background(PlayerScrimPanel, CircleShape)
-                .padding(SoundDiscRim),
+    GlassSurface(
+        modifier = Modifier.size(SoundDiscSize),
+        shape = CircleShape,
+        containerColor = PlayerScrimPanel.copy(alpha = 0.78f),
+        borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+        borderWidth = 0.8.dp,
     ) {
         ChannelAvatarImage(
             url = avatarUrl,
@@ -170,6 +169,7 @@ private fun ShortsSoundDisc(
             modifier =
                 Modifier
                     .fillMaxSize()
+                    .padding(SoundDiscRim)
                     .clip(CircleShape)
                     .then(if (spinning) spinningDiscModifier() else Modifier),
         )
