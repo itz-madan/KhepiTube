@@ -177,18 +177,18 @@ class VideoPlayerService : MediaSessionService() {
         if (popupPlayerWindow == null) {
             popupPlayerWindow =
                 PopupPlayerWindow(
-                context = this,
-                onClose = {
-                    popupPlayerWindow?.dismiss()
-                    EnhancedPlayerManager.getInstance().stop()
-                    stopSelf()
-                },
-                onAudioOnly = {
-                    // Keep the current queue/session alive; only disable the video stream.
-                    EnhancedPlayerManager.getInstance().switchToAudioOnly()
-                    popupPlayerWindow?.dismiss()
-                },
-            )
+                    context = this,
+                    onClose = {
+                        popupPlayerWindow?.dismiss()
+                        EnhancedPlayerManager.getInstance().stop()
+                        stopSelf()
+                    },
+                    onAudioOnly = {
+                        // Keep the current queue/session alive; only disable the video stream.
+                        EnhancedPlayerManager.getInstance().switchToAudioOnly()
+                        popupPlayerWindow?.dismiss()
+                    },
+                )
         }
         popupPlayerWindow?.show(player)
     }
