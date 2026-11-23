@@ -138,7 +138,7 @@ fun KhepiNavRow(
         modifier = modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick),
         shape = shape,
         glass = glass,
-        containerColor = if (glass) KhepiGlassRowFill else MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = if (glass) khepiGlassRowFill() else MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
             if (leadingContent != null) {
@@ -187,7 +187,7 @@ fun KhepiSwitchRow(
         modifier = modifier.fillMaxWidth().clickable(enabled = enabled, role = Role.Switch) { onCheckedChange(!checked) },
         shape = shape,
         glass = glass,
-        containerColor = if (glass) KhepiGlassRowFill else MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = if (glass) khepiGlassRowFill() else MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             if (leadingContent != null) {
