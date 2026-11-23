@@ -1,18 +1,17 @@
 package com.khepilabs.khepitube.ui.components.videoplayer.overlay
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.theme.PlayerScrim
 import com.khepilabs.khepitube.ui.theme.PlayerScrimContent
 import com.khepilabs.khepitube.ui.theme.PlayerScrimPanel
@@ -44,14 +43,16 @@ internal fun SeekDragOverlay(
     ) {
         val target = targetMs()
         val delta = deltaMs()
-        Column(
-            modifier =
-                Modifier
-                    .clip(MaterialTheme.shapes.large)
-                    .background(PlayerScrimPanel)
-                    .padding(horizontal = 22.dp, vertical = 14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        GlassSurface(
+            shape = MaterialTheme.shapes.large,
+            containerColor = PlayerScrimPanel.copy(alpha = 0.8f),
+            borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+            borderWidth = 0.8.dp,
         ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 22.dp, vertical = 14.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
             Text(
                 text = formatDurationMillis(target, padMinutes = true),
                 color = PlayerScrimContent,
@@ -69,6 +70,7 @@ internal fun SeekDragOverlay(
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
             )
+            }
         }
     }
 }
