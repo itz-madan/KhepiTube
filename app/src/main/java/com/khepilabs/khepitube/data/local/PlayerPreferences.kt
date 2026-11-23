@@ -3744,6 +3744,24 @@ class PlayerPreferences(
         }
     }
 
+    /** Returns true while Deep Flow is enabled and its optional timer has not expired. */
+    suspend fun isDeepFlowCurrentlyActive(): Boolean {
+        val preferences = context.playerPreferencesDataStore.data.first()
+        if (preferences[Keys.DEEP_FLOW_ACTIVE] != true) return false
+        val expiryHours = preferences[Keys.DEEP_FLOW_EXPIRE_HOURS] ?: 4
+        if (expiryHours == DEEP_FLOW_NEVER_EXPIRES_HOURS) return true
+        val activatedAt = preferences[Keys.DEEP_FLOW_ACTIVATED_AT] ?: 0L
+        if (activatedAt <= 0L) return false
+        return System.currentTimeMillis() - activatedAt < expiryHours * 60L * 60L * 1000L
+    }
+
+    /** Shared privacy gate used by every watch-history writer. */
+    suspend fun isWatchHistorySavingBlocked(): Boolean {
+        val preferences = context.playerPreferencesDataStore.data.first()
+        if (preferences[Keys.WATCH_HISTORY_PAUSED] == true) return true
+        return isDeepFlowCurrentlyActive() && preferences[Keys.DEEP_FLOW_SAVE_HISTORY] != true
+    }
+
     // AUTO-BACKUP SETTINGS
 
 }
