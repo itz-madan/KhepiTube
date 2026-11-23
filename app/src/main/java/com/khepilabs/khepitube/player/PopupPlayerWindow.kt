@@ -117,7 +117,10 @@ internal class PopupPlayerWindow(
                 .LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     (40 * density).toInt(),
-                ).apply { marginEnd = (48 * density).toInt() },
+                ).apply {
+                    marginStart = (48 * density).toInt()
+                    marginEnd = (48 * density).toInt()
+                },
         )
         attachDragHandling(dragHandle, params)
 
