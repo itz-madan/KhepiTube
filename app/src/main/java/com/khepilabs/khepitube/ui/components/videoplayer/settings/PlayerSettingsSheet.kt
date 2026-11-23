@@ -110,6 +110,7 @@ fun SettingsMenuDialog(
         dismissOnOutsideTap = false,
         shape = RectangleShape,
         containerColor = MaterialTheme.colorScheme.surface,
+        glassContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.58f),
         onBack = backPage?.let { page -> { currentPage = page } },
         onProgressChange = onSheetProgressChange,
         header = { dragModifier ->
