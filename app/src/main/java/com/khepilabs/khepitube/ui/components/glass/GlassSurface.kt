@@ -41,12 +41,44 @@ import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.ui.theme.GlassTier
 import com.khepilabs.khepitube.ui.theme.LocalGlassTokens
 
+private const val REFRACTION_SHADER = """
+    uniform shader content;
+    uniform float2 size;
+    uniform float cornerRadius;
+    uniform float lensDepth;
+    uniform float dispersion;
+
+    float roundedRectDistance(float2 point, float2 halfSize, float radius) {
+        float2 corner = abs(point) - (halfSize - float2(radius));
+        float outside = length(max(corner, 0.0));
+        float inside = min(max(corner.x, corner.y), 0.0);
+        return outside + inside - radius;
+    }
+
+    half4 main(float2 coordinate) {
+        float2 halfSize = size * 0.5;
+        float2 centered = coordinate - halfSize;
+        float distance = roundedRectDistance(centered, halfSize, cornerRadius);
+        float edge = 1.0 - smoothstep(0.0, lensDepth, -distance);
+        float2 direction = normalize(centered + float2(0.001));
+        float2 displacement = direction * edge * lensDepth * 0.72;
+        float2 colorSplit = displacement * dispersion * edge * 0.16;
+        float2 refracted = coordinate + displacement;
+
+        half red = content.eval(refracted + colorSplit).r;
+        half green = content.eval(refracted).g;
+        half blue = content.eval(refracted - colorSplit).b;
+        half alpha = content.eval(refracted).a;
+        return half4(red, green, blue, alpha);
+    }
+"""
+
 /**
  * MeeTube-style glass container foundation.
  *
  * Inside [GlassBackdrop], this replays the recorded Compose content through a hardware blur on
- * Android 12+. Outside a backdrop host it remains a stable tinted surface. Refraction is a later
- * rendering pass; this implementation does not claim to provide it yet.
+ * Android 12+. Android 13+ adds an edge refraction lens with chromatic dispersion. Outside a
+ * backdrop host it remains a stable tinted surface.
  */
 @Composable
 fun GlassSurface(
