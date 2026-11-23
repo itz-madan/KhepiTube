@@ -1,19 +1,23 @@
 package com.khepilabs.khepitube.ui.screens.onboarding
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.data.backup.ImportKind
 import com.khepilabs.khepitube.data.backup.ImportSource
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiNavRow
 import com.khepilabs.khepitube.ui.components.shared.KhepiRowGroup
 import com.khepilabs.khepitube.ui.components.shared.KhepiSheetHeader
@@ -33,8 +37,15 @@ internal fun ImportSourceSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberKhepiSheetState(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
     ) {
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = BottomSheetDefaults.ExpandedShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+            borderWidth = 0.75.dp,
+        ) {
         KhepiSheetHeader(
             title = stringResource(source.titleRes),
             onClose = onDismiss,
@@ -51,6 +62,7 @@ internal fun ImportSourceSheet(
                     onClick = { onImport(kind) },
                 )
             }
+        }
         }
     }
 }

@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AddCircleOutline
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -22,11 +23,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.music.model.MusicTrack
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.music.item.MusicItemDensity
 import com.khepilabs.khepitube.ui.components.music.item.MusicTrackItem
 import com.khepilabs.khepitube.ui.components.shared.KhepiSearchField
@@ -50,7 +53,18 @@ internal fun MusicAddSongsSheet(
     onPreview: (MusicTrack) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
+    ) {
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = BottomSheetDefaults.ExpandedShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+            borderWidth = 0.75.dp,
+        ) {
         Text(
             text = stringResource(R.string.ui_add_songs),
             style = MaterialTheme.typography.titleLarge,
@@ -107,6 +121,7 @@ internal fun MusicAddSongsSheet(
                     }
                 }
             }
+        }
         }
     }
 }

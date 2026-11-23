@@ -28,9 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 private val SheetTitlePadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)
 private val SheetListPadding = PaddingValues(vertical = 8.dp)
@@ -72,9 +74,16 @@ fun SaveToCollectionSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberKhepiSheetState(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
         dragHandle = { BottomSheetDefaults.DragHandle() },
     ) {
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = BottomSheetDefaults.ExpandedShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+            borderWidth = 0.75.dp,
+        ) {
         CollectionSheetContent(
             title = title,
             entries = entries,
@@ -88,6 +97,7 @@ fun SaveToCollectionSheet(
                     .heightIn(max = maxHeight)
                     .navigationBarsPadding(),
         )
+        }
     }
 }
 
