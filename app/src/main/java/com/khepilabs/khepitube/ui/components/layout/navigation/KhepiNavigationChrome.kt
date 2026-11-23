@@ -66,6 +66,7 @@ fun KhepiNavigationChrome(
     onTrendingClick: (() -> Unit)? = null,
     onBarHeightChanged: (Dp) -> Unit = {},
     onRailWidthChanged: (Dp) -> Unit = {},
+    glassOverlay: @Composable BoxScope.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
     val usesRail = khepiUsesNavigationRail()
@@ -109,12 +110,15 @@ fun KhepiNavigationChrome(
                         visible = barVisible,
                         onHeightChanged = onBarHeightChanged,
                     )
+                    glassOverlay()
                 },
             )
         } else {
-            Box(modifier = contentModifier) {
-                content()
-            }
+            GlassBackdrop(
+                modifier = contentModifier,
+                content = { content() },
+                overlay = { glassOverlay() },
+            )
         }
     }
 }
