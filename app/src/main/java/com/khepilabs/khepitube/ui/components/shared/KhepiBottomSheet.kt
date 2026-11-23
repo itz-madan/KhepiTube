@@ -140,11 +140,11 @@ fun KhepiBottomSheet(
     dismissOnOutsideTap: Boolean = true,
     shape: Shape = BottomSheetDefaults.ExpandedShape,
     containerColor: Color = BottomSheetDefaults.ContainerColor,
-    glassContainerColor: Color = Color.Transparent,
     onBack: (() -> Unit)? = null,
     onProgressChange: (Float) -> Unit = {},
     onVisibleHeightChange: (Float) -> Unit = {},
     header: (@Composable ColumnScope.(dragModifier: Modifier) -> Unit)? = null,
+    glassContainerColor: Color = Color.Transparent,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val scope = rememberCoroutineScope()
