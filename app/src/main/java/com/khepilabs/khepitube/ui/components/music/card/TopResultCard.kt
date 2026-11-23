@@ -210,6 +210,8 @@ fun TopResultCard(
     }
 }
 
+}
+
 @Composable
 private fun YTItem.topResultSubtitle(): String =
     when (this) {
