@@ -15,10 +15,6 @@ enum class SettingsDestination(
 ) {
     /** The settings list itself, for options that live directly on it such as Deep Flow. */
     HOME("home", R.string.settings_title),
-    TASTE("taste", R.string.taste_title),
-    HIDDEN_CONTENT("hidden_content", R.string.taste_hidden_title, TASTE),
-    FAVOURITE_ARTISTS("favourite_artists", R.string.favourite_artists_title, TASTE),
-    DISCOVER_CHANNELS("discover_channels", R.string.discover_channels_title, TASTE),
     APPEARANCE("appearance", R.string.appearance_title),
     THEME("theme", R.string.settings_item_theme, APPEARANCE),
     FONT("font", R.string.settings_font_title, APPEARANCE),
@@ -38,7 +34,6 @@ enum class SettingsDestination(
     LIBRARY("library", R.string.library, CONTENT),
     TOPICS("topics", R.string.settings_topics_title),
     INTEGRATIONS("integrations", R.string.settings_integrations_title),
-    BACKUP("backup", R.string.settings_backup_title),
     SYNC("sync", R.string.sync_devices_title),
     HISTORY("history", R.string.settings_history_title),
     DOWNLOADS("downloads", R.string.settings_downloads_title),
@@ -68,9 +63,6 @@ object SettingsTabs {
     const val QUALITY_VIDEO = "video"
     const val QUALITY_SHORTS = "shorts"
     const val QUALITY_MUSIC = "music"
-    const val BACKUP_EXPORT = "export"
-    const val BACKUP_IMPORT = "import"
-    const val BACKUP_AUTO = "auto"
     const val TOPICS_INTERESTS = "interests"
     const val TOPICS_BLOCKED = "blocked"
 }
