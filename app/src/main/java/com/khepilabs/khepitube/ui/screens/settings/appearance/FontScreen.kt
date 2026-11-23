@@ -9,8 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.UploadFile
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -106,10 +105,11 @@ private val builtInFonts =
 /** A sample in each type role, drawn with the app's own typography so it changes the moment the font does. */
 @Composable
 private fun FontPreviewCard() {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+    GlassSurface(
         shape = MaterialTheme.shapes.large,
         modifier = Modifier.fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
         Column(Modifier.padding(PreviewPadding), verticalArrangement = Arrangement.spacedBy(PreviewSpacing)) {
             Text(stringResource(R.string.font_preview_glyphs), style = MaterialTheme.typography.displayMedium)

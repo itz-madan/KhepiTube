@@ -5,8 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -124,10 +123,11 @@ internal fun DateTimeScreen(
 
 @Composable
 private fun DatePreviewCard(previews: List<Pair<String, String>>) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    GlassSurface(
         shape = MaterialTheme.shapes.large,
         modifier = Modifier.fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.68f),
+        borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.32f),
     ) {
         Column(Modifier.padding(PreviewPadding), verticalArrangement = Arrangement.spacedBy(PreviewSpacing)) {
             Text(
