@@ -31,21 +31,3 @@ data class SubscriptionFeedEntity(
     @ColumnInfo(defaultValue = "0") val timestampIsExact: Boolean = false,
 )
 
-@Entity(tableName = "music_home_cache")
-data class MusicHomeCacheEntity(
-    @PrimaryKey val sectionId: String, // e.g., "quick_picks", "trending", "section_0"
-    val title: String,
-    val subtitle: String?,
-    val tracksJson: String, // Store list of tracks as JSON string
-    val orderBy: Int,
-)
-
-@Entity(tableName = "music_home_chips_cache")
-data class MusicHomeChipEntity(
-    @PrimaryKey val title: String,
-    val browseId: String?,
-    val params: String?,
-    val deselectBrowseId: String?,
-    val deselectParams: String?,
-    val orderBy: Int,
-)
