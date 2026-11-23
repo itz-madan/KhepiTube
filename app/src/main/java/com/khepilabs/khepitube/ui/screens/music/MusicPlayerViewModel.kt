@@ -421,6 +421,14 @@ class MusicPlayerViewModel
             EnhancedMusicPlayerManager.playFromQueue(index)
         }
 
+        fun shuffleOnRepeat(sourceName: String) {
+            if (!EnhancedMusicPlayerManager.shuffleEnabled.value) EnhancedMusicPlayerManager.toggleShuffle()
+            when (EnhancedMusicPlayerManager.repeatMode.value.name) {
+                "OFF" -> EnhancedMusicPlayerManager.toggleRepeat()
+                "ONE" -> { EnhancedMusicPlayerManager.toggleRepeat(); EnhancedMusicPlayerManager.toggleRepeat() }
+            }
+        }
+
         fun toggleShuffle() {
             EnhancedMusicPlayerManager.toggleShuffle()
         }
