@@ -5,12 +5,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -58,15 +59,17 @@ fun <T> MediaQualitySelectorContent(
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         finalOptions.forEach { option ->
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                color = if (option.selected) {
-                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+            GlassSurface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOptionSelected(option.item) },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = if (option.selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.48f)
                 } else {
-                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.34f)
                 },
-                onClick = { onOptionSelected(option.item) },
+                borderWidth = 0.75.dp,
             ) {
                 Row(
                     modifier = Modifier
