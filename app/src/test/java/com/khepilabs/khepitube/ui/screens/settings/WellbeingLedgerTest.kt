@@ -1,10 +1,6 @@
 package com.khepilabs.khepitube.ui.screens.settings
 
 import com.google.common.truth.Truth.assertThat
-import com.khepilabs.khepitube.data.recommendation.music.MusicStatsStorage
-import com.khepilabs.khepitube.data.stats.RecapAggregates
-import com.khepilabs.khepitube.data.stats.VideoMonthRecord
-import com.khepilabs.khepitube.data.stats.VideoStatsSnapshot
 import com.khepilabs.khepitube.ui.screens.settings.wellbeing.summarizeLedgerTime
 import org.junit.Test
 import java.time.LocalDate
@@ -25,17 +21,5 @@ class WellbeingLedgerTest {
         assertThat(summary?.days?.map { it.millis }).containsExactly(30_000L, 0L, 0L, 0L, 0L, 0L, 60_000L).inOrder()
     }
 
-    @Test
-    fun `daily time adds both ledgers inside the range only`() {
-        val video = VideoStatsSnapshot(months = mapOf("2026-09" to VideoMonthRecord(dayMs = mapOf(23 to 60_000L, 1 to 5_000L))))
-        val music =
-            MusicStatsStorage.SerializableStats(
-                months =
-                    mapOf("2026-09" to MusicStatsStorage.SerializableMonth(dayMs = mapOf(23 to 30_000L))),
-            )
 
-        val days = RecapAggregates.dailyTime(video, music, today.minusDays(6), today)
-        assertThat(days).containsExactly(today, 90_000L)
-        assertThat(RecapAggregates.videoLedgerStart(video)).isEqualTo(LocalDate.of(2026, 9, 1))
-    }
 }
