@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.auth.YouTubeDeviceAuth
+import com.khepilabs.khepitube.data.auth.YouTubeTokenRefreshWorker
 import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.innertube.YouTube
 import com.khepilabs.khepitube.innertube.models.AccountInfo
@@ -78,6 +79,7 @@ fun AccountSettingsScreen(
                 }
             }
             isOAuthSignedIn -> {
+                YouTubeTokenRefreshWorker.schedule(context)
                 isLoadingAccount = true
                 withContext(Dispatchers.IO) {
                     YouTube.cookie = null
@@ -150,6 +152,7 @@ fun AccountSettingsScreen(
                                     coroutineScope.launch {
                                         preferences.setYoutubeCookie(null)
                                         deviceAuth.signOut()
+                                        YouTubeTokenRefreshWorker.cancel(context)
                                         isOAuthSignedIn = false
                                         accountInfo = null
                                         YouTube.cookie = null
@@ -225,6 +228,7 @@ fun AccountSettingsScreen(
                 )
                 isOAuthSignedIn = true
                 YouTube.accessToken = account.accessToken
+                YouTubeTokenRefreshWorker.schedule(context)
                 showDeviceLoginDialog = false
             },
             onUseWebViewFallback = {
