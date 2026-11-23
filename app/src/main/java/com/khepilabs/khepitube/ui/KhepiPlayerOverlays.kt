@@ -138,6 +138,9 @@ internal fun KhepiPlayerSessionEffects(
                 isQueueAutoAdvanceInMiniPlayer
             ) {
                 playerSheetState.collapse()
+                if (playerUiState.resumedInMiniPlayer) {
+                    playerViewModel.clearResumedInMiniPlayer()
+                }
             } else if (wasExpanded) {
                 playerSheetState.expand()
             } else {

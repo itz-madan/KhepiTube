@@ -14,9 +14,6 @@ import com.khepilabs.khepitube.data.local.SubscriptionRepository
 import com.khepilabs.khepitube.data.model.Channel
 import com.khepilabs.khepitube.data.paging.ChannelSearch
 import com.khepilabs.khepitube.data.recommendation.OnboardingCompleter
-import com.khepilabs.khepitube.data.recommendation.music.FavouriteArtistCatalog
-import com.khepilabs.khepitube.data.recommendation.music.FavouriteArtistPicker
-import com.khepilabs.khepitube.data.recommendation.music.FavouriteArtistsStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -54,16 +51,11 @@ class OnboardingViewModel
         private val channelSearch: ChannelSearch,
         private val completer: OnboardingCompleter,
         private val preferences: PlayerPreferences,
-        favouriteArtists: FavouriteArtistsStore,
-        artistCatalog: FavouriteArtistCatalog,
     ) : ViewModel() {
         private val _state = MutableStateFlow(restore())
         val state: StateFlow<OnboardingUiState> = _state.asStateFlow()
 
         val importOperation: StateFlow<BackupOperation> = backup.operation
-
-        /** Picks are saved as they are made, the same as in Settings, so nothing waits for Done. */
-        val artists = FavouriteArtistPicker(viewModelScope, favouriteArtists, artistCatalog)
 
         val newVideoAlerts: StateFlow<Boolean> =
             preferences.notifNewVideosEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)

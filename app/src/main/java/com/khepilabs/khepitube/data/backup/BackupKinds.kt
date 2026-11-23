@@ -24,7 +24,6 @@ enum class ExportKind(
     MASTER(R.string.master_backup_title, R.string.master_backup_subtitle, ZIP, "flow_master_backup", "zip"),
     APP_DATA(R.string.export_app_data_title, R.string.export_app_data_desc, JSON, "flow_backup", "json"),
     ENGINE(R.string.export_engine_data, R.string.export_engine_data_subtitle, JSON, "flow_engine", "json"),
-    MUSIC_BRAIN(R.string.export_music_brain_title, R.string.export_music_brain_desc, JSON, "flow_music_brain", "json"),
     NEWPIPE_SUBSCRIPTIONS(R.string.export_newpipe_subs_title, R.string.export_newpipe_subs_desc, JSON, "newpipe_subscriptions", "json"),
     WATCH_HISTORY(
         R.string.export_watch_history_title,
@@ -46,7 +45,6 @@ enum class ExportKind(
         MASTER -> coordinator.exportMaster(uri)
         APP_DATA -> coordinator.exportAppData(uri)
         ENGINE -> coordinator.exportEngine(uri)
-        MUSIC_BRAIN -> coordinator.exportMusicBrain(uri)
         NEWPIPE_SUBSCRIPTIONS -> coordinator.exportNewPipeSubscriptions(uri)
         WATCH_HISTORY -> coordinator.exportWatchHistory(uri)
     }
@@ -65,7 +63,6 @@ enum class ImportKind(
     FLOW_BACKUP(R.string.import_KhepiTube_backup_item_title, R.string.import_KhepiTube_backup_desc, arrayOf(JSON)),
     MASTER(R.string.import_master_backup_title, R.string.import_master_backup_desc, arrayOf(ZIP, BINARY)),
     ENGINE(R.string.import_engine_data, R.string.import_engine_data_desc, arrayOf(JSON)),
-    MUSIC_BRAIN(R.string.import_music_brain_title, R.string.import_music_brain_desc, arrayOf(JSON)),
     TAKEOUT(R.string.import_yt_takeout_all, R.string.import_yt_takeout_all_desc, ZipTypes, takesSeveralFiles = true),
     YOUTUBE_SUBSCRIPTIONS(R.string.import_from_youtube, R.string.import_from_youtube_desc, CsvTypes),
     YOUTUBE_HISTORY(R.string.import_yt_watch_history, R.string.import_yt_watch_history_desc, arrayOf("text/html", "text/plain", ANY)),
@@ -102,7 +99,6 @@ enum class ImportKind(
         FLOW_BACKUP -> coordinator.importFlowBackup(uri)
         MASTER -> coordinator.importMaster(uri)
         ENGINE -> coordinator.importEngine(uri)
-        MUSIC_BRAIN -> coordinator.importMusicBrain(uri)
         TAKEOUT -> coordinator.importYouTubeTakeout(listOf(uri))
         YOUTUBE_SUBSCRIPTIONS -> coordinator.importYouTube(uri)
         YOUTUBE_HISTORY -> coordinator.importYouTubeWatchHistory(uri)

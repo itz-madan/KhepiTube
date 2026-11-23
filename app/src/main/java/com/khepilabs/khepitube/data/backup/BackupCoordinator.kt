@@ -8,10 +8,6 @@ import com.khepilabs.khepitube.data.local.BackupRepository
 import com.khepilabs.khepitube.data.local.LocalDataManager
 import com.khepilabs.khepitube.data.local.NO_LIKES
 import com.khepilabs.khepitube.data.recommendation.KhepiNeuroEngine
-import com.khepilabs.khepitube.data.recommendation.music.FavouriteArtistsStore
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
-import com.khepilabs.khepitube.data.stats.RecapBackup
-import com.khepilabs.khepitube.data.stats.VideoStatsRecorder
 import com.khepilabs.khepitube.notification.NotificationHelper
 import com.khepilabs.khepitube.sync.apply.SyncChangeLedgerStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -25,7 +21,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,10 +59,7 @@ class BackupCoordinator
     constructor(
         @ApplicationContext private val context: Context,
         private val repository: BackupRepository,
-        private val musicBrain: MusicBrainEngine,
         private val localDataManager: LocalDataManager,
-        private val videoStats: VideoStatsRecorder,
-        private val favouriteArtists: FavouriteArtistsStore,
         private val syncLedger: SyncChangeLedgerStore,
     ) {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -104,52 +96,12 @@ class BackupCoordinator
                 writeStream(uri) { out -> KhepiNeuroEngine.exportBrainToStream(out) }
             }
 
-        fun exportMusicBrain(uri: Uri) =
-            exportTo(uri, R.string.music_brain_export_success, R.string.music_brain_export_failed) {
-                writeStream(uri) { out -> musicBrain.exportBrainToStream(out).let { true } }
-            }
-
         fun exportMaster(uri: Uri) =
             exportTo(uri, R.string.master_backup_export_success, R.string.master_backup_export_failed) {
                 repository.exportMasterBackup(
                     uri,
-                    musicBrain = musicBrainBytes(),
-                    recap = recapBytes(),
-                    favouriteArtists = favouriteArtists.export(),
                 )
             }
-
-        /** Writes the automatic backup now, into the chosen folder, and records when it ran. */
-        fun backUpNow(
-            type: LocalDataManager.AutoBackupType,
-            folder: Uri,
-        ) = run(context.getString(R.string.auto_backup_run_now), notify = false) {
-            val result =
-                when (type) {
-                    LocalDataManager.AutoBackupType.APP_DATA -> {
-                        repository.exportDataToFolder(folder)
-                    }
-
-                    LocalDataManager.AutoBackupType.BRAIN -> {
-                        repository.exportBrainToFolder(folder)
-                    }
-
-                    LocalDataManager.AutoBackupType.MASTER -> {
-                        repository.exportMasterToFolder(
-                            folder,
-                            musicBrain = musicBrainBytes(),
-                            recap = recapBytes(),
-                            favouriteArtists = favouriteArtists.export(),
-                        )
-                    }
-                }
-            if (result.isSuccess) {
-                localDataManager.setAutoBackupLastRun(System.currentTimeMillis())
-                BackupOperation.Succeeded(context.getString(R.string.auto_backup_success))
-            } else {
-                BackupOperation.Failed(context.getString(R.string.auto_backup_failed))
-            }
-        }
 
         fun importFlowBackup(uri: Uri) =
             run(context.getString(R.string.import_KhepiTube_backup_item_title)) {
@@ -166,9 +118,6 @@ class BackupCoordinator
                 val result =
                     repository.importMasterBackup(
                         uri,
-                        onMusicBrain = { bytes -> musicBrain.importBrainFromStream(bytes.inputStream()) },
-                        onRecap = ::restoreRecap,
-                        onFavouriteArtists = favouriteArtists::restore,
                     )
                 if (result.isSuccess) syncLedger.reset()
                 result.fold(
@@ -184,16 +133,6 @@ class BackupCoordinator
                     BackupOperation.Succeeded(context.getString(R.string.import_engine_success))
                 } else {
                     BackupOperation.Failed(context.getString(R.string.import_engine_failed))
-                }
-            }
-
-        fun importMusicBrain(uri: Uri) =
-            run(context.getString(R.string.import_music_brain_title)) {
-                val ok = readStream(uri) { input -> musicBrain.importBrainFromStream(input).let { true } } == true
-                if (ok) {
-                    BackupOperation.Succeeded(context.getString(R.string.music_brain_import_success))
-                } else {
-                    BackupOperation.Failed(context.getString(R.string.music_brain_import_failed))
                 }
             }
 
@@ -396,18 +335,6 @@ class BackupCoordinator
                 "invalid_format" -> context.getString(R.string.import_invalid_format)
                 else -> context.getString(R.string.import_failed_template, error.message ?: context.getString(R.string.unknown_error))
             }
-
-        private suspend fun musicBrainBytes(): ByteArray? =
-            runCatching { ByteArrayOutputStream().also { musicBrain.exportBrainToStream(it) }.toByteArray() }.getOrNull()
-
-        private suspend fun recapBytes(): ByteArray? =
-            runCatching { RecapBackup(video = videoStats.snapshot(), music = musicBrain.listeningStats()).encode() }.getOrNull()
-
-        private suspend fun restoreRecap(bytes: ByteArray) {
-            val backup = RecapBackup.decode(bytes) ?: return
-            backup.video?.let { videoStats.restore(it) }
-            backup.music?.let { musicBrain.restoreListeningStats(it) }
-        }
 
         private suspend fun writeStream(
             uri: Uri,

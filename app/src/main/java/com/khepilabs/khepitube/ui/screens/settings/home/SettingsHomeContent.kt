@@ -6,7 +6,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import com.khepilabs.khepitube.BuildConfig
 import com.khepilabs.khepitube.R
-import com.khepilabs.khepitube.data.recommendation.KhepiPersona
 import com.khepilabs.khepitube.ui.components.settings.SettingsDestination
 import com.khepilabs.khepitube.ui.components.settings.SettingsGroupScope
 import com.khepilabs.khepitube.ui.components.settings.SettingsListScope
@@ -19,7 +18,6 @@ import com.khepilabs.khepitube.ui.screens.settings.index.HomeIndex
 @Immutable
 internal data class SettingsHomeState(
     val selected: SettingsDestination?,
-    val persona: KhepiPersona?,
     val deepFlow: DeepFlowState,
     /** Shown on the update row while a check the user started is running; null when idle. */
     val updateCheckingLabel: String?,

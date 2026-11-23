@@ -18,7 +18,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -194,10 +194,10 @@ fun MediaSleepTimerSheet(
             actions = actions,
         )
     } else {
-        Surface(
+        GlassSurface(
             modifier = modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 0.dp,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.58f),
+            borderWidth = 0.75.dp,
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 SleepTimerPanelHeader(
@@ -258,6 +258,7 @@ private fun FlowSleepTimerBottomSheet(
         dismissOnOutsideTap = false,
         shape = RectangleShape,
         containerColor = MaterialTheme.colorScheme.surface,
+        glassContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.58f),
         onProgressChange = onSheetProgressChange,
         header = { dragModifier ->
             KhepiSheetHeader(

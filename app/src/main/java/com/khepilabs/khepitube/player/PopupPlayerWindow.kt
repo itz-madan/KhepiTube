@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -21,6 +22,7 @@ import com.khepilabs.khepitube.R
 internal class PopupPlayerWindow(
     private val context: Context,
     private val onClose: () -> Unit,
+    private val onAudioOnly: () -> Unit,
 ) {
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private var container: FrameLayout? = null
@@ -88,6 +90,26 @@ internal class PopupPlayerWindow(
             ),
         )
 
+        // One-tap handoff: keep the same media session playing, but switch to audio-only
+        // before removing the floating video surface.
+        val audioOnlyButton =
+            TextView(context).apply {
+                text = "🎧"
+                textSize = 22f
+                gravity = Gravity.CENTER
+                contentDescription = context.getString(R.string.ui_audio_only)
+                setBackgroundColor(0x99000000.toInt())
+                setOnClickListener { onAudioOnly() }
+            }
+        root.addView(
+            audioOnlyButton,
+            FrameLayout.LayoutParams(
+                (48 * density).toInt(),
+                (48 * density).toInt(),
+                Gravity.TOP or Gravity.START,
+            ),
+        )
+
         val dragHandle = View(context)
         root.addView(
             dragHandle,
@@ -95,7 +117,10 @@ internal class PopupPlayerWindow(
                 .LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     (40 * density).toInt(),
-                ).apply { marginEnd = (48 * density).toInt() },
+                ).apply {
+                    marginStart = (48 * density).toInt()
+                    marginEnd = (48 * density).toInt()
+                },
         )
         attachDragHandling(dragHandle, params)
 

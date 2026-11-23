@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,10 +46,11 @@ internal fun WatchTimeCard(
     summary: WatchTimeSummary?,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    GlassSurface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
         Column(modifier = Modifier.padding(CardPadding)) {
             Text(

@@ -64,8 +64,6 @@ class OnboardingViewModelTest {
             channelSearch,
             completer,
             preferences,
-            mockk(relaxed = true),
-            mockk(relaxed = true),
         )
 
     @Test

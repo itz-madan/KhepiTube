@@ -40,7 +40,4 @@ fun MusicMenuSheets(menus: MusicMenus) {
     menus.song?.let { track ->
         MusicQuickActionsSheet(track = track, onDismiss = { menus.song = null })
     }
-    menus.collection?.let { item ->
-        MusicCollectionQuickActionsSheet(item = item, onDismiss = { menus.collection = null })
-    }
 }

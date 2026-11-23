@@ -19,10 +19,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
+import androidx.compose.ui.semantics.semantics
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
@@ -69,23 +70,17 @@ internal fun ThemeCard(
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val colors = MaterialTheme.colorScheme
-    OutlinedCard(
-        onClick = onClick,
-        modifier =
-            modifier.semantics {
+    GlassSurface(
+        modifier = modifier
+            .semantics {
                 role = Role.RadioButton
                 this.selected = selected
-            },
+            }
+            .clickable(onClick = onClick),
         shape = MaterialTheme.shapes.large,
-        colors =
-            CardDefaults.outlinedCardColors(
-                containerColor = if (selected) colors.surfaceContainerHighest else colors.surfaceContainerLow,
-            ),
-        border =
-            BorderStroke(
-                width = if (selected) SelectedBorderWidth else BorderWidth,
-                color = if (selected) colors.outline else colors.outlineVariant,
-            ),
+        containerColor = (if (selected) colors.surfaceContainerHighest else colors.surfaceContainerLow).copy(alpha = 0.66f),
+        borderColor = (if (selected) colors.outline else colors.outlineVariant).copy(alpha = 0.72f),
+        borderWidth = if (selected) SelectedBorderWidth else BorderWidth,
     ) {
         Row(
             modifier = Modifier.padding(CardPadding),

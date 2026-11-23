@@ -15,12 +15,7 @@ import com.khepilabs.khepitube.data.lyrics.LyricsCandidate
 import com.khepilabs.khepitube.data.lyrics.LyricsHelper
 import com.khepilabs.khepitube.data.music.DownloadManager
 import com.khepilabs.khepitube.data.music.PlaylistRepository
-import com.khepilabs.khepitube.data.music.YouTubeMusicService
-import com.khepilabs.khepitube.data.music.model.MUSIC_GENRE_SOURCE_PREFIX
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.newmusic.InnertubeMusicService
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
-import com.khepilabs.khepitube.data.recommendation.music.onRepeatShelf
 import com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
 import com.khepilabs.khepitube.ui.components.musicplayer.queue.QueueSwipes
 import com.khepilabs.khepitube.utils.PerformanceDispatcher
@@ -49,7 +44,6 @@ class MusicPlayerViewModel
         private val downloadManager: DownloadManager,
         private val likedVideosRepository: LikedVideosRepository,
         private val viewHistory: ViewHistory,
-        private val musicBrain: MusicBrainEngine,
         private val lyricsHelper: LyricsHelper,
         localLyrics: LocalLyricsReader,
     ) : ViewModel() {
@@ -93,7 +87,6 @@ class MusicPlayerViewModel
                 playlistRepository,
                 likedVideosRepository,
                 downloadManager,
-                musicBrain,
                 playerPreferences,
             )
 
@@ -162,7 +155,6 @@ class MusicPlayerViewModel
                         if (!isLocalMediaId(it.videoId)) {
                             checkIfFavorite(it.videoId)
                             fetchLyrics(it.videoId, it.artist, it.title, it.duration, it.album)
-                            fetchRelatedContent(it.videoId)
                         } else {
                             favoriteJob?.cancel()
                             _uiState.update { state -> state.copy(isLiked = false) }
@@ -296,98 +288,47 @@ class MusicPlayerViewModel
                 return
             }
             loadTrackJob?.cancel()
-            // Genre-scoped surfaces tag their source; the genre becomes listen
-            // context for this queue and is stripped from the display label.
-            // Any non-tagged queue start clears the previous context.
-            val contextGenre =
-                sourceName
-                    ?.trim()
-                    ?.takeIf { it.startsWith(MUSIC_GENRE_SOURCE_PREFIX) }
-                    ?.removePrefix(MUSIC_GENRE_SOURCE_PREFIX)
-                    ?.trim()
-                    ?.takeIf { it.isNotEmpty() }
-            EnhancedMusicPlayerManager.playContextGenre = contextGenre
-            val displaySourceName = contextGenre ?: sourceName
             loadTrackJob =
                 viewModelScope.launch {
-                    val finalSourceName = musicSourceLabel(context, displaySourceName, track)
                     val activeQueue = if (queue.isNotEmpty()) queue else listOf(track)
                     val localUriOverrides = playStart.downloadedUris(activeQueue)
+                    val selectedUri = localUriOverrides[track.videoId]
+                    if (selectedUri == null) {
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                error = context.getString(R.string.music_track_not_downloaded),
+                            )
+                        }
+                        return@launch
+                    }
+                    val playableQueue = activeQueue.filter { it.videoId in localUriOverrides }
                     val startPositionMs = playStart.resumePosition(track)
-
-                    // ─── PHASE 1: Instant start ───────────────────────────────────────────
                     _uiState.update {
                         it.copy(
                             currentTrack = track,
                             isLoading = true,
                             error = null,
-                            playingFrom = finalSourceName,
+                            playingFrom = sourceName ?: context.getString(R.string.library_downloads_label),
                         )
                     }
-
-                    // Flagged as late as possible: the service consumes the seed on the next
-                    // playlist change, and an unrelated advance during the lookup above would
-                    // otherwise eat it.
-                    EnhancedMusicPlayerManager.pendingRadioSeedId = track.videoId.takeIf { asRadio }
-
+                    EnhancedMusicPlayerManager.pendingRadioSeedId = null
                     withContext(kotlinx.coroutines.Dispatchers.Main) {
                         EnhancedMusicPlayerManager.playTrack(
                             track = track,
-                            audioUrl = "music://${track.videoId}",
-                            queue = activeQueue,
+                            audioUrl = selectedUri.toString(),
+                            queue = playableQueue,
                             startPositionMs = startPositionMs,
-                            sourceName = finalSourceName,
+                            sourceName = sourceName ?: context.getString(R.string.library_downloads_label),
                             localUriOverrides = localUriOverrides,
                         )
                     }
-
-                    // Player is now buffering — clear loading indicator so artwork etc. show
                     _uiState.update { it.copy(isLoading = false) }
-
-                    // ─── PHASE 2: Background — does NOT block audio ───────────────────────
-                    supervisorScope {
-                        launch(PerformanceDispatcher.networkIO) {
-                            if (!localUriOverrides.containsKey(track.videoId) && !downloadManager.isCachedForOffline(track.videoId)) {
-                                EnhancedMusicPlayerManager.resolveStreamUrl(track.videoId)
-                            }
-                        }
-
-                        launch(PerformanceDispatcher.diskIO) {
-                            playlistRepository.addToHistory(track)
-                            playStart.recordStart(track)
-                        }
-
-                        launch(PerformanceDispatcher.networkIO) {
-                            fetchRelatedContent(track.videoId)
-                        }
-                        // Single-track queues need no special automix fill: the service
-                        // seeds the radio pool for every new queue context.
+                    launch(PerformanceDispatcher.diskIO) {
+                        playlistRepository.addToHistory(track)
+                        playStart.recordStart(track)
                     }
                 }
-        }
-
-        /** A YouTube Music link names only the song, so its details are fetched before it plays. */
-        suspend fun playFromLink(videoId: String) {
-            val track =
-                InnertubeMusicService.fetchQueue(videoIds = listOf(videoId)).firstOrNull()
-                    ?: MusicTrack(videoId = videoId, title = "", artist = "", thumbnailUrl = "", duration = 0)
-            loadAndPlayTrack(track)
-        }
-
-        /** Plays a watch playlist such as an artist's shuffle or mix; false when YouTube returned no songs. */
-        suspend fun playWatchPlaylist(
-            playlistId: String,
-            params: String?,
-        ): Boolean {
-            val tracks = withTimeoutOrNull(10_000L) { InnertubeMusicService.fetchWatchPlaylist(playlistId, params) }.orEmpty()
-            loadAndPlayTrack(tracks.firstOrNull() ?: return false, tracks)
-            return true
-        }
-
-        /** Plays the On Repeat shelf in a shuffled order, as the widget's Shuffle asks. */
-        suspend fun shuffleOnRepeat(sourceName: String) {
-            val tracks = musicBrain.onRepeatShelf().shuffled()
-            loadAndPlayTrack(tracks.firstOrNull() ?: return, tracks, sourceName)
         }
 
         /**
@@ -480,34 +421,11 @@ class MusicPlayerViewModel
             EnhancedMusicPlayerManager.playFromQueue(index)
         }
 
-        // Both the currentTrack collector and the (kept-composed) player content request
-        // related tracks for the same id; without this guard every advance fetched twice.
-        private var relatedFetchedForId: String? = null
-
-        fun fetchRelatedContent(videoId: String) {
-            if (relatedFetchedForId == videoId) return
-            relatedFetchedForId = videoId
-            viewModelScope.launch(PerformanceDispatcher.networkIO) {
-                _uiState.update { it.copy(isRelatedLoading = true) }
-                try {
-                    val related =
-                        withTimeoutOrNull(10_000L) {
-                            YouTubeMusicService.getRelatedMusic(videoId, 20)
-                        } ?: emptyList()
-                    if (related.isEmpty()) relatedFetchedForId = null
-
-                    // Related content is display-only here: the radio pool (automix)
-                    // is owned by Media3MusicService and must not churn per track.
-                    _uiState.update {
-                        it.copy(
-                            relatedContent = related,
-                            isRelatedLoading = false,
-                        )
-                    }
-                } catch (e: Exception) {
-                    relatedFetchedForId = null
-                    _uiState.update { it.copy(isRelatedLoading = false) }
-                }
+        fun shuffleOnRepeat(sourceName: String) {
+            if (!EnhancedMusicPlayerManager.shuffleEnabled.value) EnhancedMusicPlayerManager.toggleShuffle()
+            when (EnhancedMusicPlayerManager.repeatMode.value.name) {
+                "OFF" -> EnhancedMusicPlayerManager.toggleRepeat()
+                "ONE" -> { EnhancedMusicPlayerManager.toggleRepeat(); EnhancedMusicPlayerManager.toggleRepeat() }
             }
         }
 

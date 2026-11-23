@@ -1,0 +1,65 @@
+name: Build KhepiTube APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/liquid-glass
+
+permissions:
+  contents: read
+
+concurrency:
+  group: khepitube-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build installable Debug APK
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Use CI Gradle properties
+        run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Grant Gradle wrapper permission
+        run: chmod +x ./gradlew
+
+      - name: Build Debug APK
+        run: bash .github/scripts/gradle_retry.sh :app:assembleDebug
+
+      - name: Verify APK outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          apks=(app/build/outputs/apk/debug/*.apk)
+          if (( ${#apks[@]} == 0 )); then
+            echo "::error::Gradle completed but no APK was produced."
+            exit 1
+          fi
+          mkdir -p dist
+          cp "${apks[@]}" dist/
+          (cd dist && sha256sum *.apk | tee SHA256SUMS.txt)
+          ls -lh dist
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: KhepiTube-Debug-APK-${{ github.run_number }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30

@@ -18,6 +18,9 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
+import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +49,7 @@ import sh.calvin.reorderable.ReorderableColumn
 private val RowPadding = 24.dp
 private val RowVerticalPadding = 8.dp
 private val SheetBottomSpacing = 16.dp
+private val SheetGlassShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
 
 /**
  * The lyrics sources in the order they are tried. Rows drag by their handle — TalkBack users get
@@ -75,8 +79,16 @@ internal fun LyricsProvidersSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberKhepiSheetState(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
     ) {
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = SheetGlassShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = if (windowBlurEnabled) 0.84f else 1f),
+            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.38f),
+        ) {
+            Column {
         KhepiSheetHeader(
             title = stringResource(R.string.lyrics_provider_title),
             subtitle = stringResource(R.string.settings_lyrics_provider_order_description),
@@ -156,8 +168,11 @@ internal fun LyricsProvidersSheet(
                     }
                 }
             }
+            }
         }
     }
+}
+
 }
 
 private class ProviderLabel(

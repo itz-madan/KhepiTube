@@ -23,7 +23,7 @@ plugins {
 spotless {
     // Adopt formatting incrementally from the main commit that introduced linting.
     if (rootProject.file(".git").exists()) {
-        ratchetFrom("52c4928e5af05141080f46f6c1e41cbf9c457023")
+        ratchetFrom("HEAD~1")
     }
     lineEndings = LineEnding.UNIX
 

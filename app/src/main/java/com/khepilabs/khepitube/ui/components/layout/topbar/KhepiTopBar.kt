@@ -1,6 +1,8 @@
 package com.khepilabs.khepitube.ui.components.layout.topbar
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons
@@ -13,6 +15,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.khepilabs.khepitube.R
@@ -89,8 +93,15 @@ fun KhepiTopBar(
             KhepiGlobalActionsMode.Auto -> onBack == null
         }
 
+    GlassSurface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(bottomStart = 22.dp, bottomEnd = 22.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.76f),
+        borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+        borderWidth = 0.75.dp,
+    ) {
     TopAppBar(
-        modifier = modifier,
+        modifier = Modifier.fillMaxWidth(),
         title = title,
         navigationIcon = {
             when {
@@ -117,6 +128,7 @@ fun KhepiTopBar(
         colors = KhepiTopBarDefaults.colors(),
         windowInsets = windowInsets,
     )
+    }
 }
 
 @Composable

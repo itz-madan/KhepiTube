@@ -22,7 +22,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.videoplayer.UpcomingVideoOverlay
 import com.khepilabs.khepitube.ui.components.videoplayer.gesture.PlayerSpeedBoost
 import com.khepilabs.khepitube.ui.components.videoplayer.overlay.PlayerGestureOverlays
@@ -79,8 +79,10 @@ internal fun BoxScope.VideoStageOverlays(session: VideoPlayerStageSession) {
                             cutoutTopInset(screenState.isFullscreenPortrait),
                 ),
     ) {
-        Surface(
-            color = PlayerScrimPanel,
+        GlassSurface(
+            containerColor = PlayerScrimPanel.copy(alpha = 0.8f),
+            borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+            borderWidth = 0.75.dp,
             shape = CircleShape,
         ) {
             Text(

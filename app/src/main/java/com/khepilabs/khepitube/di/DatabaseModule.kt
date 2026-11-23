@@ -64,6 +64,4 @@ object DatabaseModule {
     @Provides
     fun provideSyncPeerDao(database: AppDatabase): com.khepilabs.khepitube.data.local.dao.SyncPeerDao = database.syncPeerDao()
 
-    @Provides
-    fun provideMusicGraphDao(database: AppDatabase): com.khepilabs.khepitube.data.local.dao.MusicGraphDao = database.musicGraphDao()
 }

@@ -17,7 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -167,7 +167,12 @@ private fun SettingsTextField(
     options: FieldOptions,
     shape: Shape,
 ) {
-    Surface(shape = shape, color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+    GlassSurface(
+        shape = shape,
+        modifier = Modifier.fillMaxWidth(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
+    ) {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,

@@ -2,8 +2,6 @@ package com.khepilabs.khepitube.sync.merge
 
 import com.khepilabs.khepitube.sync.canonical.BrainCounters
 import com.khepilabs.khepitube.sync.canonical.CanonicalBrain
-import com.khepilabs.khepitube.sync.canonical.CanonicalMusicAffinity
-import com.khepilabs.khepitube.sync.canonical.CanonicalMusicBrain
 import com.khepilabs.khepitube.sync.canonical.GCounter
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -67,28 +65,5 @@ class CounterOwnershipTest {
         assertEquals(30L, settled.idfWordFrequency.getValue("kotlin").sum())
     }
 
-    @Test
-    fun music_plays_follow_the_same_rules() {
-        val local =
-            CanonicalMusicBrain(
-                totalPlays = GCounter(mapOf("phone123" to 4L, "desk-uuid" to 60L)),
-                artistAffinity = mapOf("UCx" to CanonicalMusicAffinity(plays = GCounter(mapOf("desk-uuid" to 60L)))),
-            )
-        val remote =
-            CanonicalMusicBrain(
-                totalPlays = GCounter(mapOf("phone123" to 9L, "desk-uuid" to 20L)),
-                artistAffinity = mapOf("UCx" to CanonicalMusicAffinity(plays = GCounter(mapOf("desk-uuid" to 20L)))),
-            )
 
-        val settled = CounterOwnership.music(MusicBrainMerger.merge(local, remote), local, remote, own, sender)
-
-        assertEquals(mapOf("phone123" to 4L, "desk-uuid" to 20L), settled.totalPlays.perDevice)
-        assertEquals(
-            20L,
-            settled.artistAffinity
-                .getValue("UCx")
-                .plays
-                .sum(),
-        )
-    }
 }

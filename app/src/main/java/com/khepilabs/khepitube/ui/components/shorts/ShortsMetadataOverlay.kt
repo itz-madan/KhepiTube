@@ -222,7 +222,7 @@ private fun ShortsLinkedVideoChip(linkedVideo: ShortLinkedVideo) {
         },
         colors =
             AssistChipDefaults.assistChipColors(
-                containerColor = PlayerScrimPanel,
+                containerColor = PlayerScrimPanel.copy(alpha = 0.78f),
                 labelColor = PlayerScrimContent,
                 leadingIconContentColor = PlayerScrimContent,
             ),

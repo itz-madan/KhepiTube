@@ -3,7 +3,6 @@ package com.khepilabs.khepitube.ui.screens.library
 import android.content.Intent
 import android.net.Uri
 import android.webkit.CookieManager
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalConfiguration
@@ -59,10 +59,10 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.data.music.DownloadedTrack
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.stats.RecapPeriod
 import com.khepilabs.khepitube.data.video.DownloadedVideo
 import com.khepilabs.khepitube.innertube.models.AccountInfo
 import com.khepilabs.khepitube.ui.OnTabReselected
@@ -92,7 +92,6 @@ fun LibraryScreen(
     onNavigateToLocalMedia: () -> Unit,
     onNavigateToNotes: () -> Unit,
     onManageData: () -> Unit,
-    onOpenRecap: (RecapPeriod?) -> Unit,
     onVideoClick: (Video) -> Unit,
     onMusicClick: (MusicTrack, List<MusicTrack>, String) -> Unit,
     onPlaylistClick: (String) -> Unit,
@@ -264,7 +263,7 @@ private fun YouTubeAccountCard(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
+    GlassSurface(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
@@ -274,11 +273,9 @@ private fun YouTubeAccountCard(
                 spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
             )
             .clip(RoundedCornerShape(20.dp)),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f),
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-        ),
+        shape = RoundedCornerShape(20.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderWidth = 0.75.dp,
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

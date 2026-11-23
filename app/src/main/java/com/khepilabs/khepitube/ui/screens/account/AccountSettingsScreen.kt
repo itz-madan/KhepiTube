@@ -18,7 +18,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,9 +34,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.data.auth.YouTubeDeviceAuth
+import com.khepilabs.khepitube.data.auth.YouTubeTokenRefreshWorker
 import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.innertube.YouTube
 import com.khepilabs.khepitube.innertube.models.AccountInfo
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsPage
 import com.khepilabs.khepitube.ui.components.shared.ChannelAvatarImage
 import kotlinx.coroutines.Dispatchers
@@ -52,26 +54,53 @@ fun AccountSettingsScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val preferences = remember { PlayerPreferences(context) }
+    val deviceAuth = remember { YouTubeDeviceAuth(context) }
+    var savedProfile by remember { mutableStateOf(deviceAuth.savedProfile()) }
+    var isOAuthSignedIn by remember { mutableStateOf(deviceAuth.hasRefreshToken()) }
+    var showDeviceLoginDialog by remember { mutableStateOf(false) }
     val youtubeCookie by preferences.youtubeCookie.collectAsStateWithLifecycle(initialValue = null)
 
     var accountInfo by remember { mutableStateOf<AccountInfo?>(null) }
     var isLoadingAccount by remember { mutableStateOf(false) }
     var showLoginDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(youtubeCookie) {
-        if (!youtubeCookie.isNullOrBlank()) {
-            isLoadingAccount = true
-            withContext(Dispatchers.IO) {
-                YouTube.cookie = youtubeCookie
-                val result = YouTube.accountInfo()
-                withContext(Dispatchers.Main) {
-                    accountInfo = result.getOrNull()
-                    isLoadingAccount = false
+    LaunchedEffect(youtubeCookie, isOAuthSignedIn) {
+        when {
+            !youtubeCookie.isNullOrBlank() -> {
+                isLoadingAccount = true
+                withContext(Dispatchers.IO) {
+                    YouTube.accessToken = null
+                    YouTube.cookie = youtubeCookie
+                    val result = YouTube.accountInfo()
+                    withContext(Dispatchers.Main) {
+                        accountInfo = result.getOrNull()
+                        isLoadingAccount = false
+                    }
                 }
             }
-        } else {
-            accountInfo = null
-            isLoadingAccount = false
+            isOAuthSignedIn -> {
+                YouTubeTokenRefreshWorker.schedule(context)
+                isLoadingAccount = true
+                withContext(Dispatchers.IO) {
+                    YouTube.cookie = null
+                    val token = runCatching { deviceAuth.accessToken() }.getOrNull()
+                    withContext(Dispatchers.Main) {
+                        YouTube.accessToken = token
+                        accountInfo = AccountInfo(
+                            name = savedProfile.first ?: "YouTube",
+                            email = null,
+                            channelHandle = null,
+                            thumbnailUrl = savedProfile.second,
+                        )
+                        isLoadingAccount = false
+                    }
+                }
+            }
+            else -> {
+                YouTube.accessToken = null
+                accountInfo = null
+                isLoadingAccount = false
+            }
         }
     }
 
@@ -82,22 +111,22 @@ fun AccountSettingsScreen(
     ) {
         group(key = "account.main", header = R.string.scrobbling_account) {
             row("account.status") { shape ->
-                Surface(
+                GlassSurface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = shape,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        if (!youtubeCookie.isNullOrBlank()) {
+                        if (!youtubeCookie.isNullOrBlank() || isOAuthSignedIn) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
-                                val avatarUrl = accountInfo?.thumbnailUrl.orEmpty()
-                                val accountName = accountInfo?.name ?: stringResource(R.string.account_signed_in)
+                                val avatarUrl = accountInfo?.thumbnailUrl ?: savedProfile.second.orEmpty()
+                                val accountName = accountInfo?.name ?: savedProfile.first ?: stringResource(R.string.account_signed_in)
                                 ChannelAvatarImage(
                                     url = avatarUrl,
                                     contentDescription = accountName,
@@ -122,7 +151,12 @@ fun AccountSettingsScreen(
                                 onClick = {
                                     coroutineScope.launch {
                                         preferences.setYoutubeCookie(null)
+                                        deviceAuth.signOut()
+                                        YouTubeTokenRefreshWorker.cancel(context)
+                                        isOAuthSignedIn = false
+                                        accountInfo = null
                                         YouTube.cookie = null
+                                        YouTube.accessToken = null
                                         CookieManager.getInstance().removeAllCookies(null)
                                         CookieManager.getInstance().flush()
                                     }
@@ -163,7 +197,7 @@ fun AccountSettingsScreen(
                                 }
                             }
                             Button(
-                                onClick = { showLoginDialog = true },
+                                onClick = { showDeviceLoginDialog = true },
                                 modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Icon(
@@ -179,6 +213,30 @@ fun AccountSettingsScreen(
                 }
             }
         }
+    }
+
+
+    if (showDeviceLoginDialog) {
+        YouTubeDeviceLoginDialog(
+            onDismiss = { showDeviceLoginDialog = false },
+            onApproved = { account ->
+                savedProfile = account.name to account.avatarUrl
+                accountInfo = AccountInfo(
+                    name = account.name ?: "YouTube",
+                    email = null,
+                    channelHandle = null,
+                    thumbnailUrl = account.avatarUrl,
+                )
+                isOAuthSignedIn = true
+                YouTube.accessToken = account.accessToken
+                YouTubeTokenRefreshWorker.schedule(context)
+                showDeviceLoginDialog = false
+            },
+            onUseWebViewFallback = {
+                showDeviceLoginDialog = false
+                showLoginDialog = true
+            },
+        )
     }
 
     if (showLoginDialog) {

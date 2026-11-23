@@ -80,12 +80,5 @@ class DesktopFixturesTest {
         assertEquals(listOf("UCabc", "UCdef"), group.channelIds)
     }
 
-    @Test
-    fun the_music_brain_decodes() {
-        val brain = checkNotNull(SyncSerialization.decodeMusicBrain(lines("music_brain")))
-        val psy = brain.artistAffinity.getValue("UCpsy")
-        assertEquals(12L, psy.plays.sum())
-        assertEquals(0.7, psy.score, 0.0)
-        assertEquals("PSY", brain.trackMeta.getValue("9bZkp7q19f0").artist)
-    }
+
 }

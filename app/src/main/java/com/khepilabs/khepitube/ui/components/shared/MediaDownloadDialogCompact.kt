@@ -201,10 +201,11 @@ fun MediaDownloadDialogCompact(
     }
 
     BasicAlertDialog(onDismissRequest = onDismiss) {
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
         Surface(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             shape = AlertDialogDefaults.shape,
-            color = AlertDialogDefaults.containerColor,
+            color = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.86f) else AlertDialogDefaults.containerColor,
             tonalElevation = AlertDialogDefaults.TonalElevation,
         ) {
             Column(

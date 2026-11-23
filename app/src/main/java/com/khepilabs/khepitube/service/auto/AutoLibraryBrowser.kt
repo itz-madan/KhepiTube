@@ -16,11 +16,9 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.recommendation.music.MusicTimeBucket
 import com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
 import com.khepilabs.khepitube.player.musicAudioUri
 import com.khepilabs.khepitube.player.musicMediaItem
-import com.khepilabs.khepitube.ui.components.music.section.rotationTitleRes
 import com.khepilabs.khepitube.utils.PerformanceDispatcher
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -310,7 +308,7 @@ internal class AutoLibraryBrowser(
             AutoBrowseTree.PLAYLISTS -> context.getString(R.string.library_playlists_label)
             AutoBrowseTree.QUEUE -> context.getString(R.string.auto_tab_queue)
             AutoBrowseTree.ON_REPEAT -> context.getString(R.string.section_on_repeat)
-            AutoBrowseTree.RIGHT_NOW -> context.getString(MusicTimeBucket.fromTimestamp(System.currentTimeMillis()).rotationTitleRes())
+            AutoBrowseTree.RIGHT_NOW -> context.getString(R.string.auto_tab_for_you)
             AutoBrowseTree.REDISCOVER -> context.getString(R.string.section_rediscover)
             AutoBrowseTree.LIKED -> context.getString(R.string.liked_music_playlist)
             AutoBrowseTree.DOWNLOADS -> context.getString(R.string.downloads_title)

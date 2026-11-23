@@ -6,14 +6,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 /**
  * A video in a library grid on wide windows: its [thumbnail] over the title, [subtitle] and
@@ -31,14 +32,15 @@ internal fun LibraryVideoCard(
     selected: Boolean = false,
     thumbnail: @Composable () -> Unit,
 ) {
-    Surface(
-        color = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.background,
+    GlassSurface(
+        containerColor = (if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh).copy(alpha = if (selected) 0.76f else 0.48f),
         shape = MaterialTheme.shapes.large,
-        modifier =
-            modifier
-                .clip(MaterialTheme.shapes.large)
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        borderWidth = 0.75.dp,
+        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
+        CompositionLocalProvider(
+            LocalContentColor provides if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface,
+        ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -61,6 +63,7 @@ internal fun LibraryVideoCard(
                     modifier = Modifier.padding(horizontal = 4.dp),
                 )
             }
+        }
         }
     }
 }

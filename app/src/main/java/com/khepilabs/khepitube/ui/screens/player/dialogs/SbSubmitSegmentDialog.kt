@@ -7,6 +7,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -15,7 +16,9 @@ import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.data.model.SponsorBlockCategories
 import com.khepilabs.khepitube.data.repository.SponsorBlockRepository
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiDialogDefaults
+import com.khepilabs.khepitube.ui.components.shared.rememberKhepiWindowBlurEnabled
 import com.khepilabs.khepitube.utils.formatDurationMillis
 import com.khepilabs.khepitube.utils.parseTimestampMs
 import com.khepilabs.khepitube.utils.sponsorCategoryLabelRes
@@ -48,9 +51,10 @@ internal fun SbSubmitSegmentDialog(
     var endError by remember { mutableStateOf(false) }
 
     BasicAlertDialog(onDismissRequest = onDismiss) {
+        val windowBlurEnabled = rememberKhepiWindowBlurEnabled()
         Surface(
             shape = AlertDialogDefaults.shape,
-            color = AlertDialogDefaults.containerColor,
+            color = if (windowBlurEnabled) AlertDialogDefaults.containerColor.copy(alpha = 0.86f) else AlertDialogDefaults.containerColor,
             tonalElevation = AlertDialogDefaults.TonalElevation,
         ) {
             Column(
@@ -132,15 +136,26 @@ internal fun SbSubmitSegmentDialog(
                         ExposedDropdownMenu(
                             expanded = categoryExpanded,
                             onDismissRequest = { categoryExpanded = false },
+                            containerColor = Color.Transparent,
+                            tonalElevation = 0.dp,
+                            shadowElevation = 0.dp,
                         ) {
-                            SponsorBlockCategories.submittable.forEachIndexed { idx, category ->
-                                DropdownMenuItem(
-                                    text = { Text(submitCategoryLabel(category), style = MaterialTheme.typography.bodyLarge) },
-                                    onClick = {
-                                        selectedCategoryIndex = idx
-                                        categoryExpanded = false
-                                    },
-                                )
+                            GlassSurface(
+                                shape = MaterialTheme.shapes.medium,
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.72f),
+                                borderWidth = 0.75.dp,
+                            ) {
+                                Column {
+                                    SponsorBlockCategories.submittable.forEachIndexed { idx, category ->
+                                        DropdownMenuItem(
+                                            text = { Text(submitCategoryLabel(category), style = MaterialTheme.typography.bodyLarge) },
+                                            onClick = {
+                                                selectedCategoryIndex = idx
+                                                categoryExpanded = false
+                                            },
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

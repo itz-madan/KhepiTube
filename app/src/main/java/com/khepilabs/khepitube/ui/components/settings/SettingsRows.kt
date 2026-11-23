@@ -6,6 +6,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -21,12 +22,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.border
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiNavRow
 import com.khepilabs.khepitube.ui.components.shared.KhepiSelectionRow
 import com.khepilabs.khepitube.ui.components.shared.KhepiSwitchRow
@@ -229,15 +232,22 @@ private fun InfoRow(
         } else {
             Modifier
         }
-    SegmentedListItem(
-        modifier = focusModifier,
-        verticalAlignment = Alignment.CenterVertically,
-        shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        leadingContent = icon?.let { { SettingsIconBadge(icon = it) } },
-        supportingContent = value?.let { { Text(it) } },
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
-        Text(title)
+        SegmentedListItem(
+            modifier = focusModifier,
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = ListItemDefaults.shapes(shape = shape),
+            colors = ListItemDefaults.segmentedColors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+            leadingContent = icon?.let { { SettingsIconBadge(icon = it) } },
+            supportingContent = value?.let { { Text(it) } },
+        ) {
+            Text(title)
+        }
     }
 }
 

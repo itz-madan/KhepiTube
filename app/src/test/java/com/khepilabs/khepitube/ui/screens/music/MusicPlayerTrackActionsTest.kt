@@ -6,7 +6,6 @@ import com.khepilabs.khepitube.data.local.PlayerPreferences
 import com.khepilabs.khepitube.data.music.DownloadManager
 import com.khepilabs.khepitube.data.music.PlaylistRepository
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.recommendation.music.MusicBrainEngine
 import com.khepilabs.khepitube.utils.PerformanceDispatcher
 import io.mockk.coVerify
 import io.mockk.every
@@ -48,7 +47,6 @@ class MusicPlayerTrackActionsTest {
             playlistRepository = mockk<PlaylistRepository>(relaxed = true),
             likedVideosRepository = mockk<LikedVideosRepository>(relaxed = true),
             downloadManager = downloadManager,
-            musicBrain = mockk<MusicBrainEngine>(relaxed = true),
             playerPreferences = preferences,
         )
 

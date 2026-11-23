@@ -21,7 +21,6 @@ import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Restore
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -49,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.localmedia.LocalMediaItem
+import com.khepilabs.khepitube.ui.components.shared.KhepiAlertDialog
 import com.khepilabs.khepitube.ui.components.shared.KhepiBottomSheet
 import com.khepilabs.khepitube.ui.components.shared.KhepiEmptyState
 import com.khepilabs.khepitube.ui.components.shared.KhepiSheetHeader
@@ -296,7 +296,7 @@ internal fun LocalMediaTrashSheet(
 
     // Confirmation dialog for permanent deletion
     itemsToDelete?.let { targets ->
-        AlertDialog(
+        KhepiAlertDialog(
             onDismissRequest = { itemsToDelete = null },
             title = { Text(stringResource(R.string.local_trash_confirm_delete_title)) },
             text = {

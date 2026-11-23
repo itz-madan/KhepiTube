@@ -1,5 +1,6 @@
 package com.khepilabs.khepitube.ui.components.shared
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -8,6 +9,8 @@ import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 
 /** One read-only dropdown of the compact download dialog: quality, format or audio track. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,15 +49,26 @@ internal fun DownloadDropdownRow(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
+            containerColor = Color.Transparent,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
         ) {
-            options.forEach { (optLabel, onSelect) ->
-                DropdownMenuItem(
-                    text = { Text(optLabel, style = MaterialTheme.typography.bodyLarge) },
-                    onClick = {
-                        onSelect()
-                        expanded = false
-                    },
-                )
+            GlassSurface(
+                shape = MaterialTheme.shapes.medium,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.72f),
+                borderWidth = 0.75.dp,
+            ) {
+                Column {
+                    options.forEach { (optLabel, onSelect) ->
+                        DropdownMenuItem(
+                            text = { Text(optLabel, style = MaterialTheme.typography.bodyLarge) },
+                            onClick = {
+                                onSelect()
+                                expanded = false
+                            },
+                        )
+                    }
+                }
             }
         }
     }

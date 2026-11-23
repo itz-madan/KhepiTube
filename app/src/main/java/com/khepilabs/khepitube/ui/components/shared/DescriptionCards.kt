@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -35,6 +36,7 @@ import coil3.compose.AsyncImage
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.innertube.pages.VideoDescriptionChannel
 import com.khepilabs.khepitube.innertube.pages.VideoDescriptionFactoid
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 /** One of the three figures above the description: a big value over the label that names it. */
 @Composable
@@ -43,12 +45,7 @@ internal fun FactoidCard(
     tint: MediaArtworkTint,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        color = tint.container,
-        contentColor = tint.onContainer,
-        modifier = modifier,
-    ) {
+    TintedGlassCard(tint = tint, modifier = modifier) {
         Column(
             modifier = Modifier.padding(vertical = FactoidVerticalPadding, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -89,12 +86,7 @@ internal fun DescriptionBody(
     var expanded by rememberSaveable(text.text) { mutableStateOf(false) }
     var overflowed by remember(text.text) { mutableStateOf(false) }
 
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        color = tint.container,
-        contentColor = tint.onContainer,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+    TintedGlassCard(tint = tint, modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(BodyPadding),
             verticalArrangement = Arrangement.spacedBy(BodySpacing),
@@ -267,12 +259,9 @@ internal fun DescriptionSectionRow(
     tint: MediaArtworkTint,
     onClick: () -> Unit,
 ) {
-    Surface(
-        onClick = onClick,
-        shape = MaterialTheme.shapes.large,
-        color = tint.container,
-        contentColor = tint.onContainer,
-        modifier = Modifier.fillMaxWidth(),
+    TintedGlassCard(
+        tint = tint,
+        modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onClick),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
@@ -293,6 +282,25 @@ internal fun DescriptionSectionRow(
                 imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 contentDescription = null,
             )
+        }
+    }
+}
+
+
+@Composable
+private fun TintedGlassCard(
+    tint: MediaArtworkTint,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    GlassSurface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.large,
+        containerColor = tint.container.copy(alpha = 0.74f),
+        borderWidth = 0.75.dp,
+    ) {
+        CompositionLocalProvider(LocalContentColor provides tint.onContainer) {
+            content()
         }
     }
 }

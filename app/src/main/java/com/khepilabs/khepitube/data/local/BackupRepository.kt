@@ -132,9 +132,6 @@ private enum class HistoryImportFormat {
 
 private const val MASTER_APP_DATA_ENTRY = "app_data.json"
 private const val MASTER_ENGINE_ENTRY = "engine_brain.json"
-private const val MASTER_MUSIC_BRAIN_ENTRY = "music_brain.json"
-private const val MASTER_RECAP_ENTRY = "recap_stats.json"
-private const val MASTER_FAVOURITE_ARTISTS_ENTRY = "favourite_artists.json"
 
 internal const val NO_LIKES = "no_likes"
 private const val LIKES_LEARNING_WINDOW_DAYS = 365L
@@ -302,9 +299,6 @@ class BackupRepository(
         out: java.io.OutputStream,
         appDataJson: String,
         brainBytes: ByteArray,
-        musicBrain: ByteArray?,
-        recap: ByteArray?,
-        favouriteArtists: ByteArray?,
     ) {
         ZipOutputStream(out).use { zip ->
             zip.putNextEntry(ZipEntry(MASTER_APP_DATA_ENTRY))
@@ -313,21 +307,6 @@ class BackupRepository(
             zip.putNextEntry(ZipEntry(MASTER_ENGINE_ENTRY))
             zip.write(brainBytes)
             zip.closeEntry()
-            if (musicBrain != null) {
-                zip.putNextEntry(ZipEntry(MASTER_MUSIC_BRAIN_ENTRY))
-                zip.write(musicBrain)
-                zip.closeEntry()
-            }
-            if (recap != null) {
-                zip.putNextEntry(ZipEntry(MASTER_RECAP_ENTRY))
-                zip.write(recap)
-                zip.closeEntry()
-            }
-            if (favouriteArtists != null) {
-                zip.putNextEntry(ZipEntry(MASTER_FAVOURITE_ARTISTS_ENTRY))
-                zip.write(favouriteArtists)
-                zip.closeEntry()
-            }
         }
     }
 
@@ -1728,9 +1707,6 @@ class BackupRepository(
 
     suspend fun exportMasterBackup(
         uri: Uri,
-        musicBrain: ByteArray? = null,
-        recap: ByteArray? = null,
-        favouriteArtists: ByteArray? = null,
     ): Result<Unit> =
         withContext(Dispatchers.IO) {
             try {
@@ -1740,7 +1716,7 @@ class BackupRepository(
                 val brainBytes = exportBrainBytes()
 
                 context.contentResolver.openOutputStream(uri, "wt")?.use { out ->
-                    writeMasterZip(out, appDataJson, brainBytes, musicBrain, recap, favouriteArtists)
+                    writeMasterZip(out, appDataJson, brainBytes)
                 } ?: return@withContext Result.failure(Exception("Could not open output stream"))
 
                 Result.success(Unit)
@@ -1751,17 +1727,11 @@ class BackupRepository(
 
     suspend fun importMasterBackup(
         uri: Uri,
-        onMusicBrain: (suspend (ByteArray) -> Unit)? = null,
-        onRecap: (suspend (ByteArray) -> Unit)? = null,
-        onFavouriteArtists: (suspend (ByteArray) -> Unit)? = null,
     ): Result<Unit> =
         withContext(Dispatchers.IO) {
             try {
                 var appDataJson: String? = null
                 var brainBytes: ByteArray? = null
-                var musicBrainBytes: ByteArray? = null
-                var recapBytes: ByteArray? = null
-                var favouriteArtistBytes: ByteArray? = null
                 var contentPreferences: ContentPreferencesBackup? = null
 
                 context.contentResolver.openInputStream(uri)?.use { raw ->
@@ -1771,9 +1741,6 @@ class BackupRepository(
                             when (entry.name) {
                                 MASTER_APP_DATA_ENTRY -> appDataJson = zip.readBytes().toString(Charsets.UTF_8)
                                 MASTER_ENGINE_ENTRY -> brainBytes = zip.readBytes()
-                                MASTER_MUSIC_BRAIN_ENTRY -> musicBrainBytes = zip.readBytes()
-                                MASTER_RECAP_ENTRY -> recapBytes = zip.readBytes()
-                                MASTER_FAVOURITE_ARTISTS_ENTRY -> favouriteArtistBytes = zip.readBytes()
                             }
                             zip.closeEntry()
                             entry = zip.nextEntry
@@ -1797,9 +1764,6 @@ class BackupRepository(
                     KhepiNeuroEngine.importBrainFromStream(context, bytes.inputStream())
                 }
 
-                musicBrainBytes?.let { bytes -> onMusicBrain?.invoke(bytes) }
-                recapBytes?.let { bytes -> onRecap?.invoke(bytes) }
-                favouriteArtistBytes?.let { bytes -> onFavouriteArtists?.invoke(bytes) }
 
                 contentPreferences?.let { preferences ->
                     KhepiNeuroEngine.restoreContentPreferences(
@@ -1874,102 +1838,6 @@ class BackupRepository(
             }
         }
     }
-
-    private suspend fun writeToFolder(
-        folderUri: Uri,
-        filename: String,
-        mimeType: String,
-        write: (OutputStream) -> Unit,
-    ): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            try {
-                val treeDocId = DocumentsContract.getTreeDocumentId(folderUri)
-                val treeUri = DocumentsContract.buildDocumentUriUsingTree(folderUri, treeDocId)
-                val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(folderUri, treeDocId)
-
-                val existingDocId =
-                    context.contentResolver
-                        .query(
-                            childrenUri,
-                            arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME),
-                            null,
-                            null,
-                            null,
-                        )?.use { cursor ->
-                            val nameCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-                            val idCol = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-                            var found: String? = null
-                            while (cursor.moveToNext()) {
-                                if (cursor.getString(nameCol) == filename) {
-                                    found = cursor.getString(idCol)
-                                    break
-                                }
-                            }
-                            found
-                        }
-
-                val targetUri =
-                    if (existingDocId != null) {
-                        DocumentsContract.buildDocumentUriUsingTree(folderUri, existingDocId)
-                    } else {
-                        DocumentsContract.createDocument(context.contentResolver, treeUri, mimeType, filename)
-                            ?: return@withContext Result.failure(Exception("Failed to create document: $filename"))
-                    }
-
-                context.contentResolver.openOutputStream(targetUri, "wt")?.use { outputStream ->
-                    write(outputStream)
-                } ?: return@withContext Result.failure(Exception("Could not open output stream for $filename"))
-
-                Result.success(Unit)
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
-
-    suspend fun exportDataToFolder(folderUri: Uri): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            try {
-                val backupData = buildBackupData()
-                val json = gson.toJson(backupData)
-                writeToFolder(folderUri, "flow_backup.json", "application/json") { out ->
-                    out.write(json.toByteArray(Charsets.UTF_8))
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
-
-    suspend fun exportBrainToFolder(folderUri: Uri): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            try {
-                val brainBytes = exportBrainBytes()
-                writeToFolder(folderUri, "flow_engine.json", "application/json") { out ->
-                    out.write(brainBytes)
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
-
-    suspend fun exportMasterToFolder(
-        folderUri: Uri,
-        musicBrain: ByteArray? = null,
-        recap: ByteArray? = null,
-        favouriteArtists: ByteArray? = null,
-    ): Result<Unit> =
-        withContext(Dispatchers.IO) {
-            try {
-                val backupData = buildBackupData()
-                val appDataJson = gson.toJson(backupData)
-                val brainBytes = exportBrainBytes()
-
-                writeToFolder(folderUri, "flow_master_backup.zip", "application/zip") { out ->
-                    writeMasterZip(out, appDataJson, brainBytes, musicBrain, recap, favouriteArtists)
-                }
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
 
     private suspend fun fetchChannelAvatar(channelId: String): String =
         if (channelId.startsWith("UC")) {

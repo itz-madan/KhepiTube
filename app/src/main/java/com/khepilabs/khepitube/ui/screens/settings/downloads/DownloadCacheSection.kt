@@ -40,6 +40,7 @@ import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.local.MediaCacheSizes
 import com.khepilabs.khepitube.data.repository.MediaCacheType
 import com.khepilabs.khepitube.data.repository.MediaCacheUsage
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.settings.SettingsListScope
 import com.khepilabs.khepitube.ui.components.shared.KhepiChoice
 import com.khepilabs.khepitube.ui.components.shared.KhepiChoiceDialog
@@ -121,23 +122,30 @@ private fun CacheUsageRow(
     shape: Shape,
 ) {
     val context = LocalContext.current
-    SegmentedListItem(
-        verticalAlignment = Alignment.CenterVertically,
-        shapes = ListItemDefaults.shapes(shape = shape),
-        colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        leadingContent = { Icon(Icons.Outlined.Storage, contentDescription = null) },
-        supportingContent = {
-            Column(verticalArrangement = Arrangement.spacedBy(UsageSpacing)) {
-                Text(
-                    usage?.let { stringResource(R.string.cache_in_use, Formatter.formatShortFileSize(context, it.total)) }
-                        ?: stringResource(R.string.cache_measuring),
-                )
-                CacheBar(usage)
-                if (usage != null) CacheLegend(usage)
-            }
-        },
+    GlassSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
-        Text(stringResource(DownloadsIndex.cacheUsage.title))
+        SegmentedListItem(
+            verticalAlignment = Alignment.CenterVertically,
+            shapes = ListItemDefaults.shapes(shape = shape),
+            colors = ListItemDefaults.segmentedColors(containerColor = Color.Transparent),
+            leadingContent = { Icon(Icons.Outlined.Storage, contentDescription = null) },
+            supportingContent = {
+                Column(verticalArrangement = Arrangement.spacedBy(UsageSpacing)) {
+                    Text(
+                        usage?.let { stringResource(R.string.cache_in_use, Formatter.formatShortFileSize(context, it.total)) }
+                            ?: stringResource(R.string.cache_measuring),
+                    )
+                    CacheBar(usage)
+                    if (usage != null) CacheLegend(usage)
+                }
+            },
+        ) {
+            Text(stringResource(DownloadsIndex.cacheUsage.title))
+        }
     }
 }
 
@@ -242,15 +250,22 @@ private fun CacheRow(
             trailingContent = clear,
         )
     } else {
-        SegmentedListItem(
-            verticalAlignment = Alignment.CenterVertically,
-            shapes = ListItemDefaults.shapes(shape = shape),
-            colors = ListItemDefaults.segmentedColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-            leadingContent = { Icon(type.icon(), contentDescription = null) },
-            supportingContent = { Text(summary) },
-            trailingContent = clear,
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = shape,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
         ) {
-            Text(stringResource(type.title()))
+            SegmentedListItem(
+                verticalAlignment = Alignment.CenterVertically,
+                shapes = ListItemDefaults.shapes(shape = shape),
+                colors = ListItemDefaults.segmentedColors(containerColor = Color.Transparent),
+                leadingContent = { Icon(type.icon(), contentDescription = null) },
+                supportingContent = { Text(summary) },
+                trailingContent = clear,
+            ) {
+                Text(stringResource(type.title()))
+            }
         }
     }
 }

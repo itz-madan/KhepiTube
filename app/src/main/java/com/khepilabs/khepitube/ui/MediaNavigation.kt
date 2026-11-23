@@ -7,27 +7,7 @@ import com.khepilabs.khepitube.data.shorts.queue.ShortsQueueSource
 import com.khepilabs.khepitube.ui.components.layout.navigation.MediaNavigator
 import com.khepilabs.khepitube.utils.YouTubeLink
 
-internal const val MUSIC_ARTIST_ROUTE_PATTERN = "artist/{channelId}"
-internal const val MUSIC_PLAYLIST_ROUTE_PATTERN = "musicPlaylist/{playlistId}"
-internal const val MUSIC_PLAYER_ROUTE_PATTERN = "musicPlayer/{videoId}?list={list}"
-internal const val MUSIC_PLAYER_ROUTE_ARG = "videoId"
-internal const val MUSIC_PLAYER_LIST_ARG = "list"
 internal const val EQUALIZER_ROUTE = "equalizer"
-
-internal fun musicArtistRoute(artistId: String): String? = artistId.trim().takeIf(String::isNotEmpty)?.let { "artist/${Uri.encode(it)}" }
-
-/**
- * Plays a song in the music player from its id alone, the way a YouTube Music link names it, with
- * the playlist the link plays it from as the queue.
- */
-internal fun musicPlayerRoute(
-    videoId: String,
-    playlistId: String? = null,
-): String = "musicPlayer/${Uri.encode(videoId)}" + playlistId?.let { "?list=${Uri.encode(it)}" }.orEmpty()
-
-/** Albums and playlists share one page; InnerTube tells them apart by the browse id itself. */
-internal fun musicCollectionRoute(collectionId: String): String? =
-    collectionId.trim().takeIf(String::isNotEmpty)?.let { "musicPlaylist/${Uri.encode(it)}" }
 
 internal enum class PageOpen { PUSH, STAY, RETURN }
 
@@ -73,11 +53,11 @@ internal class KhepiMediaNavigator(
         navController.navigateToYoutubeChannel(channelId)
     }
 
-    override fun openArtist(artistId: String) = open(musicArtistRoute(artistId))
+    override fun openArtist(artistId: String) = Unit
 
-    override fun openAlbum(albumId: String) = openCollection(albumId)
+    override fun openAlbum(albumId: String) = Unit
 
-    override fun openMusicPlaylist(playlistId: String) = openCollection(playlistId)
+    override fun openMusicPlaylist(playlistId: String) = Unit
 
     override fun openEqualizer() {
         beforeNavigate()
@@ -131,11 +111,5 @@ internal class KhepiMediaNavigator(
 
     private fun isShortsOnTop() = navController.currentBackStackEntry?.destination?.route == SHORTS_ROUTE_PATTERN
 
-    private fun openCollection(id: String) = open(musicCollectionRoute(id))
 
-    private fun open(route: String?) {
-        if (route == null) return
-        beforeNavigate()
-        navController.openPage(route)
-    }
 }

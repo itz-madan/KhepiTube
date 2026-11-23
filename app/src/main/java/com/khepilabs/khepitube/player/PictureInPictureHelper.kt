@@ -183,6 +183,19 @@ object PictureInPictureHelper {
         return true
     }
 
+    /** Opens the draggable overlay player independently of Android's native PiP mode. */
+    fun requestFloatingPlayerMode(activity: Activity): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false
+        if (!Settings.canDrawOverlays(activity)) {
+            openOverlaySettings(activity)
+            return false
+        }
+        activity.startService(
+            Intent(activity, VideoPlayerService::class.java).setAction(VideoPlayerService.ACTION_SHOW_POPUP),
+        )
+        return true
+    }
+
     fun dismissPopup(context: Context) {
         if (!isPopupActive) return
         context.startService(

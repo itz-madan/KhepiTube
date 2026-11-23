@@ -16,7 +16,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.theme.PlayerScrimContent
 import com.khepilabs.khepitube.ui.theme.PlayerScrimContentSecondary
 import com.khepilabs.khepitube.ui.theme.PlayerScrimPanel
@@ -59,14 +59,15 @@ internal fun UpcomingVideoOverlay(
         }
     }
 
-    Surface(
+    GlassSurface(
         modifier =
             modifier
                 .padding(horizontal = 16.dp, vertical = 12.dp)
                 .widthIn(max = 360.dp),
         shape = MaterialTheme.shapes.largeIncreased,
-        color = PlayerScrimPanel,
-        tonalElevation = 0.dp,
+        containerColor = PlayerScrimPanel.copy(alpha = 0.8f),
+        borderColor = PlayerScrimContent.copy(alpha = 0.28f),
+        borderWidth = 0.9.dp,
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),

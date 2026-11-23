@@ -18,9 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.data.music.model.MusicTrack
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.player.RepeatMode
 
 /** The pull-up queue sheet used where there is no room for a side pane. */
@@ -43,11 +45,17 @@ internal fun QueueSheet(
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = Color.Transparent,
         shape = RoundedCornerShape(topStart = sheetCornerRadius, topEnd = sheetCornerRadius),
         shadowElevation = 24.dp,
         tonalElevation = 0.dp,
     ) {
+        GlassSurface(
+            modifier = Modifier.fillMaxSize(),
+            shape = RoundedCornerShape(topStart = sheetCornerRadius, topEnd = sheetCornerRadius),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+            borderWidth = 0.75.dp,
+        ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier =
@@ -92,6 +100,7 @@ internal fun QueueSheet(
                 actions = actions,
                 modifier = Modifier.weight(1f),
             )
+        }
         }
     }
 }

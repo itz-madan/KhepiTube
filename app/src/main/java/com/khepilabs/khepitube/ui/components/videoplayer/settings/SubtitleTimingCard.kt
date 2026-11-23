@@ -10,7 +10,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -21,6 +20,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiRowGroup
 import com.khepilabs.khepitube.ui.components.shared.khepiRowGroupShape
 import java.text.DecimalFormat
@@ -39,9 +39,10 @@ internal fun SubtitleTimingCard(
 ) {
     val haptics = LocalHapticFeedback.current
     KhepiRowGroup(modifier = modifier) {
-        Surface(
+        GlassSurface(
             shape = khepiRowGroupShape(0, 1),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.64f),
+            borderWidth = 0.75.dp,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(

@@ -53,7 +53,6 @@ internal fun SettingsHomeScreen(
 ) {
     val context = LocalContext.current
     val deepFlow by viewModel.deepFlow.collectAsStateWithLifecycle()
-    val persona by viewModel.persona.collectAsStateWithLifecycle()
     val updateCheck by viewModel.updateCheck.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -64,7 +63,6 @@ internal fun SettingsHomeScreen(
     val checkingLabel = stringResource(R.string.checking_for_updates)
     val searchable = rememberSearchableSettings()
     LifecycleResumeEffect(selected) {
-        viewModel.refreshPersona()
         onPauseOrDispose {}
     }
     val results = remember(query, searchable) { SettingsSearch.search(query, searchable) }
@@ -112,7 +110,6 @@ internal fun SettingsHomeScreen(
                 state =
                     SettingsHomeState(
                         selected = selected,
-                        persona = persona,
                         deepFlow = deepFlow,
                         updateCheckingLabel = checkingLabel.takeIf { updateCheck == UpdateCheckState.Checking },
                         selectedRowFocus = selectedRowFocus,

@@ -176,11 +176,19 @@ class VideoPlayerService : MediaSessionService() {
         val player = EnhancedPlayerManager.getInstance().getPlayer() ?: return
         if (popupPlayerWindow == null) {
             popupPlayerWindow =
-                PopupPlayerWindow(this) {
-                    popupPlayerWindow?.dismiss()
-                    EnhancedPlayerManager.getInstance().stop()
-                    stopSelf()
-                }
+                PopupPlayerWindow(
+                    context = this,
+                    onClose = {
+                        popupPlayerWindow?.dismiss()
+                        EnhancedPlayerManager.getInstance().stop()
+                        stopSelf()
+                    },
+                    onAudioOnly = {
+                        // Keep the current queue/session alive; only disable the video stream.
+                        EnhancedPlayerManager.getInstance().switchToAudioOnly()
+                        popupPlayerWindow?.dismiss()
+                    },
+                )
         }
         popupPlayerWindow?.show(player)
     }

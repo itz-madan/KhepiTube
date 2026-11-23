@@ -55,6 +55,7 @@ fun SettingsMenuDialog(
     onAmbientModeToggle: (Boolean) -> Unit = {},
     onCastClick: () -> Unit = {},
     onPipClick: () -> Unit = {},
+    onFloatingPlayerClick: () -> Unit = {},
     onSleepTimerClick: () -> Unit = {},
     sponsorBlockSegmentCount: Int = 0,
     sponsorBlockOffForVideo: Boolean = false,
@@ -110,6 +111,7 @@ fun SettingsMenuDialog(
         dismissOnOutsideTap = false,
         shape = RectangleShape,
         containerColor = MaterialTheme.colorScheme.surface,
+        glassContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.58f),
         onBack = backPage?.let { page -> { currentPage = page } },
         onProgressChange = onSheetProgressChange,
         header = { dragModifier ->
@@ -147,6 +149,7 @@ fun SettingsMenuDialog(
                         },
                         onCastClick = { leaveFor(onCastClick) },
                         onPipClick = { sheetState.dismiss(onPipClick) },
+                        onFloatingPlayerClick = { sheetState.dismiss(onFloatingPlayerClick) },
                         onSleepTimerClick = { leaveFor(onSleepTimerClick) },
                         onLoopToggle = onLoopToggle,
                         onAutoplayToggle = onAutoplayToggle,

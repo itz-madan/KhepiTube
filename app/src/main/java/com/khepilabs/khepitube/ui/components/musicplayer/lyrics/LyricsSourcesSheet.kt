@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -29,12 +30,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.lyrics.LyricsCandidate
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.rememberKhepiSheetState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -49,13 +52,21 @@ internal fun LyricsSourcesSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberKhepiSheetState(),
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = BottomSheetDefaults.ExpandedShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+            borderWidth = 0.75.dp,
         ) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+            ) {
             Text(
                 text = stringResource(R.string.lyrics_choose_source),
                 style = MaterialTheme.typography.titleMedium,
@@ -128,6 +139,7 @@ internal fun LyricsSourcesSheet(
                         }
                     }
                 }
+            }
             }
         }
     }

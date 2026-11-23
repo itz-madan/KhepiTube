@@ -66,6 +66,7 @@ class InnerTube {
     /** Every change of identity, including a refused one dropped to null, so it can be persisted. */
     var onVisitorDataChanged: ((String?) -> Unit)? = null
     var dataSyncId: String? = null
+    var accessToken: String? = null
     var cookie: String? = null
         set(value) {
             field = value
@@ -211,6 +212,7 @@ class InnerTube {
                 header("Accept", "application/json")
                 header("Accept-Language", "en-US,en;q=0.9")
                 header("Cache-Control", "no-cache")
+                accessToken?.let { header("Authorization", "Bearer $it") }
             }
         }
 

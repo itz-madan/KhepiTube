@@ -31,7 +31,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,6 +53,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.player.AutoplayCountdownState
 import com.khepilabs.khepitube.player.EnhancedPlayerManager
 import com.khepilabs.khepitube.ui.components.shared.thumbnailUrlOrNull
@@ -117,9 +117,11 @@ private fun CountdownCard(
             label = "autoplayCountdownProgress",
         )
 
-    Surface(
+    GlassSurface(
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.82f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.8f),
+        borderWidth = 0.9.dp,
         modifier =
             modifier
                 .padding(horizontal = 20.dp)

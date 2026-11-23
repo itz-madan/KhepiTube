@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -27,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 private val SheetBottomPadding: Dp = 24.dp
 private val HeaderPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)
@@ -64,8 +67,15 @@ fun MergeIntoCollectionSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberKhepiSheetState(),
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
     ) {
+        GlassSurface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = BottomSheetDefaults.ExpandedShape,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.62f),
+            borderWidth = 0.75.dp,
+        ) {
         Column(
             modifier =
                 Modifier
@@ -160,6 +170,7 @@ fun MergeIntoCollectionSheet(
                     }
                 }
             }
+        }
         }
     }
 }

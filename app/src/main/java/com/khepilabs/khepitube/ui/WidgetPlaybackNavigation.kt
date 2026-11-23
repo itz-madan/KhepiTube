@@ -12,6 +12,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.data.music.model.MusicTrack
 import com.khepilabs.khepitube.data.music.model.toMusicTrack
 import com.khepilabs.khepitube.player.GlobalPlayerState
 import com.khepilabs.khepitube.ui.screens.music.sharedMusicPlayerViewModel
@@ -20,6 +21,9 @@ import com.khepilabs.khepitube.ui.screens.widgets.WidgetPlaybackViewModel
 
 internal const val ON_REPEAT_SHUFFLE_ROUTE = "onRepeatShuffle"
 private const val WIDGET_PLAYLIST_ROUTE = "widgetPlaylist/{playlistId}?shuffle={shuffle}&start={start}"
+private const val WIDGET_MUSIC_TRACK_ROUTE = "widgetMusicTrack/{videoId}"
+
+internal fun musicPlayerRoute(videoId: String): String = "$WIDGET_MUSIC_TRACK_ROUTE".replace("{videoId}", Uri.encode(videoId))
 
 internal fun widgetPlaylistRoute(
     playlistId: String,
@@ -46,6 +50,25 @@ internal fun NavGraphBuilder.widgetPlaybackRoutes(
             if (playerViewModel.uiState.value.cachedVideo != null) GlobalPlayerState.requestDismiss()
             musicPlayerViewModel.shuffleOnRepeat(sourceName)
             onMusicStarted()
+            withFrameNanos { }
+            navController.popTransientRouteOrNavigateStart(defaultStartRoute)
+        }
+    }
+
+    composable(
+        route = WIDGET_MUSIC_TRACK_ROUTE,
+        arguments = listOf(navArgument("videoId") { type = NavType.StringType }),
+    ) { entry ->
+        currentRoute.value = "musicPlayer"
+        val videoId = entry.arguments?.getString("videoId").orEmpty()
+        val musicPlayerViewModel = sharedMusicPlayerViewModel()
+        LaunchedEffect(videoId) {
+            if (videoId.isNotBlank()) {
+                if (playerViewModel.uiState.value.cachedVideo != null) GlobalPlayerState.requestDismiss()
+                val track = MusicTrack(videoId = videoId, title = "", artist = "", thumbnailUrl = "", duration = 0)
+                musicPlayerViewModel.loadAndPlayTrack(track, listOf(track), "Downloads")
+                onMusicStarted()
+            }
             withFrameNanos { }
             navController.popTransientRouteOrNavigateStart(defaultStartRoute)
         }

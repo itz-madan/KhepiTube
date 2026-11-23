@@ -59,6 +59,7 @@ import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.data.music.model.MusicTrack
 import com.khepilabs.khepitube.player.EnhancedMusicPlayerManager
 import com.khepilabs.khepitube.ui.components.PlayingWaveform
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.MediaPlayPauseButton
 import com.khepilabs.khepitube.ui.theme.ArtworkScrimContent
 import com.khepilabs.khepitube.ui.theme.ArtworkScrimNowPlaying
@@ -96,14 +97,18 @@ internal fun MiniPlayerContent(
         label = "miniProgress",
     )
 
-    Row(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .padding(start = 8.dp, end = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    GlassSurface(
+        modifier = modifier.fillMaxSize(),
+        shape = RoundedCornerShape(22.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.74f),
+        borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+        borderWidth = 0.75.dp,
     ) {
+        Row(
+            modifier = Modifier.fillMaxSize().padding(start = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
         // With [onOpen] the cover and titles are one target of their own, beside the transport buttons,
         // so a remote reaches each of them; a touch host opens the player from the whole bar instead.
         Row(
@@ -247,6 +252,7 @@ internal fun MiniPlayerContent(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
         }
     }
 }

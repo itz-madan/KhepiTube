@@ -7,6 +7,7 @@ import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -45,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
@@ -53,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.data.notes.Note
 import com.khepilabs.khepitube.data.notes.NoteKind
@@ -296,16 +299,30 @@ private fun NotesSortButton(
         IconButton(onClick = { open = true }) {
             Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = stringResource(R.string.notes_sort))
         }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            NotesSort.entries.forEach { sort ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(sort.labelRes)) },
-                    trailingIcon = { if (sort == selected) Icon(Icons.Default.Check, contentDescription = null) },
-                    onClick = {
-                        open = false
-                        onSelected(sort)
-                    },
-                )
+        DropdownMenu(
+            expanded = open,
+            onDismissRequest = { open = false },
+            containerColor = Color.Transparent,
+            tonalElevation = 0.dp,
+            shadowElevation = 0.dp,
+        ) {
+            GlassSurface(
+                shape = MaterialTheme.shapes.medium,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+                borderWidth = 0.75.dp,
+            ) {
+                Column {
+                    NotesSort.entries.forEach { sort ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(sort.labelRes)) },
+                            trailingIcon = { if (sort == selected) Icon(Icons.Default.Check, contentDescription = null) },
+                            onClick = {
+                                open = false
+                                onSelected(sort)
+                            },
+                        )
+                    }
+                }
             }
         }
     }

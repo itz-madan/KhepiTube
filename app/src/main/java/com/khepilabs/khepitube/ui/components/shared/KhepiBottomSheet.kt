@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import kotlinx.coroutines.launch
 
 private fun sheetSpring() =
@@ -143,6 +144,7 @@ fun KhepiBottomSheet(
     onProgressChange: (Float) -> Unit = {},
     onVisibleHeightChange: (Float) -> Unit = {},
     header: (@Composable ColumnScope.(dragModifier: Modifier) -> Unit)? = null,
+    glassContainerColor: Color = Color.Transparent,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -269,15 +271,21 @@ fun KhepiBottomSheet(
                         translationY = dragRangePx(size.height) * (1f - progress.value)
                     },
             shape = shape,
-            color = containerColor,
+            color = Color.Transparent,
             tonalElevation = 0.dp,
         ) {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding(),
+            GlassSurface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = shape,
+                containerColor = glassContainerColor,
+                borderWidth = 0.75.dp,
             ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding(),
+                ) {
                 if (header != null) {
                     header(dragModifier)
                 } else {
@@ -291,7 +299,8 @@ fun KhepiBottomSheet(
                         BottomSheetDefaults.DragHandle()
                     }
                 }
-                content()
+                    content()
+                }
             }
         }
     }

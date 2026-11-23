@@ -2,7 +2,7 @@ package com.khepilabs.khepitube.player
 
 import com.khepilabs.khepitube.data.localmedia.LocalMediaIds
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.recommendation.music.primaryArtistKey
+import com.khepilabs.khepitube.data.music.model.primaryArtistKey
 
 /**
  * Decides whether a playlist change opens a new radio session or continues the current one.

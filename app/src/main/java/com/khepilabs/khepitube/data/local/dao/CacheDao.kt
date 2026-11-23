@@ -5,8 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.khepilabs.khepitube.data.local.entity.MusicHomeCacheEntity
-import com.khepilabs.khepitube.data.local.entity.MusicHomeChipEntity
 import com.khepilabs.khepitube.data.local.entity.SubscriptionFeedEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -132,23 +130,4 @@ interface CacheDao {
         insertSubscriptionFeedIfAbsent(rows)
     }
 
-    // Music
-    @Query("SELECT * FROM music_home_cache ORDER BY orderBy ASC")
-    fun getMusicHomeSections(): Flow<List<MusicHomeCacheEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMusicHomeSections(sections: List<MusicHomeCacheEntity>)
-
-    @Query("DELETE FROM music_home_cache")
-    suspend fun clearMusicHomeCache()
-
-    // Music Chips
-    @Query("SELECT * FROM music_home_chips_cache ORDER BY orderBy ASC")
-    fun getMusicHomeChips(): Flow<List<MusicHomeChipEntity>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMusicHomeChips(chips: List<MusicHomeChipEntity>)
-
-    @Query("DELETE FROM music_home_chips_cache")
-    suspend fun clearMusicHomeChips()
 }

@@ -2,6 +2,8 @@ package com.khepilabs.khepitube.ui.components.shared
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,8 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,6 +29,36 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+
+/** Enables the settings-only translucent row treatment without changing shared rows elsewhere. */
+val LocalKhepiGlassRows = staticCompositionLocalOf { false }
+
+@Composable
+private fun khepiGlassRowFill() = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f)
+
+@Composable
+private fun khepiGlassRowBorder() = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f)
+
+@Composable
+private fun SettingsGlassRowFrame(
+    modifier: Modifier,
+    shape: Shape,
+    glass: Boolean,
+    containerColor: androidx.compose.ui.graphics.Color,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    if (glass) {
+        GlassSurface(
+            modifier = modifier,
+            shape = shape,
+            containerColor = containerColor,
+            borderColor = khepiGlassRowBorder(),
+            content = content,
+        )
+    } else {
+        Box(modifier = modifier.clip(shape).background(containerColor), content = content)
+    }
+}
 
 fun khepiRowGroupShape(
     index: Int,
@@ -59,40 +93,25 @@ fun KhepiSelectionRow(
     showSelectedContainer: Boolean = false,
     shape: Shape = RoundedCornerShape(12.dp),
 ) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(
-                    if (selected && showSelectedContainer) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh
-                    },
-                ).clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    val glass = LocalKhepiGlassRows.current
+    val fill = if (selected && showSelectedContainer) {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (glass) 0.72f else 1f)
+    } else if (glass) khepiGlassRowFill() else MaterialTheme.colorScheme.surfaceContainerHigh
+    SettingsGlassRowFrame(
+        modifier = modifier.fillMaxWidth().clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
+        shape = shape,
+        glass = glass,
+        containerColor = fill,
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            )
-            if (supportingText != null) {
-                Text(
-                    text = supportingText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
+                if (supportingText != null) Text(supportingText, style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            RadioButton(selected = selected, onClick = null, enabled = enabled)
         }
-        RadioButton(
-            selected = selected,
-            onClick = null,
-            enabled = enabled,
-        )
     }
 }
 
@@ -113,66 +132,39 @@ fun KhepiNavRow(
     stateDescription: String? = null,
     shape: Shape = RoundedCornerShape(12.dp),
 ) {
-    val textColor =
-        if (destructive) {
-            MaterialTheme.colorScheme.error
-        } else {
-            MaterialTheme.colorScheme.onSurface
-        }
-
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .clickable(enabled = enabled, onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    val textColor = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+    val glass = LocalKhepiGlassRows.current
+    SettingsGlassRowFrame(
+        modifier = modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick),
+        shape = shape,
+        glass = glass,
+        containerColor = if (glass) khepiGlassRowFill() else MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
-        if (leadingContent != null) {
-            leadingContent()
-            Spacer(modifier = Modifier.width(12.dp))
-        } else if (leadingIcon != null) {
-            Icon(
-                imageVector = leadingIcon,
-                contentDescription = null,
-                tint = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = textColor,
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            )
-            if (supportingText != null) {
-                Text(
-                    text = supportingText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (leadingContent != null) {
+                leadingContent()
+                Spacer(Modifier.width(12.dp))
+            } else if (leadingIcon != null) {
+                Icon(leadingIcon, contentDescription = null,
+                    tint = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.width(12.dp))
             }
-        }
-        if (trailingContent != null) {
-            trailingContent()
-            if (showChevron) Spacer(modifier = Modifier.width(8.dp))
-        } else if (trailingText != null) {
-            Text(
-                text = trailingText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            if (showChevron) Spacer(modifier = Modifier.width(8.dp))
-        }
-        if (showChevron) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.bodyLarge, color = textColor,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
+                if (supportingText != null) Text(supportingText, style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (trailingContent != null) {
+                trailingContent()
+                if (showChevron) Spacer(Modifier.width(8.dp))
+            } else if (trailingText != null) {
+                Text(trailingText, style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (showChevron) Spacer(Modifier.width(8.dp))
+            }
+            if (showChevron) Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -190,45 +182,28 @@ fun KhepiSwitchRow(
     enabled: Boolean = true,
     shape: Shape = RoundedCornerShape(12.dp),
 ) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .clickable(enabled = enabled, role = Role.Switch) { onCheckedChange(!checked) }
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    val glass = LocalKhepiGlassRows.current
+    SettingsGlassRowFrame(
+        modifier = modifier.fillMaxWidth().clickable(enabled = enabled, role = Role.Switch) { onCheckedChange(!checked) },
+        shape = shape,
+        glass = glass,
+        containerColor = if (glass) khepiGlassRowFill() else MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
-        if (leadingContent != null) {
-            leadingContent()
-            Spacer(modifier = Modifier.width(12.dp))
-        } else if (leadingIcon != null) {
-            Icon(
-                imageVector = leadingIcon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            if (supportingText != null) {
-                Text(
-                    text = supportingText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (leadingContent != null) {
+                leadingContent()
+                Spacer(Modifier.width(12.dp))
+            } else if (leadingIcon != null) {
+                Icon(leadingIcon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.width(12.dp))
             }
+            Column(Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.bodyLarge)
+                if (supportingText != null) Text(supportingText, style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Switch(checked = checked, onCheckedChange = null, enabled = enabled)
         }
-        Switch(
-            checked = checked,
-            onCheckedChange = null,
-            enabled = enabled,
-        )
     }
 }
 

@@ -49,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiActionButton
 import com.khepilabs.khepitube.ui.components.shared.KhepiMaxContentWidth
 import com.khepilabs.khepitube.ui.components.shared.khepiActionShape
@@ -180,9 +181,10 @@ private fun CrashHeader() {
 @Composable
 private fun SummaryCard(summary: CrashSummary) {
     val timeFormatter = remember { DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT) }
-    Surface(
+    GlassSurface(
         shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderWidth = 0.75.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(Spacing / 2)) {
@@ -223,9 +225,10 @@ private fun ReportCard(
     onCopy: () -> Unit,
     onShare: () -> Unit,
 ) {
-    Surface(
+    GlassSurface(
         shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderWidth = 0.75.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(start = CardPadding, bottom = CardPadding)) {

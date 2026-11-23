@@ -1,5 +1,6 @@
 package com.khepilabs.khepitube.ui.components.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,12 +21,20 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassScreenHost
+import com.khepilabs.khepitube.ui.components.shared.LocalKhepiGlassRows
+import androidx.compose.ui.graphics.Color
 import com.khepilabs.khepitube.ui.components.layout.LocalKhepiBottomInsets
 import com.khepilabs.khepitube.ui.components.layout.floatAboveBottomChrome
 import com.khepilabs.khepitube.ui.components.layout.khepiBottomContentPadding
@@ -40,6 +49,7 @@ import kotlinx.coroutines.flow.first
 internal val SettingsMaxContentWidth = KhepiMaxContentWidth
 internal val SettingsHorizontalPadding = 16.dp
 private val SettingsBottomSpacing = 32.dp
+private val SettingsTopBarHeight = 64.dp
 private const val HIGHLIGHT_VISIBLE_OFFSET_PX = -160
 
 /** The key of the option a search result asked this page to scroll to and flash. */
@@ -70,6 +80,9 @@ fun SettingsPage(
 ) {
     val keys = remember { SettingsKeyRecorder() }
     val glassTokens = rememberGlassTokens()
+    val density = LocalDensity.current
+    var headerHeightPx by remember { mutableIntStateOf(if (header != null) with(density) { SettingsTopBarHeight.roundToPx() } else 0) }
+    val contentTopPadding = with(density) { headerHeightPx.toDp() }.coerceAtLeast(SettingsTopBarHeight)
 
     LaunchedEffect(highlight) {
         if (highlight == null) return@LaunchedEffect
@@ -78,48 +91,72 @@ fun SettingsPage(
         if (index >= 0) listState.animateScrollToItem(index, HIGHLIGHT_VISIBLE_OFFSET_PX)
     }
 
-    CompositionLocalProvider(LocalGlassTokens provides glassTokens) {
-        Scaffold(
+    CompositionLocalProvider(LocalGlassTokens provides glassTokens, LocalKhepiGlassRows provides true) {
+        GlassScreenHost(
             modifier = modifier,
-            contentWindowInsets = WindowInsets(0.dp),
-            containerColor = MaterialTheme.colorScheme.background,
-            topBar = {
+            contentBackdrop = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background),
+                )
+            },
+            content = {
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    contentWindowInsets = WindowInsets(0.dp),
+                    containerColor = Color.Transparent,
+                    snackbarHost = {
+                        snackbarHostState?.let {
+                            SnackbarHost(it, Modifier.floatAboveBottomChrome(LocalKhepiBottomInsets.current))
+                        }
+                    },
+                ) { padding ->
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .padding(top = contentTopPadding)
+                                .padding(padding),
+                    ) {
+                        val onTv = LocalDpadNavigation.current
+                        CompositionLocalProvider(LocalSettingsHighlight provides highlight) {
+                            LazyColumn(
+                                state = listState,
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(SettingsRowGap),
+                                contentPadding =
+                                    PaddingValues(bottom = khepiBottomContentPadding(SettingsBottomSpacing)),
+                            ) {
+                                keys.reset()
+                                SettingsListScope(this, keys, onTv = onTv).content()
+                            }
+                        }
+                    }
+                }
+            },
+            glassOverlay = {
                 KhepiTopBar(
+                    modifier = Modifier.align(Alignment.TopCenter),
                     title = title,
                     subtitle = subtitle,
                     onBack = onBack,
                     actions = actions,
                     globalActions = KhepiGlobalActionsMode.None,
                 )
-            },
-            snackbarHost = {
-                snackbarHostState?.let { SnackbarHost(it, Modifier.floatAboveBottomChrome(LocalKhepiBottomInsets.current)) }
-            },
-        ) { padding ->
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-            ) {
                 if (header != null) {
-                    SettingsColumnFrame(Modifier.padding(horizontal = SettingsHorizontalPadding)) { header() }
-                }
-                val onTv = LocalDpadNavigation.current
-                CompositionLocalProvider(LocalSettingsHighlight provides highlight) {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(SettingsRowGap),
-                        contentPadding =
-                            PaddingValues(bottom = khepiBottomContentPadding(SettingsBottomSpacing)),
+                    SettingsColumnFrame(
+                        modifier = Modifier
+                            .padding(horizontal = SettingsHorizontalPadding)
+                            .onSizeChanged { headerHeightPx = it.height },
                     ) {
-                        keys.reset()
-                        SettingsListScope(this, keys, onTv = onTv).content()
+                        Box(modifier = Modifier.padding(top = SettingsTopBarHeight)) {
+                            header()
+                        }
                     }
                 }
-            }
-        }
+            },
+        )
     }
 }
 

@@ -1,13 +1,13 @@
 package com.khepilabs.khepitube.widget.core.action
 
+import com.khepilabs.khepitube.ui.musicPlayerRoute
+
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.khepilabs.khepitube.MainActivity
 import com.khepilabs.khepitube.ui.ON_REPEAT_SHUFFLE_ROUTE
-import com.khepilabs.khepitube.ui.musicCollectionRoute
-import com.khepilabs.khepitube.ui.musicPlayerRoute
 import com.khepilabs.khepitube.ui.widgetPlaylistRoute
 import com.khepilabs.khepitube.widget.config.WidgetConfigActivity
 
@@ -61,7 +61,7 @@ object WidgetDeepLink {
         context: Context,
         playlistId: String,
         isMusic: Boolean,
-    ): Intent = openRoute(context, if (isMusic) musicCollectionRoute(playlistId) ?: ROUTE_LIBRARY else "playlist/$playlistId")
+    ): Intent = openRoute(context, if (isMusic) ROUTE_LIBRARY else "playlist/$playlistId")
 
     /** The launcher's configure screen for one widget, reached from the widget itself. */
     fun configure(

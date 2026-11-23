@@ -18,13 +18,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.khepilabs.khepitube.data.backup.BackupOperation
 import com.khepilabs.khepitube.data.backup.ImportKind
 import com.khepilabs.khepitube.ui.components.shared.KhepiMaxContentWidth
@@ -86,12 +84,9 @@ internal fun SharedTransitionScope.OnboardingSteps(
             }
 
             step == OnboardingStep.READY -> {
-                val artists by actions.viewModel.artists.state
-                    .collectAsStateWithLifecycle()
                 Readable {
                     ReadyStep(
                         state = state,
-                        artistCount = artists.picked.size,
                         hero = hero,
                         onEdit = actions.viewModel::goTo,
                         contentPadding = StepPadding,
@@ -159,10 +154,6 @@ private fun StepBody(
                 header = header,
                 contentPadding = contentPadding,
             )
-        }
-
-        OnboardingStep.ARTISTS -> {
-            ArtistsStep(picker = viewModel.artists, header = header, contentPadding = contentPadding)
         }
 
         OnboardingStep.ALERTS -> {

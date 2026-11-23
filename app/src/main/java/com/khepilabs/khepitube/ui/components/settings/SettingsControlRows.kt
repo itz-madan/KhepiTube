@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiConnectedToggleGroup
 import com.khepilabs.khepitube.ui.components.shared.KhepiToggleOption
 
@@ -103,16 +104,20 @@ private fun SettingsControlRowFrame(
     modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .padding(horizontal = ControlRowHorizontalPadding, vertical = ControlRowVerticalPadding),
-        verticalArrangement = Arrangement.spacedBy(ControlRowSpacing),
+    GlassSurface(
+        modifier = modifier.fillMaxWidth(),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.62f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.42f),
     ) {
-        content()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = ControlRowHorizontalPadding, vertical = ControlRowVerticalPadding),
+            verticalArrangement = Arrangement.spacedBy(ControlRowSpacing),
+        ) {
+            content()
+        }
     }
 }
 

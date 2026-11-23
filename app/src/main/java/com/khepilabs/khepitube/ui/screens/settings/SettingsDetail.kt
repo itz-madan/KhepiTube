@@ -13,10 +13,8 @@ import com.khepilabs.khepitube.ui.screens.settings.appearance.player.PlayerAppea
 import com.khepilabs.khepitube.ui.screens.settings.appearance.theme.CustomThemeEditorScreen
 import com.khepilabs.khepitube.ui.screens.settings.appearance.theme.CustomThemesScreen
 import com.khepilabs.khepitube.ui.screens.settings.appearance.theme.ThemeScreen
-import com.khepilabs.khepitube.ui.screens.settings.backup.BackupScreen
 import com.khepilabs.khepitube.ui.screens.settings.content.ContentSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.content.LibrarySettingsScreen
-import com.khepilabs.khepitube.ui.screens.settings.content.MusicHomeSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.diagnostics.DiagnosticsScreen
 import com.khepilabs.khepitube.ui.screens.settings.downloads.DownloadSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.history.HistorySettingsScreen
@@ -28,10 +26,6 @@ import com.khepilabs.khepitube.ui.screens.settings.playback.BufferSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.playback.PlaybackSettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.quality.QualitySettingsScreen
 import com.khepilabs.khepitube.ui.screens.settings.region.LanguageRegionScreen
-import com.khepilabs.khepitube.ui.screens.settings.taste.DiscoverChannelsScreen
-import com.khepilabs.khepitube.ui.screens.settings.taste.FavouriteArtistsScreen
-import com.khepilabs.khepitube.ui.screens.settings.taste.HiddenContentScreen
-import com.khepilabs.khepitube.ui.screens.settings.taste.TasteScreen
 import com.khepilabs.khepitube.ui.screens.settings.topics.TopicPreferencesScreen
 import com.khepilabs.khepitube.ui.screens.settings.wellbeing.WellbeingScreen
 import com.khepilabs.khepitube.ui.screens.settings.widgets.WidgetsSettingsScreen
@@ -46,7 +40,6 @@ internal fun SettingsDetail(
     target: SettingsTarget,
     onBack: (() -> Unit)?,
     onNavigate: (SettingsTarget) -> Unit,
-    onOpenRecap: () -> Unit,
     options: SettingsHostOptions = SettingsHostOptions(),
 ) {
     options.pages[target.destination]?.let { page ->
@@ -58,22 +51,6 @@ internal fun SettingsDetail(
         SettingsDestination.APPEARANCE,
         -> {
             AppearanceScreen(onBack = onBack, highlight = target.highlight, onNavigate = onNavigate)
-        }
-
-        SettingsDestination.TASTE -> {
-            TasteScreen(onBack = onBack, highlight = target.highlight, onNavigate = onNavigate, onOpenRecap = onOpenRecap)
-        }
-
-        SettingsDestination.HIDDEN_CONTENT -> {
-            HiddenContentScreen(onBack = onBack, highlight = target.highlight)
-        }
-
-        SettingsDestination.FAVOURITE_ARTISTS -> {
-            FavouriteArtistsScreen(onBack = onBack, highlight = target.highlight)
-        }
-
-        SettingsDestination.DISCOVER_CHANNELS -> {
-            DiscoverChannelsScreen(onBack = onBack, highlight = target.highlight)
         }
 
         SettingsDestination.THEME -> {
@@ -102,10 +79,6 @@ internal fun SettingsDetail(
 
         SettingsDestination.CONTENT -> {
             ContentSettingsScreen(onBack = onBack, highlight = target.highlight, onNavigate = onNavigate)
-        }
-
-        SettingsDestination.MUSIC_HOME -> {
-            MusicHomeSettingsScreen(onBack = onBack, highlight = target.highlight)
         }
 
         SettingsDestination.LIBRARY -> {
@@ -146,10 +119,6 @@ internal fun SettingsDetail(
 
         SettingsDestination.INTEGRATIONS -> {
             IntegrationsScreen(onBack = onBack, highlight = target.highlight, onNavigate = onNavigate)
-        }
-
-        SettingsDestination.BACKUP -> {
-            BackupScreen(onBack = onBack, highlight = target.highlight, tab = target.tab)
         }
 
         SettingsDestination.SYNC -> {

@@ -1,5 +1,6 @@
 package com.khepilabs.khepitube.ui.components.equalizer
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +15,6 @@ import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,6 +31,7 @@ import com.khepilabs.khepitube.data.audio.eq.BuiltInEqPresets
 import com.khepilabs.khepitube.data.audio.eq.EqLimits
 import com.khepilabs.khepitube.data.audio.eq.EqState
 import com.khepilabs.khepitube.data.audio.eq.isEdited
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.KhepiFilterChip
 import com.khepilabs.khepitube.ui.components.shared.KhepiNavRow
 import com.khepilabs.khepitube.ui.components.shared.KhepiRowGroup
@@ -163,10 +164,11 @@ internal fun PanelRow(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    val color = MaterialTheme.colorScheme.surfaceContainerHigh
-    if (onClick != null) {
-        Surface(onClick = onClick, shape = shape, color = color, modifier = modifier.fillMaxWidth()) { content() }
-    } else {
-        Surface(shape = shape, color = color, modifier = modifier.fillMaxWidth()) { content() }
-    }
+    GlassSurface(
+        modifier = modifier.fillMaxWidth().then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        shape = shape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.68f),
+        borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+        borderWidth = 0.65.dp,
+    ) { content() }
 }

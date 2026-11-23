@@ -432,9 +432,6 @@ class PlayerPreferences(
         val HOME_SUBS_ROTATION_CURSOR = intPreferencesKey("home_subs_rotation_cursor")
 
         // Auto-backup settings
-        val AUTO_BACKUP_FREQUENCY = stringPreferencesKey("auto_backup_frequency")
-        val AUTO_BACKUP_FOLDER_URI = stringPreferencesKey("auto_backup_folder_uri")
-        val AUTO_BACKUP_TYPE = stringPreferencesKey("auto_backup_type")
 
         // Return YouTube Dislikes
         val RYTD_ENABLED = booleanPreferencesKey("rytd_enabled")
@@ -3747,82 +3744,35 @@ class PlayerPreferences(
         }
     }
 
-    // AUTO-BACKUP SETTINGS
-    val autoBackupFrequency: Flow<LocalDataManager.AutoBackupFrequency> =
-        context.playerPreferencesDataStore.data
-            .map { preferences ->
-                runCatching {
-                    LocalDataManager.AutoBackupFrequency.valueOf(
-                        preferences[Keys.AUTO_BACKUP_FREQUENCY] ?: LocalDataManager.AutoBackupFrequency.NONE.name,
-                    )
-                }.getOrDefault(LocalDataManager.AutoBackupFrequency.NONE)
-            }
-
-    suspend fun setAutoBackupFrequency(frequency: LocalDataManager.AutoBackupFrequency) {
-        context.playerPreferencesDataStore.edit { preferences ->
-            preferences[Keys.AUTO_BACKUP_FREQUENCY] = frequency.name
-        }
-    }
-
-    val autoBackupFolderUri: Flow<String?> =
-        context.playerPreferencesDataStore.data
-            .map { preferences -> preferences[Keys.AUTO_BACKUP_FOLDER_URI]?.takeIf { it.isNotBlank() } }
-
-    suspend fun setAutoBackupFolderUri(uri: String?) {
-        context.playerPreferencesDataStore.edit { preferences ->
-            if (uri != null) {
-                preferences[Keys.AUTO_BACKUP_FOLDER_URI] = uri
-            } else {
-                preferences.remove(Keys.AUTO_BACKUP_FOLDER_URI)
-            }
-        }
-    }
-
-    val autoBackupType: Flow<LocalDataManager.AutoBackupType> =
-        context.playerPreferencesDataStore.data
-            .map { preferences ->
-                runCatching {
-                    LocalDataManager.AutoBackupType.valueOf(
-                        preferences[Keys.AUTO_BACKUP_TYPE] ?: LocalDataManager.AutoBackupType.APP_DATA.name,
-                    )
-                }.getOrDefault(LocalDataManager.AutoBackupType.APP_DATA)
-            }
-
-    suspend fun setAutoBackupType(type: LocalDataManager.AutoBackupType) {
-        context.playerPreferencesDataStore.edit { preferences ->
-            preferences[Keys.AUTO_BACKUP_TYPE] = type.name
-        }
-    }
-
-    /** Whether a watch may be written to history: paused history and Deep Flow both stop it. */
-    suspend fun isWatchHistorySavingBlocked(): Boolean =
-        watchHistoryPaused.first() || (isDeepFlowCurrentlyActive() && !isDeepFlowSaveToHistoryEnabled())
-
+    /** Returns true while Deep Flow is enabled and its optional timer has not expired. */
     suspend fun isDeepFlowCurrentlyActive(): Boolean {
-        val prefs = context.playerPreferencesDataStore.data.first()
-        val active = prefs[Keys.DEEP_FLOW_ACTIVE] ?: false
-        if (!active) return false
-        val activatedAt = prefs[Keys.DEEP_FLOW_ACTIVATED_AT] ?: 0L
-        val expireHours = prefs[Keys.DEEP_FLOW_EXPIRE_HOURS] ?: 4
-        if (expireHours == DEEP_FLOW_NEVER_EXPIRES_HOURS) return true
-        val elapsedHours = (System.currentTimeMillis() - activatedAt) / 3_600_000.0
-        val stillActive = elapsedHours < expireHours
-        if (!stillActive) {
-            setDeepFlowActive(false)
-        }
-        return stillActive
+        val preferences = context.playerPreferencesDataStore.data.first()
+        if (preferences[Keys.DEEP_FLOW_ACTIVE] != true) return false
+        val expiryHours = preferences[Keys.DEEP_FLOW_EXPIRE_HOURS] ?: 4
+        if (expiryHours == DEEP_FLOW_NEVER_EXPIRES_HOURS) return true
+        val activatedAt = preferences[Keys.DEEP_FLOW_ACTIVATED_AT] ?: 0L
+        if (activatedAt <= 0L) return false
+        return System.currentTimeMillis() - activatedAt < expiryHours * 60L * 60L * 1000L
     }
 
+    /** Shared privacy gate used by every watch-history writer. */
+    suspend fun isWatchHistorySavingBlocked(): Boolean {
+        val preferences = context.playerPreferencesDataStore.data.first()
+        if (preferences[Keys.WATCH_HISTORY_PAUSED] == true) return true
+        return isDeepFlowCurrentlyActive() && preferences[Keys.DEEP_FLOW_SAVE_HISTORY] != true
+    }
+
+    // AUTO-BACKUP SETTINGS
+
+    /** Export primitive player preferences using the shared backup representation. */
     suspend fun getExportData(): SettingsBackup {
-        val prefs = context.playerPreferencesDataStore.data.first()
+        val values = context.playerPreferencesDataStore.data.first().asMap()
         val strings = mutableMapOf<String, String>()
         val booleans = mutableMapOf<String, Boolean>()
         val ints = mutableMapOf<String, Int>()
         val floats = mutableMapOf<String, Float>()
         val longs = mutableMapOf<String, Long>()
-
-        prefs.asMap().forEach { (key, value) ->
-            if (key.name in BackupExcludedKeys) return@forEach
+        values.forEach { (key, value) ->
             when (value) {
                 is String -> strings[key.name] = value
                 is Boolean -> booleans[key.name] = value
@@ -3834,24 +3784,17 @@ class PlayerPreferences(
         return SettingsBackup(strings, booleans, ints, floats, longs)
     }
 
+    /** Restore only primitive preference types represented by SettingsBackup. */
     suspend fun restoreData(backup: SettingsBackup) {
-        context.playerPreferencesDataStore.edit { prefs ->
-            backup.strings.forEach { (k, v) ->
-                if (k !in BackupExcludedKeys) {
-                    prefs[stringPreferencesKey(k)] = v
-                }
-            }
-            backup.booleans.forEach { (k, v) -> prefs[booleanPreferencesKey(k)] = v }
-            backup.ints.forEach { (k, v) -> prefs[intPreferencesKey(k)] = v }
-            backup.floats.forEach { (k, v) -> prefs[floatPreferencesKey(k)] = v }
-            backup.longs.forEach { (k, v) -> prefs[longPreferencesKey(k)] = v }
+        context.playerPreferencesDataStore.edit { preferences ->
+            backup.strings.forEach { (key, value) -> preferences[stringPreferencesKey(key)] = value }
+            backup.booleans.forEach { (key, value) -> preferences[booleanPreferencesKey(key)] = value }
+            backup.ints.forEach { (key, value) -> preferences[intPreferencesKey(key)] = value }
+            backup.floats.forEach { (key, value) -> preferences[floatPreferencesKey(key)] = value }
+            backup.longs.forEach { (key, value) -> preferences[longPreferencesKey(key)] = value }
         }
-        // The UI language belongs to the language manager; written here alone it would never show,
-        // while YouTube's language follows what is shown (#1277).
-        backup.strings[Keys.APP_LANGUAGE.name]
-            ?.takeIf { AppLanguageManager.normalizeLanguageTag(it) != AppLanguageManager.appliedLanguage.value }
-            ?.let { tag -> withContext(Dispatchers.Main.immediate) { AppLanguageManager.applyLanguageTag(context, tag) } }
     }
+
 }
 
 /** Action to take when a SponsorBlock segment is encountered. */

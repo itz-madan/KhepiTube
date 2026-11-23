@@ -24,7 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -34,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
 import com.khepilabs.khepitube.player.error.PlayerDiagnostics
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 
 private val ButtonPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
 
@@ -46,14 +46,15 @@ internal fun PlayerErrorPanel(
     onRetryClick: () -> Unit,
     onResetSession: (() -> Unit)? = null,
 ) {
-    Surface(
+    GlassSurface(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f),
-        tonalElevation = 0.dp,
+        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.34f),
+        borderColor = MaterialTheme.colorScheme.error.copy(alpha = 0.28f),
+        borderWidth = 0.75.dp,
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),

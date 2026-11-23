@@ -2,14 +2,12 @@ package com.khepilabs.khepitube.sync.protocol
 
 import com.khepilabs.khepitube.sync.canonical.CanonicalBrain
 import com.khepilabs.khepitube.sync.canonical.CanonicalLike
-import com.khepilabs.khepitube.sync.canonical.CanonicalMusicBrain
 import com.khepilabs.khepitube.sync.canonical.CanonicalNote
 import com.khepilabs.khepitube.sync.canonical.CanonicalPlaylist
 import com.khepilabs.khepitube.sync.canonical.CanonicalSetting
 import com.khepilabs.khepitube.sync.canonical.CanonicalSubscribedChannel
 import com.khepilabs.khepitube.sync.canonical.CanonicalSubscriptionGroup
 import com.khepilabs.khepitube.sync.canonical.CanonicalWatchHistory
-import com.khepilabs.khepitube.sync.merge.MusicBrainMerger
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -139,19 +137,6 @@ object SyncSerialization {
 
     /** One line per device snapshot, the sender's own carrying the shared CRDT state. */
     fun encodeBrain(snapshots: List<CanonicalBrain>) = wire(snapshots.sortedBy { it.deviceId }, CanonicalBrain.serializer())
-
-    // --- music brain ---
-    fun encodeMusicBrain(brain: CanonicalMusicBrain): CollectionWire {
-        val line = enc(CanonicalMusicBrain.serializer(), brain)
-        return CollectionWire(listOf(line), 1, sha256Hex(line))
-    }
-
-    /** Fold every record (one snapshot per device the peer knows) so a third device converges. */
-    fun decodeMusicBrain(lines: List<String>): CanonicalMusicBrain? =
-        lines
-            .filter { it.isNotBlank() }
-            .map { json.decodeFromString(CanonicalMusicBrain.serializer(), it) }
-            .reduceOrNull(MusicBrainMerger::merge)
 
     /**
      * Every record, kept apart: the desktop ships one snapshot per device it knows about
