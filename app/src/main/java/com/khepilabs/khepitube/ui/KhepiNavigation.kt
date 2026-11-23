@@ -47,9 +47,6 @@ import com.khepilabs.khepitube.ui.screens.player.state.VideoPlayerUiState
 import com.khepilabs.khepitube.ui.screens.player.state.blankVideo
 import com.khepilabs.khepitube.ui.screens.playlists.PlaylistDetailScreen
 import com.khepilabs.khepitube.ui.screens.playlists.PlaylistsScreen
-import com.khepilabs.khepitube.ui.screens.recap.RecapRoutes
-import com.khepilabs.khepitube.ui.screens.recap.RecapScreen
-import com.khepilabs.khepitube.ui.screens.recap.story.RecapStoryScreen
 import com.khepilabs.khepitube.ui.screens.search.SearchScreen
 import com.khepilabs.khepitube.ui.screens.settings.SettingsHost
 import com.khepilabs.khepitube.ui.screens.shorts.ShortsScreen
@@ -182,7 +179,7 @@ fun NavGraphBuilder.khepiAppGraph(
                 R.string.library_downloads_label,
             )
         LibraryScreen(
-            onOpenRecap = { period -> navController.navigate(period?.let { RecapRoutes.story(it) } ?: RecapRoutes.stats()) },
+            onOpenRecap = { },
             onNavigateToHistory = {
                 navController.navigate("history")
             },
@@ -480,52 +477,10 @@ fun NavGraphBuilder.khepiAppGraph(
             start = SettingsTarget.decode(backStackEntry.arguments?.getString("target")),
             onExit = { navController.popBackStack() },
             onOpenDonations = {},
-            onOpenRecap = { navController.navigate(RecapRoutes.stats()) },
+            onOpenRecap = { },
             onOpenUpdate = {},
         )
     }
 
-    composable(
-        route = RecapRoutes.STATS,
-        arguments =
-            listOf(
-                navArgument(RecapRoutes.ARG_PERIOD) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-            ),
-    ) { backStackEntry ->
-        currentRoute.value = RecapRoutes.STATS
-        RecapScreen(
-            onBack = { navController.popBackStack() },
-            onPlayStory = { period, source -> navController.navigate(RecapRoutes.story(period, source)) },
-            startAt = RecapRoutes.decode(backStackEntry.arguments?.getString(RecapRoutes.ARG_PERIOD)),
-        )
-    }
 
-    composable(
-        route = RecapRoutes.STORY,
-        arguments =
-            listOf(
-                navArgument(RecapRoutes.ARG_PERIOD) { type = NavType.StringType },
-                navArgument(RecapRoutes.ARG_SOURCE) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-            ),
-    ) { backStackEntry ->
-        currentRoute.value = RecapRoutes.STORY
-        val period = RecapRoutes.decode(backStackEntry.arguments?.getString(RecapRoutes.ARG_PERIOD))
-        if (period == null) {
-            LaunchedEffect(Unit) { navController.popBackStack() }
-        } else {
-            RecapStoryScreen(
-                period = period,
-                source = RecapRoutes.decodeSource(backStackEntry.arguments?.getString(RecapRoutes.ARG_SOURCE)),
-                onClose = { navController.popBackStack() },
-            )
-        }
-    }
 }
