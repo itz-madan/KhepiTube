@@ -174,7 +174,7 @@ class YouTubeDeviceAuth(context: Context) {
             ?: error("Could not discover YouTube TV client script")
         val scriptUrl = if (clientPath.startsWith("http")) clientPath else "https://www.youtube.com$clientPath"
         val script = get(scriptUrl)
-        val match = Regex("""clientId:"([-\\w]+\\.apps\\.googleusercontent\\.com)",\\s*\\w+:"(\\w+)""")
+        val match = Regex("""clientId:"([-\w]+\.apps\.googleusercontent\.com)",\s*\w+:"(\w+)""")
             .find(script) ?: error("YouTube OAuth client credentials were not found in the current TV client")
         return OAuthClient(match.groupValues[1], match.groupValues[2])
     }
