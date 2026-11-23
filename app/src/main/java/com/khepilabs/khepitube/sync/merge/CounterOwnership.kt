@@ -2,7 +2,6 @@ package com.khepilabs.khepitube.sync.merge
 
 import com.khepilabs.khepitube.sync.canonical.BrainCounters
 import com.khepilabs.khepitube.sync.canonical.CanonicalBrain
-import com.khepilabs.khepitube.sync.canonical.CanonicalMusicBrain
 import com.khepilabs.khepitube.sync.canonical.GCounter
 
 /**
@@ -61,27 +60,4 @@ object CounterOwnership {
         )
     }
 
-    fun music(
-        merged: CanonicalMusicBrain,
-        local: CanonicalMusicBrain,
-        remote: CanonicalMusicBrain,
-        own: Set<String>,
-        sender: Set<String>,
-    ): CanonicalMusicBrain =
-        merged.copy(
-            totalPlays = reconcile(merged.totalPlays, local.totalPlays, listOf(remote.totalPlays), own, sender),
-            artistAffinity =
-                merged.artistAffinity.mapValues { (artist, affinity) ->
-                    affinity.copy(
-                        plays =
-                            reconcile(
-                                affinity.plays,
-                                local.artistAffinity[artist]?.plays ?: GCounter(),
-                                listOfNotNull(remote.artistAffinity[artist]?.plays),
-                                own,
-                                sender,
-                            ),
-                    )
-                },
-        )
 }
