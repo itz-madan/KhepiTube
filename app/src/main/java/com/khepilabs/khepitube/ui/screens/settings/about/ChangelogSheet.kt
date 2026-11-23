@@ -229,7 +229,7 @@ private fun LazyListScope.releaseItems(
                 .fillMaxWidth()
                 .height(BodyEndHeight)
                 .clip(shape.withoutTopCorners())
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.48f)),
         )
     }
 }
@@ -243,7 +243,7 @@ private fun LazyItemScope.BodyItem(
         Modifier
             .animateItem()
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh, RectangleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.48f), RectangleShape)
             .padding(horizontal = RowPadding)
             .then(innerModifier),
     ) { content() }
@@ -271,7 +271,7 @@ private fun ReleaseHeader(
             modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.58f))
                 .clickable(onClickLabel = toggleLabel, role = Role.Button, onClick = onToggle)
                 .padding(horizontal = RowPadding, vertical = HeaderVerticalPadding),
         verticalAlignment = Alignment.CenterVertically,
@@ -325,7 +325,7 @@ private fun ReleaseBadge(
 ) {
     Surface(
         shape = MaterialTheme.shapes.small,
-        color = if (highlighted) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = if (highlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.62f),
         contentColor = if (highlighted) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
     ) {
         Text(text = label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(BadgePadding))
