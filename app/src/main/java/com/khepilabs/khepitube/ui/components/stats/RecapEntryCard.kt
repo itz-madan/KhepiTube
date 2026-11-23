@@ -1,5 +1,6 @@
 package com.khepilabs.khepitube.ui.components.stats
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,16 +13,19 @@ import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.Insights
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.khepiActionShape
 
 private val CardPadding = 16.dp
@@ -41,12 +45,15 @@ fun RecapEntryCard(
     modifier: Modifier = Modifier,
 ) {
     val ready = readyLabel != null
-    Surface(
-        onClick = onOpen,
-        modifier = modifier.fillMaxWidth(),
+    GlassSurface(
+        modifier = modifier.fillMaxWidth().clickable(role = Role.Button, onClick = onOpen),
         shape = MaterialTheme.shapes.extraLarge,
-        color = if (ready) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+        containerColor = (if (ready) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh).copy(alpha = 0.72f),
+        borderWidth = 0.75.dp,
     ) {
+        androidx.compose.runtime.CompositionLocalProvider(
+            LocalContentColor provides if (ready) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+        ) {
         Column(Modifier.padding(CardPadding), verticalArrangement = Arrangement.spacedBy(CardSpacing / 2)) {
             Row(horizontalArrangement = Arrangement.spacedBy(CardSpacing), verticalAlignment = Alignment.CenterVertically) {
                 Surface(modifier = Modifier.size(BadgeSize), shape = khepiActionShape(), color = MaterialTheme.colorScheme.primary) {
@@ -73,6 +80,7 @@ fun RecapEntryCard(
                     Button(onClick = onOpen) { Text(stringResource(R.string.recap_ready_open)) }
                 }
             }
+        }
         }
     }
 }
