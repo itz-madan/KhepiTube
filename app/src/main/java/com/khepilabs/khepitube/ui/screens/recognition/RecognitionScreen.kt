@@ -76,6 +76,7 @@ import com.khepilabs.khepitube.ui.components.layout.LocalKhepiBottomInsets
 import com.khepilabs.khepitube.ui.components.layout.topbar.KhepiTopBar
 import com.khepilabs.khepitube.ui.components.music.common.rememberMusicArtworkColors
 import com.khepilabs.khepitube.ui.components.shared.KhepiStateIcon
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.ui.components.shared.flowHeroArtworkSize
 import com.khepilabs.khepitube.ui.components.shared.khepiActionShape
 
@@ -314,13 +315,10 @@ private fun RecognitionResultCard(
     val artworkSize = flowHeroArtworkSize()
     val buttonHeight = ButtonDefaults.MediumContainerHeight
 
-    Card(
+    GlassSurface(
         shape = MaterialTheme.shapes.extraLarge,
-        colors =
-            CardDefaults.cardColors(
-                containerColor = colors.container,
-                contentColor = colors.onContainer,
-            ),
+        containerColor = colors.container.copy(alpha = 0.72f),
+        borderWidth = 0.9.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
