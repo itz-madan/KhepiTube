@@ -10,13 +10,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CloudOff
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +26,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.R
+import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.utils.KhepiDiagnostics
 import com.khepilabs.khepitube.utils.copyPlainText
 import kotlinx.coroutines.Dispatchers
@@ -65,14 +66,13 @@ internal fun SubscriptionFeedErrorCard(
             named
         }
 
-    Card(
+    GlassSurface(
         modifier = modifier.fillMaxWidth(),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            ),
+        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.78f),
+        borderColor = MaterialTheme.colorScheme.error.copy(alpha = 0.42f),
+        borderWidth = 0.8.dp,
     ) {
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onErrorContainer) {
         Column(modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
@@ -131,6 +131,7 @@ internal fun SubscriptionFeedErrorCard(
                     Text(stringResource(R.string.retry))
                 }
             }
+        }
         }
     }
 }
