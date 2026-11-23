@@ -36,16 +36,16 @@ internal val LocalGlassBackdrop = staticCompositionLocalOf<GlassBackdropState?> 
  * themselves. This is a Compose-native backdrop source; it avoids View snapshots and bitmap readbacks.
  */
 /**
- * Hosts a screen's ordinary content below a separate glass-overlay layer.
+ * Hosts ordinary screen content, a separate optional backdrop source, and floating glass chrome.
  *
- * Put scrolling content and the screen body in [content]. Put only floating chrome (for example,
- * a translucent top bar, search field, or floating action controls) in [glassOverlay]. Glass
- * surfaces in the overlay can sample the content underneath without recording themselves.
+ * Put scrolling content and the screen body in [content]. When individual cards inside that body
+ * need live blur, provide a background-only [contentBackdrop] layer. That layer is recorded
+ * separately and exposed only while [content] draws, so embedded GlassSurface instances cannot
+ * recursively sample their own text or siblings. Put floating chrome in [glassOverlay]; it samples
+ * the foreground content instead.
  *
- * This is deliberately a two-slot API: placing a GlassSurface inside [content] does not make it a
- * backdrop overlay. Migrate a screen's chrome into [glassOverlay] when that chrome needs live
- * backdrop sampling. On Android versions without supported render effects, GlassSurface keeps its
- * readable tinted fallback.
+ * Keep [contentBackdrop] limited to visuals genuinely behind the embedded glass surfaces. On
+ * Android versions without supported render effects, GlassSurface keeps its readable tinted fallback.
  */
 @Composable
 fun GlassScreenHost(
