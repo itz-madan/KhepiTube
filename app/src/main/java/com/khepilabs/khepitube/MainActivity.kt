@@ -54,7 +54,6 @@ import com.khepilabs.khepitube.ui.components.shared.ProvideChannelGroupLabels
 import com.khepilabs.khepitube.ui.components.shared.ProvideDateDisplaySettings
 import com.khepilabs.khepitube.ui.components.shared.card.ProvideVideoCardState
 import com.khepilabs.khepitube.ui.linkTextOf
-import com.khepilabs.khepitube.ui.musicCollectionRoute
 import com.khepilabs.khepitube.ui.screens.crash.CrashReportScreen
 import com.khepilabs.khepitube.ui.startup.KhepiTheme
 import com.khepilabs.khepitube.ui.startup.SplashController
@@ -346,7 +345,7 @@ class MainActivity : ComponentActivity() {
             val result = playlistTransfer.get().import(file, getString(R.string.imported_playlist_default_name))
             Toast.makeText(this@MainActivity, result.message(this@MainActivity), Toast.LENGTH_LONG).show()
             if (result is PlaylistImport.Imported) {
-                links.openRoute(if (result.isMusic) musicCollectionRoute(result.playlistId) else "playlist/${result.playlistId}")
+                links.openRoute("playlist/${result.playlistId}")
             }
         }
     }
