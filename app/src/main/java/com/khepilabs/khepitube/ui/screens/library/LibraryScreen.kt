@@ -63,7 +63,6 @@ import com.khepilabs.khepitube.ui.components.glass.GlassSurface
 import com.khepilabs.khepitube.data.model.Video
 import com.khepilabs.khepitube.data.music.DownloadedTrack
 import com.khepilabs.khepitube.data.music.model.MusicTrack
-import com.khepilabs.khepitube.data.stats.RecapPeriod
 import com.khepilabs.khepitube.data.video.DownloadedVideo
 import com.khepilabs.khepitube.innertube.models.AccountInfo
 import com.khepilabs.khepitube.ui.OnTabReselected
@@ -93,7 +92,6 @@ fun LibraryScreen(
     onNavigateToLocalMedia: () -> Unit,
     onNavigateToNotes: () -> Unit,
     onManageData: () -> Unit,
-    onOpenRecap: (RecapPeriod?) -> Unit,
     onVideoClick: (Video) -> Unit,
     onMusicClick: (MusicTrack, List<MusicTrack>, String) -> Unit,
     onPlaylistClick: (String) -> Unit,
