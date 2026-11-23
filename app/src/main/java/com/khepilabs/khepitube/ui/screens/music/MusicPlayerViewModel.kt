@@ -288,18 +288,6 @@ class MusicPlayerViewModel
                 return
             }
             loadTrackJob?.cancel()
-            // Genre-scoped surfaces tag their source; the genre becomes listen
-            // context for this queue and is stripped from the display label.
-            // Any non-tagged queue start clears the previous context.
-            val contextGenre =
-                sourceName
-                    ?.trim()
-                    ?.takeIf { it.startsWith(MUSIC_GENRE_SOURCE_PREFIX) }
-                    ?.removePrefix(MUSIC_GENRE_SOURCE_PREFIX)
-                    ?.trim()
-                    ?.takeIf { it.isNotEmpty() }
-            EnhancedMusicPlayerManager.playContextGenre = contextGenre
-            val displaySourceName = contextGenre ?: sourceName
             loadTrackJob =
                 viewModelScope.launch {
                     val activeQueue = if (queue.isNotEmpty()) queue else listOf(track)
