@@ -20,10 +20,15 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.khepilabs.khepitube.ui.components.glass.GlassScreenHost
@@ -74,6 +79,8 @@ fun SettingsPage(
 ) {
     val keys = remember { SettingsKeyRecorder() }
     val glassTokens = rememberGlassTokens()
+    var headerHeightPx by remember { mutableIntStateOf(0) }
+    val headerHeight = with(LocalDensity.current) { headerHeightPx.toDp() }
 
     LaunchedEffect(highlight) {
         if (highlight == null) return@LaunchedEffect
@@ -100,12 +107,9 @@ fun SettingsPage(
                         modifier =
                             Modifier
                                 .fillMaxSize()
-                                .padding(top = SettingsTopBarHeight)
+                                .padding(top = SettingsTopBarHeight + headerHeight)
                                 .padding(padding),
                     ) {
-                        if (header != null) {
-                            SettingsColumnFrame(Modifier.padding(horizontal = SettingsHorizontalPadding)) { header() }
-                        }
                         val onTv = LocalDpadNavigation.current
                         CompositionLocalProvider(LocalSettingsHighlight provides highlight) {
                             LazyColumn(
@@ -131,6 +135,17 @@ fun SettingsPage(
                     actions = actions,
                     globalActions = KhepiGlobalActionsMode.None,
                 )
+                if (header != null) {
+                    SettingsColumnFrame(
+                        modifier = Modifier
+                            .padding(horizontal = SettingsHorizontalPadding)
+                            .onSizeChanged { headerHeightPx = it.height },
+                    ) {
+                        Box(modifier = Modifier.padding(top = SettingsTopBarHeight)) {
+                            header()
+                        }
+                    }
+                }
             },
         )
     }
