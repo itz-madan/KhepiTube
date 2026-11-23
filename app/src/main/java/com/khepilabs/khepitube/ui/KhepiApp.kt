@@ -481,7 +481,7 @@ fun KhepiApp(
                 showMusicSheet = isMusicSheetShown,
                 showVideoBar = showVideoBar,
                 musicPlayerSheetState = musicPlayerSheetState,
-                containerWidth = maxWidth,
+                containerWidth = this@BoxWithConstraints.maxWidth,
                 containerHeight = with(density) { screenHeightPx.toDp() },
                 miniBarBounds = miniPlayerBounds,
                 musicMenus = musicMenus,
